@@ -1,0 +1,21 @@
+使用xcode打开工程build，报错，在lib里面删除依赖即可
+
+增加redux、crypto-js、react-native-calendars依赖
+需要增加react-native-gesture-handler依赖，否则react-navigation报错
+注册APP，注意ID和ios工程里面一致
+IonIcoins字体问题，需要按照说明链接本地资源（更改podfile配置，pod upate）
+
+StackNavigator改成createStackNavigator，外面需要套一个createAppContainer
+TabNavigator改成createBottomTabNavigator
+NavigationActions的reset没有了，改成用StackActions的reset
+
+List被废掉了，直接去掉
+WebView被去掉了，需要安装react-native-webview并import，并执行react-native link
+
+
+
+xcode设置默认语言为中文
+
+react-native-camera构建问题，需要在build.gradle的defaultConfig里面增加missingDimensionStrategy 'react-native-camera', 'general'
+build.gradle里面需要配置证书位置和密码，可以生成没有签名的证书
+安卓SDK28之后，不能访问http地址，build.gradle配置里面需要指定使用27及其以下版本，否则release版本不能连接http地址，debug版本可以

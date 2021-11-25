@@ -98,8 +98,10 @@ export default class StrategyInfoView extends BaseComponent {
                   <TableColumn key="positionAmount" title="持仓数量" />
                   <TableColumn key="positionPrice" title="持仓均价" />
                   <TableColumn key="cost" title="费用" />
-                  <TableColumn key="closeOrderCount" title="已完成订单数量" />
-                  <TableColumn key="openOrderCount" title="未完成订单数量" />
+                  <TableColumn key="takePrice" title="止盈" />
+                  <TableColumn key="stopPrice" title="止损" />
+                  <TableColumn key="closeOrderCount" title="已完成订单" />
+                  <TableColumn key="openOrderCount" title="未完成订单" />
                   <TableColumn key="op" title="操作" width="150"
                     b-template={(data, index) => {
                         return <React.Fragment>
@@ -236,7 +238,7 @@ export default class StrategyInfoView extends BaseComponent {
               >
           <Table type="grid" fixHeader={true} style={{flex: 1, fontFamily:'Monaco'}} data={this.state.orders} checkType="none" resizable stripe noDataTemplate={this.getEmptyTableMessage()}> 
               <TableColumn key="type" title="订单类型" />
-              <TableColumn key="positionSide" title="交易方向" />
+              <TableColumn key="positionSide" title="持仓方向" />
               <TableColumn key="time" title="订单时间" width={180}/>
               <TableColumn key="price" title="委托价格" />
               <TableColumn key="amount" title="委托数量" />
@@ -267,17 +269,17 @@ export default class StrategyInfoView extends BaseComponent {
                   <FormItem label="价格：" value={this.state.orderInfo.price} rules={{required: true, number: true}}>
                       <Input width={480} value={this.state.orderInfo.price} on$change-value={(c, value) => {this.onFormValueChange("price",value)}} placeholder={"市场来源数据推送参考："+this.state.newPrice}/>
                   </FormItem>
-                  <FormItem label="数量：" value={this.state.orderInfo.amount} rules={{required: true, number: true}}>
-                      <Input width={480} value={this.state.orderInfo.amount} on$change-value={(c, value) => {this.onFormValueChange("amount",value)}} />
+                  <FormItem label="止盈：" value={this.state.orderInfo.takePrice} rules={{required: true, number: true}}>
+                      <Input width={480} value={this.state.orderInfo.takePrice} on$change-value={(c, value) => {this.onFormValueChange("takePrice",value)}} />
+                  </FormItem>
+                  <FormItem label="止损：" value={this.state.orderInfo.stopPrice} rules={{required: true, number: true}}>
+                      <Input width={480} value={this.state.orderInfo.stopPrice} on$change-value={(c, value) => {this.onFormValueChange("stopPrice",value)}} />
                   </FormItem>
                 </Form> 
               :
                 <Form ref={i => this.templateForm = i} size="default">
                   <FormItem label="合约：" value={this.state.orderInfo.symbol} rules={{required: true}}>
                       <Input width={480} value={this.state.orderInfo.symbol} on$change-value={(c, value) => {this.onFormValueChange("symbol",value)}} readonly={true}/>
-                  </FormItem>
-                  <FormItem label="价格：" value={this.state.orderInfo.price} rules={{required: true, number: true}}>
-                      <Input width={480} value={this.state.orderInfo.price} on$change-value={(c, value) => {this.onFormValueChange("price",value)}} placeholder={"市场来源数据推送参考："+this.state.newPrice}/>
                   </FormItem>
                 </Form> 
             }

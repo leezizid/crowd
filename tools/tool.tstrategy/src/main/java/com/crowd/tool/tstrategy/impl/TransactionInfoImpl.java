@@ -57,6 +57,12 @@ class TransactionInfoImpl implements TransactionInfo {
 	 * 开始时间
 	 */
 	private long openTime;
+	
+	
+	/**
+	 * 开仓时间
+	 */
+	private long positionTime;
 
 	/**
 	 * 结束时间
@@ -67,6 +73,11 @@ class TransactionInfoImpl implements TransactionInfo {
 	 * 止盈价格
 	 */
 	private BigDecimal takePrice;
+	
+	/**
+	 * 委托价格
+	 */
+	private BigDecimal orderPrice;
 
 	/**
 	 * 止损价格
@@ -194,6 +205,14 @@ class TransactionInfoImpl implements TransactionInfo {
 	public void setOpenTime(long openTime) {
 		this.openTime = openTime;
 	}
+	
+	public long getPositionTime() {
+		return positionTime;
+	}
+	
+	public void setPositionTime(long positionTime) {
+		this.positionTime = positionTime;
+	}
 
 	public long getCloseTime() {
 		return closeTime;
@@ -201,6 +220,16 @@ class TransactionInfoImpl implements TransactionInfo {
 
 	public void setCloseTime(long closeTime) {
 		this.closeTime = closeTime;
+	}
+	
+	
+
+	public BigDecimal getOrderPrice() {
+		return orderPrice;
+	}
+
+	public void setOrderPrice(BigDecimal orderPrice) {
+		this.orderPrice = orderPrice;
 	}
 
 	public BigDecimal getTakePrice() {
@@ -236,7 +265,9 @@ class TransactionInfoImpl implements TransactionInfo {
 		this.balance = new BigDecimal(o.optDouble("balance"));
 		this.cost = new BigDecimal(o.optDouble("cost"));
 		this.openTime = o.optLong("openTime");
+		this.positionTime = o.optLong("positionTime");
 		this.closeTime = o.optLong("closeTime");
+		this.orderPrice = new BigDecimal(o.optDouble("orderPrice"));
 		this.takePrice = new BigDecimal(o.optDouble("takePrice"));
 		this.stopPrice = new BigDecimal(o.optDouble("stopPrice"));
 		this.forceCloseFlag = o.optBoolean("forceCloseFlag");
@@ -261,7 +292,9 @@ class TransactionInfoImpl implements TransactionInfo {
 		o.put("balance", balance.doubleValue());
 		o.put("cost", cost.doubleValue());
 		o.put("openTime", openTime);
+		o.put("positionTime", positionTime);
 		o.put("closeTime", closeTime);
+		o.put("orderPrice", orderPrice != null ? orderPrice.doubleValue() : 0);
 		o.put("takePrice", takePrice != null ? takePrice.doubleValue() : 0);
 		o.put("stopPrice", stopPrice != null ? stopPrice.doubleValue() : 0);
 		o.put("forceCloseFlag", forceCloseFlag);

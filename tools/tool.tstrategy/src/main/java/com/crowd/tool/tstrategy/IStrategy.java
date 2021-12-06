@@ -2,19 +2,24 @@ package com.crowd.tool.tstrategy;
 
 import java.math.BigDecimal;
 
-import com.crowd.tool.misc.OrderType;
-import com.crowd.tool.misc.PositionSide;
-
 /**
  * 基础（半自动化/手动）策略接口
  */
 public interface IStrategy {
 
+	/**
+	 * 
+	 * @param context
+	 */
 	public void init(StrategyContext context);
 
-	public void validateOrderRisk(StrategyContext context, OrderType type, String symbol, PositionSide positionSide,
-			float amount, float price) throws Throwable;
-
+	/**
+	 * 
+	 * @param context
+	 * @param symbol
+	 * @param price
+	 * @return
+	 */
 	public BigDecimal calcTransactionAmount(StrategyContext context, String symbol, BigDecimal price);
 
 	/**

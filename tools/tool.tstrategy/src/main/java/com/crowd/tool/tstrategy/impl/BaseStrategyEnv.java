@@ -2,6 +2,7 @@ package com.crowd.tool.tstrategy.impl;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Calendar;
 
 import com.crowd.service.base.CrowdContext;
 import com.crowd.tool.misc.OrderType;
@@ -24,6 +25,10 @@ public abstract class BaseStrategyEnv implements StrategyContext, StrategyEnv {
 	private CrowdContext crowdContext;
 
 	private Products products;
+	
+	//
+	private Calendar calendar = Calendar.getInstance();
+	private String tradeDay = "";
 
 	public BaseStrategyEnv(CrowdContext crowdContext, IStrategy strategyInstance, StrategyInfo strategyInfo,
 			Products products) throws Throwable {
@@ -49,6 +54,25 @@ public abstract class BaseStrategyEnv implements StrategyContext, StrategyEnv {
 	public void onTick(String symbol, long time, BigDecimal lowerLimitPrice, BigDecimal upperLimitPrice,
 			BigDecimal price, BigDecimal amount) {
 		synchronized (strategyInfo) {
+			//
+			calendar.setTimeInMillis(time);
+			int hour = calendar.get(Calendar.HOUR_OF_DAY);
+			if(hour >= 6 && hour <= 18) {
+				int year = calendar.get(Calendar.YEAR);
+				int month = calendar.get(Calendar.MONTH) + 1;
+				int day = calendar.get(Calendar.DAY_OF_MONTH);
+				String newTradeDay = year + "-" + (month < 10 ? "0" : "") + month + "-" + (day < 10 ? "0" : "") + day;
+				if (!newTradeDay.equals(tradeDay)) {
+					strategyInfo.addTradeDay(newTradeDay);
+					tradeDay = newTradeDay;
+					try {
+						saveInfo(crowdContext);
+					} catch (Throwable t) {
+
+					}
+				}
+			}
+			//
 			for (TransactionInfo transaction : strategyInfo.getTransactions()) {
 				if (transaction.getSymbol().equals(symbol)) {
 					try {
@@ -141,7 +165,7 @@ public abstract class BaseStrategyEnv implements StrategyContext, StrategyEnv {
 
 		// 开盘内15分钟不交易
 		if (productInfo.afterOpenMarket(time) < 15 * 60) {
-			throw new IllegalStateException("开盘内不超过15分钟，不允许开仓");
+			throw new IllegalStateException("开盘内15分钟，不允许开仓");
 		}
 
 		// 上次交易时间30分钟内不交易，不交易
@@ -200,6 +224,7 @@ public abstract class BaseStrategyEnv implements StrategyContext, StrategyEnv {
 			transactionInfo.setPositionSide(positionSide);
 			transactionInfo.setPositionAmount(BigDecimal.ZERO);
 			transactionInfo.setOpenTime(time);
+			transactionInfo.setOrderPrice(price);
 			transactionInfo.setTakePrice(takePrice);
 			transactionInfo.setStopPrice(stopPrice);
 			OrderInfoImpl orderInfo = new OrderInfoImpl();
@@ -343,6 +368,7 @@ public abstract class BaseStrategyEnv implements StrategyContext, StrategyEnv {
 				}
 				if (matchOrderInfo.getType() == OrderType.Open) {
 					transactionInfo.setPositionAmount(transactionInfo.getPositionAmount().add(newExecAmount));
+					transactionInfo.setPositionTime(time);
 				} else {
 					transactionInfo.setPositionAmount(transactionInfo.getPositionAmount().subtract(newExecAmount));
 				}

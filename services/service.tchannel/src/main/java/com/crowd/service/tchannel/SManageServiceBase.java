@@ -115,8 +115,21 @@ public abstract class SManageServiceBase implements CrowdService {
 		if (history) {
 			String content = context.load(id + ".history");
 			JSONArray historyArray = new JSONArray();
+			JSONArray matches = new JSONArray();
 			if (StringUtils.isNotEmpty(content)) {
 				JSONArray arr = new JSONArray(content);
+				for (int i = 0; i < arr.length(); i++) {
+					JSONObject o = arr.getJSONObject(i);
+					JSONArray m = new JSONArray();
+					m.put(o.getLong("openTime"));
+					m.put(o.getLong("positionTime"));
+					m.put(o.getLong("closeTime"));
+					m.put(o.getLong("orderPrice"));
+					m.put(o.getLong("takePrice"));
+					m.put(o.getLong("stopPrice"));
+					m.put(o.getString("positionSide"));
+					matches.put(m);
+				}
 				for (int i = arr.length() - 1; i >= 0; i--) {
 					JSONObject o = arr.getJSONObject(i);
 					o.put("openTime", DateHelper.dateTime2String(new Date(o.getLong("openTime"))));
@@ -138,6 +151,7 @@ public abstract class SManageServiceBase implements CrowdService {
 				}
 			}
 			output.put("history", historyArray);
+			output.put("matches", matches);
 		}
 		//
 		//
@@ -149,6 +163,7 @@ public abstract class SManageServiceBase implements CrowdService {
 		output.put("transactions", transactionArray);
 		output.put("openOrders", openOrderArray);
 		output.put("productArray", products.toJSONArray());
+		output.put("tradeDays", contentObject.optJSONArray("tradeDays"));
 	}
 
 	@CrowdMethod

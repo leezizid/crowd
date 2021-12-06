@@ -88,6 +88,19 @@ final class StrategyInfoImpl implements StrategyInfo {
 	 * 当前活动交易列表（一般只有一笔交易）
 	 */
 	private List<TransactionInfoImpl> transactions = new ArrayList<TransactionInfoImpl>();
+	
+	/**
+	 * 交易日列表
+	 */
+	private List<String> tradeDayList = new ArrayList<String>();
+	
+	/**
+	 * 增加交易日
+	 * @param tradeDay
+	 */
+	public void addTradeDay(String tradeDay) {
+		tradeDayList.add(tradeDay);
+	}
 
 	/**
 	 * 开始一笔交易
@@ -138,7 +151,7 @@ final class StrategyInfoImpl implements StrategyInfo {
 			throw new IllegalStateException("交易持仓数量不为0或存在未完成的订单，不能关闭");
 		}
 		this.transactions.remove(index);
-		transactionInfo.setCloseTime(time);
+ 		transactionInfo.setCloseTime(time);
 		// XXX：productInfo可能为空（下单时信息错误）
 		if (productInfo != null && productInfo.isDelivery()) {
 			// 资产本位的盈利计算正好相反（资产价格增加，实际余额会降低）
@@ -379,6 +392,7 @@ final class StrategyInfoImpl implements StrategyInfo {
 			transactionArray.put(this.transactions.get(i).toJSON());
 		}
 		o.put("transactions", transactionArray);
+		o.put("tradeDays", new JSONArray(tradeDayList));
 		return o;
 	}
 

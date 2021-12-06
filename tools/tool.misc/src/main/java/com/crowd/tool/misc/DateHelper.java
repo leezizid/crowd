@@ -77,5 +77,14 @@ public class DateHelper {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
 		return sdf.format(date);
 	}
+	
+	
+	public final static String time2String(Date date) {
+		if(date == null || date.getTime() == 0) {
+			return "";
+		}
+		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+		return sdf.format(date);
+	}
 
 }

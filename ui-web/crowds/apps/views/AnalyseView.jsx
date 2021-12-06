@@ -29,7 +29,7 @@ export default class AnalyseView extends BaseComponent {
   }
 
 
-  renderChart(title, data, pieces, showKLine, showTimeLine) {
+  renderChart(title, data, pieces, markPoints, markLines, markAreas, showKLine, showTimeLine) {
     var option = {
         title: {
             text: ""
@@ -104,7 +104,7 @@ export default class AnalyseView extends BaseComponent {
                 scale: true,
                 axisLine: { show: true, lineStyle: { color: 'lightgrey'} },
                 axisLabel: {show: true},
-                splitLine: { show: true }
+                splitLine: { show: true , lineStyle: {opacity: 0.4}}
             },
             {
                 scale: true,
@@ -128,7 +128,7 @@ export default class AnalyseView extends BaseComponent {
                 show: true,
                 xAxisIndex: [0, 1],
                 type: 'slider',
-                top: '25',
+                top: '5',
                 start: 0,
                 end: 100
             }
@@ -155,6 +155,18 @@ export default class AnalyseView extends BaseComponent {
                 },
                 lineStyle: {
                     width: 1
+                },
+                markPoint: {
+                    data: markPoints,
+                    animation: false
+                },                
+                markLine: {
+                    data : markLines,
+                    animation: false
+                },
+                markArea: {
+                    data: markAreas,
+                    animation: false
                 }
             },
             {
@@ -163,7 +175,13 @@ export default class AnalyseView extends BaseComponent {
                 encode: {
                     x: 1,
                     y: [2, 3, 5, 4]
-                } ,                   
+                } ,    
+                markPoint: {
+                    data: [
+                        { type: 'max', name: 'Max', valueDim: 'highest', symbol: 'pin', symbolSize: 1, symbolOffset: [0, -10] },
+                        { type: 'min', name: 'Min', valueDim: 'lowest', symbol: 'arrow', symbolSize: 1, symbolOffset: [0, 10]  }
+                    ]
+                },                
                 itemStyle: {
                     color: upColor,
                     color0: downColor,
@@ -203,7 +221,7 @@ export default class AnalyseView extends BaseComponent {
           Message.error(error.message);
         } else {
           let chartData = JSON.parse(data.content);
-          this.renderChart("日K线", chartData, [{gte: 0, lt: chartData.length, color: normalColor}], true, false);
+          this.renderChart("日K线", chartData, [{gte: 0, lt: chartData.length, color: normalColor}], [], [], [], true, false);
         }
       });  
   }
@@ -226,15 +244,19 @@ export default class AnalyseView extends BaseComponent {
         Message.error(error.message);
       } else {
         let chartData = JSON.parse(data.content);
-        var pieces = [];
-        var matches = this.matches;
+        let pieces = [];
+        let matches = this.matches;
 
         //
-        var isInMatch = false;
-        var matchIndex = 0;
-        var dataIndex = 0;
-        var lastPicesStart = 0;
-        var lastPicesEnd = 0;
+        let markPoints = [];
+        let markLines = [];
+        let markAreas = [];
+
+        let isInMatch = false;
+        let matchIndex = 0;
+        let dataIndex = 0;
+        let lastPicesStart = 0;
+        let lastPicesEnd = 0;
         if(matches != null && matches.length > 0) {
             while(chartData[dataIndex][0] > matches[matchIndex][0]) {
                 matchIndex++;
@@ -245,9 +267,17 @@ export default class AnalyseView extends BaseComponent {
                 break;
             }
             if(isInMatch) {
-                if(matches[matchIndex][1] <= chartData[dataIndex][0]) {
+                //alert(matches[matchIndex][1] + "--" + chartData[dataIndex][0]) 
+                if(matches[matchIndex][2] <= chartData[dataIndex][0]) {
                     lastPicesEnd = dataIndex;
-                    pieces.push({gte: lastPicesStart, lt: lastPicesEnd, color: matches[matchIndex][2] == "Long" ? upColor : downColor});
+                    pieces.push({gte: lastPicesStart, lt: lastPicesEnd, color: matches[matchIndex][6] == "Long" ? upColor : downColor});
+                    if(matches[matchIndex][1] > 0) {
+                        markPoints.push({coord: [chartData[dataIndex][1],chartData[dataIndex][6]], value: '←平',symbolSize: 1, symbolOffset: [16, 0]})
+                    }
+                    markAreas[markAreas.length-1].push({xAxis: chartData[dataIndex][1]});
+                    markLines[markLines.length-1].push({xAxis: chartData[dataIndex][1], yAxis:matches[matchIndex][5], symbol:'none'});
+                    markLines[markLines.length-2].push({xAxis: chartData[dataIndex][1], yAxis:matches[matchIndex][4], symbol:'none'});
+                    markLines[markLines.length-3].push({xAxis: chartData[dataIndex][1], yAxis:matches[matchIndex][3], symbol:'none'});
                     matchIndex++;
                     isInMatch = false;
                 }
@@ -256,17 +286,24 @@ export default class AnalyseView extends BaseComponent {
                     lastPicesStart = dataIndex;
                     pieces.push({gte: lastPicesEnd, lt: lastPicesStart, color: normalColor});
                     isInMatch = true;
+                    markAreas.push([{xAxis: chartData[dataIndex][1], itemStyle: {}}]);
+                    markLines.push([{xAxis:chartData[dataIndex][1], yAxis:matches[matchIndex][3], symbol:'none', lineStyle: {color: 'lightblue'}}]);
+                    markLines.push([{xAxis:chartData[dataIndex][1], yAxis:matches[matchIndex][4], symbol:'none', lineStyle: {color: matches[matchIndex][6] == "Long" ? upColor : downColor}}]);
+                    markLines.push([{xAxis:chartData[dataIndex][1], yAxis:matches[matchIndex][5], symbol:'none', lineStyle: {color: 'orange'}}]);
+                    //markLines.push([{x:100, yAxis:matches[matchIndex][5], symbol:'none'}, {x:400, yAxis:matches[matchIndex][5], symbol:'none'}]);
                 }
             }
-            
+            if(dataIndex > 0 && matches[matchIndex][1] >= chartData[dataIndex - 1][0] && matches[matchIndex][1] <= chartData[dataIndex][0]) {
+                //alert(dataIndex)
+                markPoints.push({coord: [chartData[dataIndex][1],chartData[dataIndex][6]], value: '开→',symbolSize: 1, symbolOffset: [-16, 0] })
+            }
             dataIndex++;
         }
         if(lastPicesEnd < chartData.length) {
             pieces.push({gte: lastPicesEnd, lt: chartData.length, color: normalColor});
         }
-        //alert(JSON.stringify(pieces))
         //
-        this.renderChart(tradeDay, chartData, pieces, false, true);
+        this.renderChart(tradeDay, chartData, pieces, markPoints, markLines, markAreas, false, true);
       }
     });  
   }

@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 import {Button, Message, Tree, Table, TableColumn, Spin, Tabs, Tab, Dialog, Form, FormItem, Input, Select, Option, Spinner,ButtonGroup} from 'kpc-react';
 import BaseComponent from '../../commons/react/BaseComponent'
-
+import AnalyseView from './views/AnalyseView'
 
 export default class StrategyInfoView extends BaseComponent {
 
   constructor(props) {
     super(props);
-    this.setState({loading: false, showDetailDialog: false, showOrderDialog: false, orderInfo: {}, activeTab: 0, tChannelId: null, strategyId: null, serviceName: null, progress: -1, newPrice: 0, properties: [], transactions: [], openOrders: [], history: [], orders: [], productArray: []});
+    this.setState({loading: false, showDetailDialog: false, showOrderDialog: false, showAnalyseDialog:false, orderInfo: {}, activeTab: 0, tChannelId: null, strategyId: null, serviceName: null, progress: -1, newPrice: 0, properties: [], transactions: [], openOrders: [], history: [], matches:[], orders: [], productArray: []});
   }
 
 
@@ -64,9 +64,13 @@ export default class StrategyInfoView extends BaseComponent {
         Message.error(error.message);
         this.setState({loading: false});
       } else {
-        this.setState({loading: false, tChannelId: data.tChannelId, strategyId: data.strategyId, serviceName: data.serviceName, progress: data.progress, properties: data.properties, transactions: data.transactions, openOrders: data.openOrders, history: data.history, productArray: data.productArray});
+        this.setState({loading: false, tChannelId: data.tChannelId, strategyId: data.strategyId, serviceName: data.serviceName, progress: data.progress, properties: data.properties, transactions: data.transactions, openOrders: data.openOrders, history: data.history, matches: data.matches, productArray: data.productArray, tradeDays: data.tradeDays});
       }
     });
+  }
+
+  analyse() {
+    this.setState({showAnalyseDialog: true})
   }
 
   getEmptyTableMessage() {
@@ -158,12 +162,15 @@ export default class StrategyInfoView extends BaseComponent {
                   <TableColumn key="positionSide" title="交易方向" />
                   <TableColumn key="balance" title="盈亏" />
                   <TableColumn key="cost" title="费用" />
-                  <TableColumn key="op" title="操作" width="80"
+                  <TableColumn key="op" title="操作" width="120"
                     b-template={(data, index) => {
                         return <React.Fragment>
                             <a onClick={()=>{
                                 this.setState({showDetailDialog: true, orders: this.state.history[index].orders});
-                            }}>订单明细</a> 
+                            }}>明细</a> 
+                            &nbsp;&nbsp;<a onClick={()=>{
+                                this.analyse();
+                            }}>分析</a>
                         </React.Fragment>
                     }}
                 ></TableColumn>
@@ -282,9 +289,23 @@ export default class StrategyInfoView extends BaseComponent {
                       <Input width={480} value={this.state.orderInfo.symbol} on$change-value={(c, value) => {this.onFormValueChange("symbol",value)}} readonly={true}/>
                   </FormItem>
                 </Form> 
-            }
-                         
+            }  
         </Dialog>           
+        <Dialog value={this.state.showAnalyseDialog}
+                  on$change-value={(c, show) => this.setState({showAnalyseDialog: show})}
+                  title="交易分析"
+                  b-footer-wrapper=""
+                  width={document.body.clientWidth-10}
+                  style={{paddingLeft:0}}
+              >
+                  <AnalyseView 
+                    width={document.body.clientWidth-50} 
+                    height={document.body.clientHeight-150} 
+                    symbol={"SHFE.ag"} 
+                    matches={this.state.matches}
+                    tradedays={this.state.tradeDays}
+                  />
+        </Dialog> 
       </div>
     )
   }

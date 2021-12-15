@@ -51,7 +51,7 @@ export default class StrategyManage extends BaseComponent {
 
 
   createStrategy() {
-    let strategyInfo = {size: 100000, currencyType: 'CNY'};
+    let strategyInfo = {size: 100000, currencyType: 'CNY', arguments: "{}"};
     this.setState({showStrategyDialog: true, strategyInfo})
   }  
 
@@ -98,6 +98,9 @@ export default class StrategyManage extends BaseComponent {
                   </FormItem>
                   <FormItem label="策略服务名" value={this.state.strategyInfo.service} rules={{required: true}}>
                       <Input width={480} value={this.state.strategyInfo.service} on$change-value={(c, value) => {this.onFormValueChange("service",value)}}/>
+                  </FormItem>
+                  <FormItem label="策略参数" value={this.state.strategyInfo.arguments} rules={{required: true}}>
+                      <Input width={480} value={this.state.strategyInfo.arguments} on$change-value={(c, value) => {this.onFormValueChange("arguments",value)}}/>
                   </FormItem>
                   <FormItem label="市场数据" value={this.state.strategyInfo.marketDataSource} rules={{required: true}}>
                       <Input width={480} value={this.state.strategyInfo.marketDataSource} on$change-value={(c, value) => {this.onFormValueChange("marketDataSource",value)}} />

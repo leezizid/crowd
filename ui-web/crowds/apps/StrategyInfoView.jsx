@@ -2,12 +2,15 @@ import React, { Component } from 'react';
 import {Button, Message, Tree, Table, TableColumn, Spin, Tabs, Tab, Dialog, Form, FormItem, Input, Select, Option, Spinner,ButtonGroup} from 'kpc-react';
 import BaseComponent from '../../commons/react/BaseComponent'
 import AnalyseView from './views/AnalyseView'
+import ProfitView from './views/ProfitView'
+import PLStatView from './views/PLStatView'
+
 
 export default class StrategyInfoView extends BaseComponent {
 
   constructor(props) {
     super(props);
-    this.setState({loading: false, showDetailDialog: false, showOrderDialog: false, showAnalyseDialog:false, orderInfo: {}, activeTab: 0, tChannelId: null, strategyId: null, serviceName: null, progress: -1, newPrice: 0, properties: [], transactions: [], openOrders: [], history: [], matches:[], orders: [], productArray: []});
+    this.setState({loading: false, showDetailDialog: false, showOrderDialog: false, showAnalyseDialog:false, orderInfo: {}, activeTab: 0, tChannelId: null, strategyId: null, serviceName: null, progress: -1, newPrice: 0, properties: [], transactions: [], openOrders: [], history: [], matches:[], orders: [], profits: [], plStats:[], productArray: []});
   }
 
 
@@ -54,17 +57,17 @@ export default class StrategyInfoView extends BaseComponent {
   }    
  
   refresh() {
-    this.setState({loading: true, tChannelId: null, strategyId: null, serviceName: null, progress: -1, properties: [], transactions: [], openOrders: [], history: [], orders: [], productArray: []});
+    this.setState({loading: true, tChannelId: null, strategyId: null, serviceName: null, progress: -1, properties: [], transactions: [], openOrders: [], history: [], orders: [], profits: [], plStats: [], productArray: []});
     if(!this.props.id) {
       this.setState({loading: false});
       return;
     }
-    this.invoke(this.props.path + "/info", {id: this.props.id, history: this.state.activeTab == 3}, (error, data) => {
+    this.invoke(this.props.path + "/info", {id: this.props.id, history: this.state.activeTab == 3, profits: this.state.activeTab == 4, plStat: this.state.activeTab == 5}, (error, data) => {
       if(error) {
         Message.error(error.message);
         this.setState({loading: false});
       } else {
-        this.setState({loading: false, tChannelId: data.tChannelId, strategyId: data.strategyId, serviceName: data.serviceName, progress: data.progress, properties: data.properties, transactions: data.transactions, openOrders: data.openOrders, history: data.history, matches: data.matches, productArray: data.productArray, tradeDays: data.tradeDays});
+        this.setState({loading: false, tChannelId: data.tChannelId, strategyId: data.strategyId, serviceName: data.serviceName, progress: data.progress, properties: data.properties, transactions: data.transactions, openOrders: data.openOrders, profits: data.profits, plStats: data.plStats, history: data.history, matches: data.matches, productArray: data.productArray, tradeDays: data.tradeDays});
       }
     });
   }
@@ -87,7 +90,7 @@ export default class StrategyInfoView extends BaseComponent {
     return options;
   }
 
-  renderTable(tab) {
+  renderTabPage(tab) {
     switch(tab) {
       case 0:
         return <Table type="grid" fixHeader={true} style={{flex: 1, fontFamily:'Monaco'}} data={this.state.properties} checkType="none" resizable stripe noDataTemplate={this.getEmptyTableMessage()}> 
@@ -174,7 +177,11 @@ export default class StrategyInfoView extends BaseComponent {
                         </React.Fragment>
                     }}
                 ></TableColumn>
-               </Table>                      
+               </Table>   
+      case 4:
+        return <ProfitView data={this.state.profits}/>     
+      case 5:
+        return <PLStatView data={this.state.plStats}/>             
     }
   }
 
@@ -225,7 +232,7 @@ export default class StrategyInfoView extends BaseComponent {
         </div>         
         <Tabs size="default" type="border-card" value={this.state.activeTab} on$change-value={(c, activeTab) => {
             this.setState({activeTab})
-            if(this.state.activeTab == 3) {
+            if(this.state.activeTab == 3 || this.state.activeTab == 4 || this.state.activeTab == 5) {
               this.refresh();
             }
           }}>
@@ -233,9 +240,11 @@ export default class StrategyInfoView extends BaseComponent {
                   <Tab disabled={this.props.id == null} value={1}>活动交易</Tab>
                   <Tab disabled={this.props.id == null} value={2}>挂单</Tab>
                   <Tab disabled={this.props.id == null} value={3}>历史交易</Tab>
+                  <Tab disabled={this.props.id == null} value={4}>收益曲线</Tab>
+                  <Tab disabled={this.props.id == null} value={5}>盈亏统计</Tab>
         </Tabs>           
         <div style={{marginBottom: 20}}></div>
-        {this.renderTable(this.state.activeTab)}
+        {this.renderTabPage(this.state.activeTab)}
         {this.state.loading ? <Spin overlay /> : ""}
         <Dialog value={this.state.showDetailDialog}
                   on$change-value={(c, show) => this.setState({showDetailDialog: show})}

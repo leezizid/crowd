@@ -53,10 +53,12 @@ public abstract class StrategyServiceBase implements CrowdService {
 				Products products = new Products(
 						crowdContext.load("products", strategyInfo.getProductGroup() + ".json"));
 				if (testFlag) {
-					strategyEnv = StrategyEnv.createTest(crowdContext, createStrategyInstance(), strategyInfo,
+					strategyEnv = StrategyEnv.createTest(crowdContext,
+							createStrategyInstance(strategyInfo.getArguments()), strategyInfo,
 							products);
 				} else {
-					strategyEnv = StrategyEnv.createReal(crowdContext, createStrategyInstance(), strategyInfo,
+					strategyEnv = StrategyEnv.createReal(crowdContext,
+							createStrategyInstance(strategyInfo.getArguments()), strategyInfo,
 							products);
 					runningStrategyEnvs.put(id, strategyEnv);
 				}
@@ -253,6 +255,6 @@ public abstract class StrategyServiceBase implements CrowdService {
 		}
 	}
 
-	protected abstract IStrategy createStrategyInstance();
+	protected abstract IStrategy createStrategyInstance(String arguments);
 
 }

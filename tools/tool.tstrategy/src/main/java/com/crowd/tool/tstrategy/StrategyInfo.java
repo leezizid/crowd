@@ -24,6 +24,8 @@ public interface StrategyInfo {
 	public String getId();
 
 	public String getName();
+	
+	public String getArguments();
 
 	/**
 	 * 

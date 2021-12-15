@@ -1,6 +1,13 @@
 package com.crowd.service.tchannel;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
@@ -19,6 +26,8 @@ public abstract class SManageServiceBase implements CrowdService {
 	public void info(CrowdContext context, JSONObject input, JSONObject output) throws Throwable {
 		String id = input.getString("id");
 		boolean history = input.optBoolean("history");
+		boolean profits = input.optBoolean("profits");
+		boolean plStat = input.optBoolean("plStat");
 		JSONObject contentObject = new JSONObject(load(context, id));
 		String serviceName = contentObject.getString("service");
 		String productGroup = contentObject.getString("productGroup");
@@ -41,6 +50,10 @@ public abstract class SManageServiceBase implements CrowdService {
 		property = new JSONObject();
 		property.put("name", "策略服务");
 		property.put("value", serviceName);
+		properties.put(property);
+		property = new JSONObject();
+		property.put("name", "策略参数");
+		property.put("value", contentObject.has("arguments") ? contentObject.getString("arguments") : "");
 		properties.put(property);
 		property = new JSONObject();
 		property.put("name", "市场数据");
@@ -148,10 +161,90 @@ public abstract class SManageServiceBase implements CrowdService {
 					}
 					//
 					historyArray.put(o);
+					if (historyArray.length() >= 500) {
+						break;
+					}
 				}
 			}
 			output.put("history", historyArray);
 			output.put("matches", matches);
+		}
+		if (profits) {
+			String content = context.load(id + ".history");
+			JSONArray profitArray = new JSONArray();
+			if (StringUtils.isNotEmpty(content)) {
+				JSONArray arr = new JSONArray(content);
+				double profit1 = 0;
+				double profit2 = 0;
+				for (int i = 0; i < arr.length(); i++) {
+					JSONObject o = arr.getJSONObject(i);
+					String day = DateHelper.date2String(new Date(o.getLong("closeTime")));
+					profit1 = profit1 + o.getDouble("balance");
+					profit2 = profit2 + o.getDouble("balance") - o.getDouble("cost");
+					if (i > 0) {
+						JSONArray prev = profitArray.getJSONArray(profitArray.length() - 1);
+						if (prev.getString(0).equals(day)) {
+							profitArray.remove(profitArray.length() - 1);
+						}
+					}
+					JSONArray dayProfit = new JSONArray();
+					dayProfit.put(day);
+					dayProfit.put(profit1);
+					dayProfit.put(new BigDecimal(profit2).setScale(0, RoundingMode.HALF_UP));
+					profitArray.put(dayProfit);
+				}
+			}
+			output.put("profits", profitArray);
+		}
+		if (plStat) {
+			String content = context.load(id + ".history");
+			Map<Double, Integer> statisticsMap = new HashMap<Double, Integer>();
+			if (StringUtils.isNotEmpty(content)) {
+				JSONArray arr = new JSONArray(content);
+				for (int i = 0; i < arr.length(); i++) {
+					JSONObject o = arr.getJSONObject(i);
+					double v = o.getDouble("balance");
+					if (!statisticsMap.containsKey(v)) {
+						statisticsMap.put(v, 0);
+					}
+					statisticsMap.put(v, statisticsMap.get(v) + 1);
+				}
+			}
+			List<Double> profitValueArray = new ArrayList<Double>(statisticsMap.keySet());
+			profitValueArray.sort(new Comparator<Double>() {
+				@Override
+				public int compare(Double o1, Double o2) {
+					return o1.compareTo(o2);
+				}
+			});
+			JSONArray statisticsArray = new JSONArray();
+			JSONArray xArray = new JSONArray();
+			JSONArray y1Array = new JSONArray();
+			JSONArray y2Array = new JSONArray();
+			JSONArray y3Array = new JSONArray();
+			for (int i = 0; i < profitValueArray.size(); i++) {
+				double v = profitValueArray.get(i);
+				int count = statisticsMap.get(profitValueArray.get(i));
+				xArray.put(Math.abs(v));
+				if (v < 0) {
+					y1Array.put(count);
+					y2Array.put("-");
+					y3Array.put("-");
+				} else if (v == 0) {
+					y1Array.put("-");
+					y2Array.put(count);
+					y3Array.put("-");
+				} else if (v > 0) {
+					y1Array.put("-");
+					y2Array.put("-");
+					y3Array.put(count);
+				}
+			}
+			statisticsArray.put(xArray);
+			statisticsArray.put(y1Array);
+			statisticsArray.put(y2Array);
+			statisticsArray.put(y3Array);
+			output.put("plStats", statisticsArray);
 		}
 		//
 		//

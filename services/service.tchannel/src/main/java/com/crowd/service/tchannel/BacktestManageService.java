@@ -114,6 +114,7 @@ public class BacktestManageService extends SManageServiceBase {
 	@CrowdMethod
 	public synchronized void startStrategy(CrowdContext context, JSONObject input, JSONObject output) throws Throwable {
 		String templatedId = input.getString("id");
+		String arguments = input.getString("arguments");
 		JSONObject templateObject = strategyTemplates.get(templatedId);
 		String testName = newTestName();
 		String testId = templatedId + "_" + testName;
@@ -131,6 +132,7 @@ public class BacktestManageService extends SManageServiceBase {
 		newBacktestObject.put("profit", 0);
 		newBacktestObject.put("cost", 0);
 		newBacktestObject.put("channelId", "测试");
+		newBacktestObject.put("arguments", arguments);
 
 		JSONArray arr = new JSONArray(context.load("backtests.json"));
 		for (int i = 0; i < arr.length(); i++) {

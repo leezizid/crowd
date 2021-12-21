@@ -97,16 +97,16 @@ final class StrategyInfoImpl implements StrategyInfo {
 	/**
 	 * 交易日列表
 	 */
-	private List<String> tradeDayList = new ArrayList<String>();
+//	private List<String> tradeDayList = new ArrayList<String>();
 
 	/**
 	 * 增加交易日
 	 * 
 	 * @param tradeDay
 	 */
-	public void addTradeDay(String tradeDay) {
-		tradeDayList.add(tradeDay);
-	}
+//	public void addTradeDay(String tradeDay) {
+//		tradeDayList.add(tradeDay);
+//	}
 
 	/**
 	 * 开始一笔交易
@@ -408,7 +408,7 @@ final class StrategyInfoImpl implements StrategyInfo {
 			transactionArray.put(this.transactions.get(i).toJSON());
 		}
 		o.put("transactions", transactionArray);
-		o.put("tradeDays", new JSONArray(tradeDayList));
+//		o.put("tradeDays", new JSONArray(tradeDayList));
 		return o;
 	}
 

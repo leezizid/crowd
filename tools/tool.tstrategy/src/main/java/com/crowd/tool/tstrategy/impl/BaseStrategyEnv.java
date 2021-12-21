@@ -2,7 +2,6 @@ package com.crowd.tool.tstrategy.impl;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Calendar;
 
 import com.crowd.service.base.CrowdContext;
 import com.crowd.tool.misc.OrderType;
@@ -27,8 +26,8 @@ public abstract class BaseStrategyEnv implements StrategyContext, StrategyEnv {
 	private Products products;
 	
 	//
-	private Calendar calendar = Calendar.getInstance();
-	private String tradeDay = "";
+//	private Calendar calendar = Calendar.getInstance();
+//	private String tradeDay = "";
 
 	public BaseStrategyEnv(CrowdContext crowdContext, IStrategy strategyInstance, StrategyInfo strategyInfo,
 			Products products) throws Throwable {
@@ -55,23 +54,23 @@ public abstract class BaseStrategyEnv implements StrategyContext, StrategyEnv {
 			BigDecimal price, BigDecimal amount) {
 		synchronized (strategyInfo) {
 			//
-			calendar.setTimeInMillis(time);
-			int hour = calendar.get(Calendar.HOUR_OF_DAY);
-			if(hour >= 6 && hour <= 18) {
-				int year = calendar.get(Calendar.YEAR);
-				int month = calendar.get(Calendar.MONTH) + 1;
-				int day = calendar.get(Calendar.DAY_OF_MONTH);
-				String newTradeDay = year + "-" + (month < 10 ? "0" : "") + month + "-" + (day < 10 ? "0" : "") + day;
-				if (!newTradeDay.equals(tradeDay)) {
-					strategyInfo.addTradeDay(newTradeDay);
-					tradeDay = newTradeDay;
-					try {
-						saveInfo(crowdContext);
-					} catch (Throwable t) {
-
-					}
-				}
-			}
+//			calendar.setTimeInMillis(time);
+//			int hour = calendar.get(Calendar.HOUR_OF_DAY);
+//			if(hour >= 6 && hour <= 18) {
+//				int year = calendar.get(Calendar.YEAR);
+//				int month = calendar.get(Calendar.MONTH) + 1;
+//				int day = calendar.get(Calendar.DAY_OF_MONTH);
+//				String newTradeDay = year + "-" + (month < 10 ? "0" : "") + month + "-" + (day < 10 ? "0" : "") + day;
+//				if (!newTradeDay.equals(tradeDay)) {
+//					strategyInfo.addTradeDay(newTradeDay);
+//					tradeDay = newTradeDay;
+//					try {
+//						saveInfo(crowdContext);
+//					} catch (Throwable t) {
+//
+//					}
+//				}
+//			}
 			//
 			for (TransactionInfo transaction : strategyInfo.getTransactions()) {
 				if (transaction.getSymbol().equals(symbol)) {

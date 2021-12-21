@@ -19,6 +19,7 @@ import com.crowd.service.base.CrowdService;
 import com.crowd.tool.misc.DateHelper;
 import com.crowd.tool.misc.NumberFormatter;
 import com.crowd.tool.misc.Products;
+import com.crowd.tool.misc.TradeDays;
 
 public abstract class SManageServiceBase implements CrowdService {
 
@@ -125,76 +126,113 @@ public abstract class SManageServiceBase implements CrowdService {
 			transactionObject.put("openOrderCount", openOrderCount);
 			transactionObject.put("closeOrderCount", closeOrderCount);
 		}
-		if (history) {
-			String content = context.load(id + ".history");
-			JSONArray historyArray = new JSONArray();
-			JSONArray matches = new JSONArray();
-			if (StringUtils.isNotEmpty(content)) {
-				JSONArray arr = new JSONArray(content);
-				for (int i = 0; i < arr.length(); i++) {
-					JSONObject o = arr.getJSONObject(i);
-					JSONArray m = new JSONArray();
-					m.put(o.getLong("openTime"));
-					m.put(o.getLong("positionTime"));
-					m.put(o.getLong("closeTime"));
-					m.put(o.getLong("orderPrice"));
-					m.put(o.getLong("takePrice"));
-					m.put(o.getLong("stopPrice"));
-					m.put(o.getString("positionSide"));
-					matches.put(m);
-				}
-				for (int i = arr.length() - 1; i >= 0; i--) {
-					JSONObject o = arr.getJSONObject(i);
-					o.put("openTime", DateHelper.dateTime2String(new Date(o.getLong("openTime"))));
-					o.put("closeTime", DateHelper.dateTime2String(new Date(o.getLong("closeTime"))));
-					o.put("cost", numberFormatter.format(o.getDouble("cost"), 8));
-					double balance = o.getDouble("balance");
-					o.put("balance", (balance >= 0 ? "+" : "") + numberFormatter.format(balance, 8));
-					//
-					JSONArray orders = o.getJSONArray("orders");
-					for (int j = 0; j < orders.length(); j++) {
-						JSONObject order = orders.getJSONObject(j);
-						order.put("time", DateHelper.dateTime2String(new Date(order.getLong("time"))));
-						order.put("price", numberFormatter.format(order.getDouble("price"), 2));
-						order.put("avgPrice", numberFormatter.format(order.getDouble("avgPrice"), 2));
-						order.put("costValue", numberFormatter.format(order.getDouble("costValue"), 8));
-					}
-					//
-					historyArray.put(o);
-					if (historyArray.length() >= 500) {
-						break;
-					}
-				}
-			}
-			output.put("history", historyArray);
-			output.put("matches", matches);
-		}
-		if (profits) {
+		if (history || profits) {
 			String content = context.load(id + ".history");
 			JSONArray profitArray = new JSONArray();
+			String startDay = "";
+			String endDay = "";
 			if (StringUtils.isNotEmpty(content)) {
+				Map<String, JSONArray> dayProfitInfos = new HashMap<String, JSONArray>();
 				JSONArray arr = new JSONArray(content);
-				double profit1 = 0;
-				double profit2 = 0;
 				for (int i = 0; i < arr.length(); i++) {
 					JSONObject o = arr.getJSONObject(i);
-					String day = DateHelper.date2String(new Date(o.getLong("closeTime")));
-					profit1 = profit1 + o.getDouble("balance");
-					profit2 = profit2 + o.getDouble("balance") - o.getDouble("cost");
-					if (i > 0) {
-						JSONArray prev = profitArray.getJSONArray(profitArray.length() - 1);
-						if (prev.getString(0).equals(day)) {
-							profitArray.remove(profitArray.length() - 1);
-						}
+					String day = TradeDays.getTradeDay(o.getLong("closeTime"));
+					if (i == 0) {
+						startDay = day;
+						endDay = day;
+					} else {
+						endDay = day;
 					}
-					JSONArray dayProfit = new JSONArray();
-					dayProfit.put(day);
-					dayProfit.put(profit1);
-					dayProfit.put(new BigDecimal(profit2).setScale(0, RoundingMode.HALF_UP));
-					profitArray.put(dayProfit);
+					if (!dayProfitInfos.containsKey(day)) {
+						JSONArray dayProfit = new JSONArray();
+						dayProfit.put(day);
+						dayProfit.put(0);
+						dayProfit.put(0);
+						dayProfitInfos.put(day, dayProfit);
+					}
+					JSONArray dayProfit = dayProfitInfos.get(day);
+					dayProfit.put(1, dayProfit.getDouble(1) + o.getDouble("balance"));
+					dayProfit.put(2,
+							new BigDecimal(dayProfit.getDouble(2) + o.getDouble("balance") - o.getDouble("cost"))
+									.setScale(0, RoundingMode.HALF_UP));
 				}
+				String[] tradeDays = TradeDays.getTradeDayList(startDay, endDay);
+				JSONArray tradeDayArray = new JSONArray();
+				for (int i = 0; i < tradeDays.length; i++) {
+					String day = tradeDays[i];
+					tradeDayArray.put(day);
+					JSONArray dayProfit = dayProfitInfos.get(day);
+					if (i == 0) {
+						profitArray.put(dayProfit);
+					} else {
+						JSONArray profitInfo = new JSONArray();
+						profitInfo.put(day);
+						JSONArray prevProfitInfo = profitArray.getJSONArray(profitArray.length() - 1);
+						if (dayProfit != null) {
+							profitInfo.put(dayProfit.getDouble(1) + prevProfitInfo.getDouble(1));
+							profitInfo.put(dayProfit.getDouble(2) + prevProfitInfo.getDouble(2));
+						} else {
+							profitInfo.put(prevProfitInfo.getDouble(1));
+							profitInfo.put(prevProfitInfo.getDouble(2));
+						}
+						profitArray.put(profitInfo);
+					}
+				}
+				output.put("tradeDays", tradeDayArray);
 			}
 			output.put("profits", profitArray);
+			//
+			if(history) {
+				JSONArray historyArray = new JSONArray();
+				JSONArray matches = new JSONArray();
+				int historyCount = 0;
+				if (StringUtils.isNotEmpty(content)) {
+					JSONArray arr = new JSONArray(content);
+					historyCount = arr.length();
+					for (int i = 0; i < arr.length(); i++) {
+						JSONObject o = arr.getJSONObject(i);
+						JSONArray m = new JSONArray();
+						m.put(o.getLong("openTime"));
+						m.put(o.getLong("positionTime"));
+						m.put(o.getLong("closeTime"));
+						m.put(o.getLong("orderPrice"));
+						m.put(o.getLong("takePrice"));
+						m.put(o.getLong("stopPrice"));
+						m.put(o.getString("positionSide"));
+						m.put(o.getDouble("balance"));
+						matches.put(m);
+					}
+					int currentPage = input.getInt("currentPage");
+					int pageCount = 18;
+					for (int i = (currentPage - 1) * pageCount; i < arr.length(); i++) {
+						JSONObject o = arr.getJSONObject(i);
+						long time = o.getLong("openTime");
+						o.put("openTime", DateHelper.dateTime2String(new Date(o.getLong("openTime"))));
+						o.put("closeTime", DateHelper.dateTime2String(new Date(o.getLong("closeTime"))));
+						o.put("cost", numberFormatter.format(o.getDouble("cost"), 8));
+						double balance = o.getDouble("balance");
+						o.put("balance", (balance >= 0 ? "+" : "") + numberFormatter.format(balance, 8));
+						o.put("tradeDay", TradeDays.getTradeDay(time));
+						//
+						JSONArray orders = o.getJSONArray("orders");
+						for (int j = 0; j < orders.length(); j++) {
+							JSONObject order = orders.getJSONObject(j);
+							order.put("time", DateHelper.dateTime2String(new Date(order.getLong("time"))));
+							order.put("price", numberFormatter.format(order.getDouble("price"), 2));
+							order.put("avgPrice", numberFormatter.format(order.getDouble("avgPrice"), 2));
+							order.put("costValue", numberFormatter.format(order.getDouble("costValue"), 8));
+						}
+						//
+						historyArray.put(o);
+						if (historyArray.length() >= pageCount) {
+							break;
+						}
+					}
+				}
+				output.put("history", historyArray);
+				output.put("historyCount", historyCount);
+				output.put("matches", matches);
+			}
 		}
 		if (plStat) {
 			String content = context.load(id + ".history");
@@ -256,7 +294,6 @@ public abstract class SManageServiceBase implements CrowdService {
 		output.put("transactions", transactionArray);
 		output.put("openOrders", openOrderArray);
 		output.put("productArray", products.toJSONArray());
-		output.put("tradeDays", contentObject.optJSONArray("tradeDays"));
 	}
 
 	@CrowdMethod

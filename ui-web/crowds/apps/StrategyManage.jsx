@@ -35,7 +35,7 @@ export default class StrategyManage extends BaseComponent {
           this.handleNodeClick(selectionNode);
         } else {
           this.setState({currentNode: null});
-          this.infoView.refresh();
+          this.infoView.refresh(true);
         }        
       }
     });
@@ -46,12 +46,12 @@ export default class StrategyManage extends BaseComponent {
       this.tree.toggleSelect(node.key)
     }    
     this.setState({currentNode: node});
-    this.infoView.refresh();
+    this.infoView.refresh(true);
   }
 
 
   createStrategy() {
-    let strategyInfo = {size: 100000, currencyType: 'CNY', arguments: "{}"};
+    let strategyInfo = {size: 100000, currencyType: 'CNY', arguments: ""};
     this.setState({showStrategyDialog: true, strategyInfo})
   }  
 

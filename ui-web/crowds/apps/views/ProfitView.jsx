@@ -81,11 +81,11 @@ export default class ProfitView extends BaseComponent {
                 smooth: false,
                 symbol: 'none',
                 itemStyle: {
-                    color: 'blue'
+                    color: 'lightblue'
                 },
                 lineStyle: {
                     width: 1,
-                    color: 'blue'
+                    color: 'lightblue'
                 },
                 encode: {
                     x: 0,
@@ -98,11 +98,11 @@ export default class ProfitView extends BaseComponent {
                 smooth: false,
                 symbol: 'none',
                 itemStyle: {
-                    color: 'red'
+                    color: 'orange'
                 },
                 lineStyle: {
                     width: 1,
-                    color: 'red'
+                    color: 'orange'
                 },
                 encode: {
                     x: 0,

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {Button, Message, Tree, Table, TableColumn, Spin, Tabs, Tab, Dialog, Form, FormItem, Input, Select, Option, Spinner,ButtonGroup} from 'kpc-react';
+import {Button, Message, Tree, Table, TableColumn, Spin, Tabs, Tab, Dialog, Form, FormItem, Input, Select, Option, Spinner,ButtonGroup, Pagination} from 'kpc-react';
 import BaseComponent from '../../commons/react/BaseComponent'
 import AnalyseView from './views/AnalyseView'
 import ProfitView from './views/ProfitView'
@@ -10,7 +10,7 @@ export default class StrategyInfoView extends BaseComponent {
 
   constructor(props) {
     super(props);
-    this.setState({loading: false, showDetailDialog: false, showOrderDialog: false, showAnalyseDialog:false, orderInfo: {}, activeTab: 0, tChannelId: null, strategyId: null, serviceName: null, progress: -1, newPrice: 0, properties: [], transactions: [], openOrders: [], history: [], matches:[], orders: [], profits: [], plStats:[], productArray: []});
+    this.setState({loading: false, showDetailDialog: false, showOrderDialog: false, showAnalyseDialog:false, analyseDay: '', orderInfo: {}, activeTab: 0, tChannelId: null, strategyId: null, serviceName: null, progress: -1, newPrice: 0, properties: [], transactions: [], openOrders: [], history: [], historyCount:0, currentPage: 1, matches:[], orders: [], profits: [], plStats:[], productArray: []});
   }
 
 
@@ -56,24 +56,27 @@ export default class StrategyInfoView extends BaseComponent {
     });
   }    
  
-  refresh() {
+  refresh(reset) {
+    if(reset) {
+      this.setState({historyCount: 0, currentPage: 1});
+    }
     this.setState({loading: true, tChannelId: null, strategyId: null, serviceName: null, progress: -1, properties: [], transactions: [], openOrders: [], history: [], orders: [], profits: [], plStats: [], productArray: []});
     if(!this.props.id) {
       this.setState({loading: false});
       return;
     }
-    this.invoke(this.props.path + "/info", {id: this.props.id, history: this.state.activeTab == 3, profits: this.state.activeTab == 4, plStat: this.state.activeTab == 5}, (error, data) => {
+    this.invoke(this.props.path + "/info", {id: this.props.id, history: this.state.activeTab == 3, profits: this.state.activeTab == 4, plStat: this.state.activeTab == 5, currentPage: this.state.currentPage}, (error, data) => {
       if(error) {
         Message.error(error.message);
         this.setState({loading: false});
       } else {
-        this.setState({loading: false, tChannelId: data.tChannelId, strategyId: data.strategyId, serviceName: data.serviceName, progress: data.progress, properties: data.properties, transactions: data.transactions, openOrders: data.openOrders, profits: data.profits, plStats: data.plStats, history: data.history, matches: data.matches, productArray: data.productArray, tradeDays: data.tradeDays});
+        this.setState({loading: false, tChannelId: data.tChannelId, strategyId: data.strategyId, serviceName: data.serviceName, progress: data.progress, properties: data.properties, transactions: data.transactions, openOrders: data.openOrders, profits: data.profits, plStats: data.plStats, history: data.history, historyCount: data.historyCount, matches: data.matches, productArray: data.productArray, tradeDays: data.tradeDays});
       }
     });
   }
 
-  analyse() {
-    this.setState({showAnalyseDialog: true})
+  analyse(day) {
+    this.setState({showAnalyseDialog: true, analyseDay: day})
   }
 
   getEmptyTableMessage() {
@@ -158,7 +161,13 @@ export default class StrategyInfoView extends BaseComponent {
                 ></TableColumn>
                </Table>        
       case 3:
-        return <Table type="grid" fixHeader={true} style={{flex: 1, fontFamily:'Monaco'}} data={this.state.history} checkType="none" resizable stripe noDataTemplate={this.getEmptyTableMessage()}> 
+        return <div style={{flex: 1, display:"flex", flexFlow:"column", overflow: 'auto'}}>
+                <Pagination counts={10} current={this.state.currentPage} showLimits={false} total={this.state.historyCount} limit={18} onChange={(v)=> {
+                  this.setState({currentPage: v.current});
+                  this.refresh();
+                }}/> 
+                <div style={{marginBottom: 10}}></div> 
+                <Table type="grid" fixHeader={true} style={{flex: 1, fontFamily:'Monaco'}} data={this.state.history} checkType="none" resizable stripe noDataTemplate={this.getEmptyTableMessage()}> 
                   <TableColumn key="symbol" title="交易标的"/>
                   <TableColumn key="openTime" title="开始时间" />
                   <TableColumn key="closeTime" title="结束时间" />
@@ -172,12 +181,13 @@ export default class StrategyInfoView extends BaseComponent {
                                 this.setState({showDetailDialog: true, orders: this.state.history[index].orders});
                             }}>明细</a> 
                             &nbsp;&nbsp;<a onClick={()=>{
-                                this.analyse();
+                                this.analyse(this.state.history[index].tradeDay);
                             }}>分析</a>
                         </React.Fragment>
                     }}
-                ></TableColumn>
-               </Table>   
+                  ></TableColumn>
+                </Table> 
+               </div>
       case 4:
         return <ProfitView data={this.state.profits}/>     
       case 5:
@@ -233,7 +243,7 @@ export default class StrategyInfoView extends BaseComponent {
         <Tabs size="default" type="border-card" value={this.state.activeTab} on$change-value={(c, activeTab) => {
             this.setState({activeTab})
             if(this.state.activeTab == 3 || this.state.activeTab == 4 || this.state.activeTab == 5) {
-              this.refresh();
+              this.refresh(true);
             }
           }}>
                   <Tab disabled={this.props.id == null} value={0}>基本信息</Tab>
@@ -313,6 +323,8 @@ export default class StrategyInfoView extends BaseComponent {
                     symbol={"SHFE.ag"} 
                     matches={this.state.matches}
                     tradedays={this.state.tradeDays}
+                    profits={this.state.profits}
+                    analyseDay={this.state.analyseDay}
                   />
         </Dialog> 
       </div>

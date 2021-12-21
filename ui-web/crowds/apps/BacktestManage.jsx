@@ -39,7 +39,7 @@ export default class BacktestManage extends BaseComponent {
         }
       });
     } else {
-      this.infoView.refresh();
+      this.infoView.refresh(true);
     }
   }
 
@@ -56,7 +56,7 @@ export default class BacktestManage extends BaseComponent {
   }
 
   createTest() {
-    let testInfo = {arguments: '{}'};
+    let testInfo = {arguments: ''};
     this.setState({showTestDialog: true, testInfo})
   } 
 

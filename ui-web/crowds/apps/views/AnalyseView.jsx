@@ -20,16 +20,20 @@ export default class AnalyseView extends BaseComponent {
     this.symbol = this.props.symbol;
     this.days = days;
     this.matches = this.props.matches;
+    this.profits = this.props.profits;
+    this.analyseDay = this.props.analyseDay;
   }
 
   componentDidMount() {
     this.chart = echarts.init(document.getElementById(this.chartId), "dark");
-    this.showDayKLine();
-    this.tree.toggleSelect('日K线')
+    // this.showDayKLine();
+    // this.tree.toggleSelect('日K线')
+    this.showDayTimeLine(this.analyseDay);
+    this.tree.toggleSelect(this.analyseDay)
   }
 
 
-  renderChart(title, data, pieces, markPoints, markLines, markAreas, showKLine, showTimeLine) {
+  renderChart(title, data, profits, pieces, markPoints, markLines, markAreas, showKLine, showTimeLine) {
     var option = {
         title: {
             text: ""
@@ -45,18 +49,22 @@ export default class AnalyseView extends BaseComponent {
                 '均价': showTimeLine
             }
         },
-        dataset: {
-            source: data
-        },
+        dataset: [
+            {
+                source: data
+            },{
+                source: profits
+            }
+        ],
         grid: [
             {
-                left: '60',
-                right: '30',
+                left: '64',
+                right: '64',
                 bottom: 260
             },
             {
-                left: '60',
-                right: '30',
+                left: '64',
+                right: '64',
                 height: 200,
                 bottom: 60
             }
@@ -82,6 +90,7 @@ export default class AnalyseView extends BaseComponent {
         xAxis: [
             {
                 type: 'category',
+                gridIndex: 0,
                 axisLabel: {show: false},
                 axisTick: {show: false},
                 axisLine: { lineStyle: { color: 'lightgrey' } }
@@ -102,9 +111,17 @@ export default class AnalyseView extends BaseComponent {
         yAxis: [
             {
                 scale: true,
+                gridIndex: 0,
                 axisLine: { show: true, lineStyle: { color: 'lightgrey'} },
                 axisLabel: {show: true},
                 splitLine: { show: true , lineStyle: {opacity: 0.4}}
+            },
+            {
+                scale: true,
+                gridIndex: 0,
+                axisLine: { show: true, lineStyle: { color: 'lightgrey'} },
+                axisLabel: {show: true},
+                splitLine: {show: false}
             },
             {
                 scale: true,
@@ -138,7 +155,7 @@ export default class AnalyseView extends BaseComponent {
                 name: '交易量',
                 type: 'bar',
                 xAxisIndex: 1,
-                yAxisIndex: 1,
+                yAxisIndex: 2,
                 encode: {
                     x: 1,
                     y: 7
@@ -147,6 +164,8 @@ export default class AnalyseView extends BaseComponent {
             {
                 name: '均价',
                 type: 'line',
+                xAxisIndex: 0,
+                yAxisIndex: 0,
                 smooth: true,
                 symbol: 'none',
                 encode: {
@@ -170,8 +189,50 @@ export default class AnalyseView extends BaseComponent {
                 }
             },
             {
+                name: '不计费用盈亏',
+                type: 'line',
+                xAxisIndex: 0,
+                yAxisIndex: 1,
+                smooth: false,
+                symbol: 'none',
+                itemStyle: {
+                    color: 'lightblue'
+                },
+                lineStyle: {
+                    width: 1,
+                    color: 'lightblue'
+                },
+                datasetIndex: 1,
+                encode: {
+                    x: 0,
+                    y: 1
+                }
+            },
+            {
+                name: '实际盈亏',
+                type: 'line',
+                xAxisIndex: 0,
+                yAxisIndex: 1,
+                smooth: false,
+                symbol: 'none',
+                itemStyle: {
+                    color: 'orange'
+                },
+                lineStyle: {
+                    width: 1,
+                    color: 'orange'
+                },
+                datasetIndex: 1,
+                encode: {
+                    x: 0,
+                    y: 2
+                }
+            },
+            {
                 name: 'K线',
                 type: 'candlestick',
+                xAxisIndex: 0,
+                yAxisIndex: 0,
                 encode: {
                     x: 1,
                     y: [2, 3, 5, 4]
@@ -216,12 +277,12 @@ export default class AnalyseView extends BaseComponent {
   }      
 
   showDayKLine() {
-    this.invoke("/history-data/dayKLine", {symbol: this.symbol}, (error, data) => {
+    this.invoke("/history-data/dayKLine", {symbol: this.symbol, startDay: this.profits[0][0], endDay: this.profits[this.profits.length - 1][0]}, (error, data) => {
         if(error) {
           Message.error(error.message);
         } else {
           let chartData = JSON.parse(data.content);
-          this.renderChart("日K线", chartData, [{gte: 0, lt: chartData.length, color: normalColor}], [], [], [], true, false);
+          this.renderChart("日K线", chartData, this.profits, [{gte: 0, lt: chartData.length, color: normalColor}], [], [], [], true, false);
         }
       });  
   }
@@ -239,6 +300,10 @@ export default class AnalyseView extends BaseComponent {
         this.showDayKLine();
         return;
     }
+    this.showDayTimeLine(tradeDay);
+  }
+
+  showDayTimeLine(tradeDay) {
     this.invoke("/history-data/dayTimeLine", {symbol: this.symbol, day: tradeDay}, (error, data) => {
       if(error) {
         Message.error(error.message);
@@ -286,7 +351,7 @@ export default class AnalyseView extends BaseComponent {
                     lastPicesStart = dataIndex;
                     pieces.push({gte: lastPicesEnd, lt: lastPicesStart, color: normalColor});
                     isInMatch = true;
-                    markAreas.push([{xAxis: chartData[dataIndex][1], itemStyle: {}}]);
+                    markAreas.push([{xAxis: chartData[dataIndex][1], name: '(' + matches[matchIndex][7] + ')', itemStyle: {color: matches[matchIndex][7] == 0 ? 'rgba(173, 216, 230, 0.1)' : (matches[matchIndex][7] > 0 ? 'rgba(143, 188, 143, 0.3)' : 'rgba(255, 127, 80, 0.3)')}}]);
                     markLines.push([{xAxis:chartData[dataIndex][1], yAxis:matches[matchIndex][3], symbol:'none', lineStyle: {color: 'lightblue'}}]);
                     markLines.push([{xAxis:chartData[dataIndex][1], yAxis:matches[matchIndex][4], symbol:'none', lineStyle: {color: matches[matchIndex][6] == "Long" ? upColor : downColor}}]);
                     markLines.push([{xAxis:chartData[dataIndex][1], yAxis:matches[matchIndex][5], symbol:'none', lineStyle: {color: 'orange'}}]);
@@ -303,7 +368,7 @@ export default class AnalyseView extends BaseComponent {
             pieces.push({gte: lastPicesEnd, lt: chartData.length, color: normalColor});
         }
         //
-        this.renderChart(tradeDay, chartData, pieces, markPoints, markLines, markAreas, false, true);
+        this.renderChart(tradeDay, chartData, [], pieces, markPoints, markLines, markAreas, false, true);
       }
     });  
   }

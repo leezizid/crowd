@@ -12,7 +12,7 @@ export default class ProfitView extends BaseComponent {
   }
 
   componentDidMount() {
-    this.chart = echarts.init(document.getElementById(this.chartId));
+    this.chart = echarts.init(document.getElementById(this.chartId), "dark");
     this.renderChart(this.props.data);
   }
 
@@ -42,7 +42,7 @@ export default class ProfitView extends BaseComponent {
             }
         ],
         legend: {
-            top: -5,
+            top: 10,
             selectedMode : false,
             icon:'circle'
         },

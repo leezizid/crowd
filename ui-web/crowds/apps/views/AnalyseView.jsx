@@ -101,7 +101,7 @@ export default class AnalyseView extends BaseComponent {
                 axisLabel: {
                     interval : 'auto',
                     formatter: function (value) {
-                        return value.length > 11 ? value.substr(11) : value;
+                        return value.length > 11 ? value.substr(11, 5) : value;
                       }
                 },
                 axisLine: { lineStyle: { color: 'lightgrey' } }
@@ -261,7 +261,7 @@ export default class AnalyseView extends BaseComponent {
                     value: 1,
                     color: upColor
                 }, {
-                    value: -1,
+                    value: 0,
                     color: downColor
                 }]
             },

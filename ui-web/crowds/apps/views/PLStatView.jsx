@@ -12,7 +12,7 @@ export default class PLStatView extends BaseComponent {
   }
 
   componentDidMount() {
-    this.chart = echarts.init(document.getElementById(this.chartId));
+    this.chart = echarts.init(document.getElementById(this.chartId), "dark");
     this.renderChart(this.props.data);
   }
 

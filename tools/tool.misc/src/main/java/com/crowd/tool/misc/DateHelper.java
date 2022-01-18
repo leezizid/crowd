@@ -66,7 +66,7 @@ public class DateHelper {
 		if(date == null || date.getTime() == 0) {
 			return "";
 		}
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		return sdf.format(date);
 	}
 
@@ -74,7 +74,7 @@ public class DateHelper {
 		if(date == null || date.getTime() == 0) {
 			return "";
 		}
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		return sdf.format(date);
 	}
 	

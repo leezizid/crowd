@@ -136,7 +136,7 @@ public abstract class SManageServiceBase implements CrowdService {
 				JSONArray arr = new JSONArray(content);
 				for (int i = 0; i < arr.length(); i++) {
 					JSONObject o = arr.getJSONObject(i);
-					String day = TradeDays.getTradeDay(o.getLong("closeTime"));
+					String day = TradeDays.matchTradeDay(o.getLong("closeTime"));
 					if (i == 0) {
 						startDay = day;
 						endDay = day;
@@ -212,7 +212,7 @@ public abstract class SManageServiceBase implements CrowdService {
 						o.put("cost", numberFormatter.format(o.getDouble("cost"), 8));
 						double balance = o.getDouble("balance");
 						o.put("balance", (balance >= 0 ? "+" : "") + numberFormatter.format(balance, 8));
-						o.put("tradeDay", TradeDays.getTradeDay(time));
+						o.put("tradeDay", TradeDays.matchTradeDay(time));
 						//
 						JSONArray orders = o.getJSONArray("orders");
 						for (int j = 0; j < orders.length(); j++) {

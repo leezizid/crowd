@@ -169,9 +169,12 @@ public class CtpInstruments {
 		String productCode = instrumentID.substring(0, instrumentID.length() - 4);
 		if (exchangeNames.containsKey(productCode)) {
 			return exchangeNames.get(productCode);
-		} else {
-			throw new IllegalStateException("找不到合约" + instrumentID + "的产品信息");
 		}
+		productCode = instrumentID.substring(0, instrumentID.length() - 3);
+		if (exchangeNames.containsKey(productCode)) {
+			return exchangeNames.get(productCode);
+		}
+		throw new IllegalStateException("找不到合约" + instrumentID + "的产品信息");
 	}
 
 	public final static BigDecimal getInstrumentMultiplier(String symbol) {
@@ -179,9 +182,12 @@ public class CtpInstruments {
 		String productCode = instrumentID.substring(0, instrumentID.length() - 4);
 		if (multipliers.containsKey(productCode)) {
 			return multipliers.get(productCode);
-		} else {
-			throw new IllegalStateException("找不到合约" + symbol + "的产品信息");
 		}
+		productCode = instrumentID.substring(0, instrumentID.length() - 3);
+		if (multipliers.containsKey(productCode)) {
+			return multipliers.get(productCode);
+		}
+		throw new IllegalStateException("找不到合约" + symbol + "的产品信息");
 	}
 
 }

@@ -13,7 +13,7 @@ public interface StrategyEnv extends StrategyContext {
 	public void dispose();
 
 	public void onTick(String symbol, long time, BigDecimal lowerLimitPrice, BigDecimal upperLimitPrice,
-			BigDecimal price, BigDecimal amount);
+			BigDecimal price, BigDecimal volumn);
 
 	public void handleOrderUpdated(long time, OrderInfo matchOrderInfo, boolean canceled, BigDecimal execAmount,
 			BigDecimal execValue) throws Throwable;

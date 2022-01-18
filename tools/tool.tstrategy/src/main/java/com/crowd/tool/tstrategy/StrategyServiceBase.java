@@ -1,9 +1,12 @@
 package com.crowd.tool.tstrategy;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.RandomAccessFile;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.SimpleDateFormat;
 import java.util.Hashtable;
 
 import org.apache.commons.lang3.StringUtils;
@@ -19,6 +22,9 @@ import com.crowd.service.base.CrowdWorkerContext;
 import com.crowd.tool.misc.OrderType;
 import com.crowd.tool.misc.PositionSide;
 import com.crowd.tool.misc.Products;
+import com.crowd.tool.misc.TradeDays;
+import com.crowd.tool.misc.k.HistoryData;
+import com.crowd.tool.misc.k.TickInfo;
 import com.crowd.tool.tapis.ba.BinanceDeliveryMarketAPI;
 import com.crowd.tool.tapis.ctp.CtpMarketAPI;
 import com.crowd.tool.tstrategy.impl.BacktestStrategyEnv;
@@ -54,17 +60,52 @@ public abstract class StrategyServiceBase implements CrowdService {
 						crowdContext.load("products", strategyInfo.getProductGroup() + ".json"));
 				if (testFlag) {
 					strategyEnv = StrategyEnv.createTest(crowdContext,
-							createStrategyInstance(strategyInfo.getArguments()), strategyInfo,
-							products);
+							createStrategyInstance(strategyInfo.getArguments()), strategyInfo, products);
 				} else {
 					strategyEnv = StrategyEnv.createReal(crowdContext,
-							createStrategyInstance(strategyInfo.getArguments()), strategyInfo,
-							products);
+							createStrategyInstance(strategyInfo.getArguments()), strategyInfo, products);
 					runningStrategyEnvs.put(id, strategyEnv);
 				}
 				try {
 					String marketDataSource = strategyInfo.getMarketDataSource();
-					if (marketDataSource.startsWith("file:")) {
+					if (marketDataSource.startsWith("history:")) {
+						if (!testFlag) {
+							throw new IllegalArgumentException("不支持使用文件数据来源推送实盘交易");
+						}
+						String[] info = StringUtils.split(marketDataSource.substring("history:".length()), ",");
+						String symbol = info[0];
+						String startDay = info[1];
+						String endDay = info[2];
+						SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+						String[] tradeDays = TradeDays.getTradeDayList(
+								TradeDays.matchTradeDay(sdf.parse(startDay).getTime()),
+								TradeDays.matchTradeDay(sdf.parse(endDay).getTime()));
+						try {
+							int finishCount = 0;
+							int totalCount = tradeDays.length;
+							for (String tradeDay : tradeDays) {
+								BigDecimal lastTotalVolumn = BigDecimal.ZERO;
+								byte[] content = HistoryData.readTradeDayTickData(symbol, tradeDay);
+								DataInputStream dis = new DataInputStream(new ByteArrayInputStream(content));
+								int count = content.length / 36;
+								for (int i = 0; i < count; i++) {
+									TickInfo tickInfo = new TickInfo();
+									tickInfo.readFromStream(dis);
+									strategyEnv.onTick(symbol + "2112", tickInfo.getTime(), BigDecimal.ZERO,
+											BigDecimal.ZERO, tickInfo.getLastPrice(),
+											tickInfo.getVolumn().subtract(lastTotalVolumn));
+									lastTotalVolumn = tickInfo.getVolumn();
+								}
+								crowdContext.reportWork(new BigDecimal(++finishCount)
+										.divide(new BigDecimal(totalCount), 4, RoundingMode.HALF_UP)
+										.floatValue(), "");
+							}
+						} catch (Throwable t) {
+							t.printStackTrace();
+						} finally {
+							System.out.println();
+						}
+					} else if (marketDataSource.startsWith("file:")) {
 						if (!testFlag) {
 							throw new IllegalArgumentException("不支持使用文件数据来源推送实盘交易");
 						}

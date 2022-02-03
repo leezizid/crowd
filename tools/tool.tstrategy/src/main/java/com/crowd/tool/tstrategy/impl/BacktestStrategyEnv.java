@@ -5,6 +5,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.crowd.service.base.CrowdContext;
@@ -20,6 +21,8 @@ public final class BacktestStrategyEnv extends BaseStrategyEnv {
 
 	private List<OrderInfoImpl> orderList = new ArrayList<OrderInfoImpl>();
 
+	private JSONArray transactions = new JSONArray();
+
 	public BacktestStrategyEnv(CrowdContext crowdContext, IStrategy strategyInstance, StrategyInfo strategyInfo,
 			Products products) throws Throwable {
 		super(crowdContext, strategyInstance, strategyInfo, products);
@@ -28,7 +31,15 @@ public final class BacktestStrategyEnv extends BaseStrategyEnv {
 	protected void init(CrowdContext crowdContext) throws Throwable {
 	}
 
-	public final void dispose() {
+	public final void dispose(CrowdContext crowdContext) {
+		try {
+			JSONObject input = new JSONObject();
+			input.put("id", strategyInfo.getId());
+			input.put("transactions", transactions);
+			crowdContext.invoke("/backtest-manage/saveTransactions", input);
+		} catch (Throwable t) {
+
+		}
 	}
 
 	public void onTick(String symbol, long time, BigDecimal lowerLimitPrice, BigDecimal upperLimitPrice,
@@ -99,10 +110,11 @@ public final class BacktestStrategyEnv extends BaseStrategyEnv {
 	}
 
 	protected void saveTransaction(CrowdContext crowdContext, TransactionInfoImpl transactionInfo) throws Throwable {
-		JSONObject input = new JSONObject();
-		input.put("id", strategyInfo.getId());
-		input.put("transaction", transactionInfo.toJSON());
-		crowdContext.invoke("/backtest-manage/saveTransaction", input);
+//		JSONObject input = new JSONObject();
+//		input.put("id", strategyInfo.getId());
+//		input.put("transaction", transactionInfo.toJSON());
+//		crowdContext.invoke("/backtest-manage/saveTransaction", input);
+		transactions.put(transactionInfo.toJSON());
 	}
 
 	public final static StrategyInfoImpl createStrategyInfo(CrowdContext crowdContext, String id) throws Throwable {

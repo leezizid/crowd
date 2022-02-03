@@ -137,7 +137,7 @@ public class OrderInfo {
 			this.tradeIds.add(tradeInfo.getId());
 			this.execAmount = this.execAmount + tradeInfo.getAmount();
 			this.execValue = this.execValue.add(tradeInfo.getPrice().multiply(new BigDecimal(tradeInfo.getAmount()))
-					.multiply(CtpInstruments.getInstrumentMultiplier(symbol)));
+					.multiply(CTPInstruments.find(symbol).getMultiplier()));
 		}
 	}
 

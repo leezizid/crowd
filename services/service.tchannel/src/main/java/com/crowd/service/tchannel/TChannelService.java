@@ -10,6 +10,7 @@ import com.crowd.service.base.CrowdContext;
 import com.crowd.service.base.CrowdInitContext;
 import com.crowd.service.base.CrowdMethod;
 import com.crowd.service.base.CrowdService;
+import com.crowd.tool.tapis.ctp.CTPInstruments;
 
 public class TChannelService implements CrowdService {
 
@@ -30,6 +31,7 @@ public class TChannelService implements CrowdService {
 //				binanceDeliveryMarketAPI.init();
 //			}
 //		}).start();
+		CTPInstruments.init();
 	}
 
 	public String getName() {

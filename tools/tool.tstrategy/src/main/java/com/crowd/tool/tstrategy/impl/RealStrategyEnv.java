@@ -82,7 +82,7 @@ public final class RealStrategyEnv extends BaseStrategyEnv {
 		}
 	}
 
-	public final void dispose() {
+	public final void dispose(CrowdContext crowdContext) {
 		orderUpdatedSubscriberHandle.unsubscribe();
 		orderFailedSubscriberHandle.unsubscribe();
 	}

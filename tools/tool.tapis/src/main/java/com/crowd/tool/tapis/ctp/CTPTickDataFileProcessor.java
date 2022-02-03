@@ -14,6 +14,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.crowd.tool.misc.ProductDefine;
 import com.crowd.tool.misc.TradeDays;
 import com.crowd.tool.misc.k.HistoryData;
 import com.crowd.tool.misc.k.TickInfo;
@@ -36,7 +37,7 @@ public class CTPTickDataFileProcessor {
 
 		//
 //		String[] info = StringUtils.split(sourceDir.getName(), ".");
-		CTPProduct ctpProduct = CTPProducts.find(productName);
+		ProductDefine ctpProduct = CTPInstruments.find(productName);
 		if (ctpProduct == null || !ctpProduct.getExchange().equals(exName)) {
 			return;
 		}

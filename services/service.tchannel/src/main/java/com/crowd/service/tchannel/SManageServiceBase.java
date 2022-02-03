@@ -293,7 +293,7 @@ public abstract class SManageServiceBase implements CrowdService {
 		output.put("properties", properties);
 		output.put("transactions", transactionArray);
 		output.put("openOrders", openOrderArray);
-		output.put("productArray", products.toJSONArray());
+//		output.put("productArray", products.toJSONArray());
 	}
 
 	@CrowdMethod
@@ -373,6 +373,13 @@ public abstract class SManageServiceBase implements CrowdService {
 		}
 		transactionHistory.put(transaction);
 		context.save(id + ".history", transactionHistory.toString(4));
+	}
+	
+	@CrowdMethod
+	public final void saveTransactions(CrowdContext context, JSONObject input, JSONObject output) throws Throwable {
+		String id = input.getString("id");
+		JSONArray transactions = input.getJSONArray("transactions");
+		context.save(id + ".history", transactions.toString(4));
 	}
 
 	protected final String load(CrowdContext context, String id) throws Throwable {

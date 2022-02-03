@@ -10,7 +10,7 @@ import com.crowd.tool.tstrategy.impl.RealStrategyEnv;
 
 public interface StrategyEnv extends StrategyContext {
 
-	public void dispose();
+	public void dispose(CrowdContext crowdContext);
 
 	public void onTick(String symbol, long time, BigDecimal lowerLimitPrice, BigDecimal upperLimitPrice,
 			BigDecimal price, BigDecimal volumn);

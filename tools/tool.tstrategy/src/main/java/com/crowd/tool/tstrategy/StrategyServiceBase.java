@@ -26,6 +26,7 @@ import com.crowd.tool.misc.TradeDays;
 import com.crowd.tool.misc.k.HistoryData;
 import com.crowd.tool.misc.k.TickInfo;
 import com.crowd.tool.tapis.ba.BinanceDeliveryMarketAPI;
+import com.crowd.tool.tapis.ctp.CTPInstruments;
 import com.crowd.tool.tapis.ctp.CtpMarketAPI;
 import com.crowd.tool.tstrategy.impl.BacktestStrategyEnv;
 import com.crowd.tool.tstrategy.impl.RealStrategyEnv;
@@ -37,7 +38,7 @@ public abstract class StrategyServiceBase implements CrowdService {
 
 	@Override
 	public void init(CrowdInitContext context) throws Throwable {
-
+		CTPInstruments.init();
 	}
 
 	/**
@@ -46,9 +47,9 @@ public abstract class StrategyServiceBase implements CrowdService {
 	@CrowdWorker
 	public void start(CrowdWorkerContext crowdContext, JSONObject inputObject) throws Throwable {
 		String id = inputObject.getString("id");
-		boolean testFlag = inputObject.optBoolean("test");
+		boolean test = inputObject.optBoolean("test");
 		StrategyInfo strategyInfo;
-		if (testFlag) {
+		if (test) {
 			strategyInfo = BacktestStrategyEnv.createStrategyInfo(crowdContext, id);
 		} else {
 			strategyInfo = RealStrategyEnv.createStrategyInfo(crowdContext, id);
@@ -58,7 +59,7 @@ public abstract class StrategyServiceBase implements CrowdService {
 				StrategyEnv strategyEnv;
 				Products products = new Products(
 						crowdContext.load("products", strategyInfo.getProductGroup() + ".json"));
-				if (testFlag) {
+				if (test) {
 					strategyEnv = StrategyEnv.createTest(crowdContext,
 							createStrategyInstance(strategyInfo.getArguments()), strategyInfo, products);
 				} else {
@@ -69,7 +70,7 @@ public abstract class StrategyServiceBase implements CrowdService {
 				try {
 					String marketDataSource = strategyInfo.getMarketDataSource();
 					if (marketDataSource.startsWith("history:")) {
-						if (!testFlag) {
+						if (!test) {
 							throw new IllegalArgumentException("不支持使用文件数据来源推送实盘交易");
 						}
 						String[] info = StringUtils.split(marketDataSource.substring("history:".length()), ",");
@@ -84,6 +85,9 @@ public abstract class StrategyServiceBase implements CrowdService {
 							int finishCount = 0;
 							int totalCount = tradeDays.length;
 							for (String tradeDay : tradeDays) {
+								if (crowdContext.isDisposed()) {
+									break;
+								}
 								BigDecimal lastTotalVolumn = BigDecimal.ZERO;
 								byte[] content = HistoryData.readTradeDayTickData(symbol, tradeDay);
 								DataInputStream dis = new DataInputStream(new ByteArrayInputStream(content));
@@ -91,22 +95,21 @@ public abstract class StrategyServiceBase implements CrowdService {
 								for (int i = 0; i < count; i++) {
 									TickInfo tickInfo = new TickInfo();
 									tickInfo.readFromStream(dis);
-									strategyEnv.onTick(symbol + "2112", tickInfo.getTime(), BigDecimal.ZERO,
+									strategyEnv.onTick(symbol + "", tickInfo.getTime(), BigDecimal.ZERO,
 											BigDecimal.ZERO, tickInfo.getLastPrice(),
 											tickInfo.getVolumn().subtract(lastTotalVolumn));
 									lastTotalVolumn = tickInfo.getVolumn();
 								}
 								crowdContext.reportWork(new BigDecimal(++finishCount)
-										.divide(new BigDecimal(totalCount), 4, RoundingMode.HALF_UP)
-										.floatValue(), "");
+										.divide(new BigDecimal(totalCount), 4, RoundingMode.HALF_UP).floatValue(), "");
 							}
 						} catch (Throwable t) {
 							t.printStackTrace();
 						} finally {
-							System.out.println();
+//							System.out.println();
 						}
 					} else if (marketDataSource.startsWith("file:")) {
-						if (!testFlag) {
+						if (!test) {
 							throw new IllegalArgumentException("不支持使用文件数据来源推送实盘交易");
 						}
 						File file = new File(marketDataSource.substring("file:".length()));
@@ -263,13 +266,13 @@ public abstract class StrategyServiceBase implements CrowdService {
 						throw new IllegalArgumentException("未知类型的数据源");
 					}
 				} finally {
-					strategyEnv.dispose();
-					if (!testFlag) {
+					strategyEnv.dispose(crowdContext);
+					if (!test) {
 						runningStrategyEnvs.remove(id);
 					}
 				}
 			} catch (Throwable t) {
-				if (testFlag) {
+				if (test) {
 					BacktestStrategyEnv.saveStrategyError(crowdContext, id, t.getMessage());
 				} else {
 					RealStrategyEnv.saveStrategyError(crowdContext, id, t.getMessage());

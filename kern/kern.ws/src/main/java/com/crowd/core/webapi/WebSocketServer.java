@@ -525,7 +525,7 @@ public class WebSocketServer implements Runnable {
 
 		@Override
 		public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-			cause.printStackTrace();
+//			cause.printStackTrace();
 			ctx.close();
 		}
 

@@ -62,6 +62,23 @@ public abstract class StrategyServiceBase implements CrowdService {
 				if (test) {
 					strategyEnv = StrategyEnv.createTest(crowdContext,
 							createStrategyInstance(strategyInfo.getArguments()), strategyInfo, products);
+					//XXX：
+//					String marketDataSource = strategyInfo.getMarketDataSource();
+//					if (marketDataSource.startsWith("history:")) {
+//						String[] info = StringUtils.split(marketDataSource.substring("history:".length()), ",");
+//						String symbol = info[0];
+//						String startDay = info[1];
+//						String endDay = info[2];
+//						JSONObject o = new JSONObject();
+//						o.put("serviceName", this.getClass().getName());
+//						o.put("arguments", strategyInfo.getArguments());
+//						o.put("symbol", symbol);
+//						o.put("rate",  products.getProduct(symbol).getOpenMakerCostRate().toString()); //XXX：注意处理baseRate
+//						o.put("dateSource", startDay + "," + endDay);
+//						crowdContext.invoke("/testserver/doTest", o);
+//						//TODO：获取结果，保存数据
+//						return;
+//					}
 				} else {
 					strategyEnv = StrategyEnv.createReal(crowdContext,
 							createStrategyInstance(strategyInfo.getArguments()), strategyInfo, products);

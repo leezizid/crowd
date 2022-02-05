@@ -75,8 +75,8 @@ export default class StrategyInfoView extends BaseComponent {
     });
   }
 
-  analyse(day) {
-    this.setState({showAnalyseDialog: true, analyseDay: day})
+  analyse(symbol, day) {
+    this.setState({showAnalyseDialog: true, analyseSymbol: symbol, analyseDay: day})
   }
 
   getEmptyTableMessage() {
@@ -181,7 +181,7 @@ export default class StrategyInfoView extends BaseComponent {
                                 this.setState({showDetailDialog: true, orders: this.state.history[index].orders});
                             }}>明细</a> 
                             &nbsp;&nbsp;<a onClick={()=>{
-                                this.analyse(this.state.history[index].tradeDay);
+                                this.analyse(this.state.history[index].symbol, this.state.history[index].tradeDay);
                             }}>分析</a>
                         </React.Fragment>
                     }}
@@ -320,7 +320,7 @@ export default class StrategyInfoView extends BaseComponent {
                   <AnalyseView 
                     width={document.body.clientWidth-50} 
                     height={document.body.clientHeight-150} 
-                    symbol={"SHFE.ag"} 
+                    symbol={this.state.analyseSymbol} 
                     matches={this.state.matches}
                     tradedays={this.state.tradeDays}
                     profits={this.state.profits}

@@ -87,7 +87,7 @@ export default class ChannelManage extends BaseComponent {
       case 1:
         return <Table type="grid" fixHeader={true} style={{flex: 1}} data={this.state.positions} checkType="none" resizable stripe noDataTemplate={this.getEmptyTableMessage()}> 
                   <TableColumn key="symbol" title="合约名称"  width="200"/>
-                  <TableColumn key="amount" title="持仓数量" />
+                  <TableColumn key="volumn" title="持仓数量" />
                   <TableColumn key="marketPrice" title="参考价格" />
                </Table>        
       case 2:
@@ -97,9 +97,9 @@ export default class ChannelManage extends BaseComponent {
                   <TableColumn key="type" title="开平" />
                   <TableColumn key="positionSide" title="方向" />
                   <TableColumn key="time" title="提交时间" />
-                  <TableColumn key="amount" title="委托数量" />
+                  <TableColumn key="volumn" title="委托数量" />
                   <TableColumn key="price" title="委托价格" />
-                  <TableColumn key="execAmount" title="完成数量" />
+                  <TableColumn key="execVolumn" title="完成数量" />
                   <TableColumn key="avgPrice" title="成交均价" />
                   <TableColumn key="op" title="操作" width="50"
                     b-template={(data, index) => {

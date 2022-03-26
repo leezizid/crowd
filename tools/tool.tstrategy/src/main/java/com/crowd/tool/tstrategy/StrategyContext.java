@@ -11,7 +11,7 @@ public interface StrategyContext {
 
 	public ProductInfo findProduct(String symbol);
 
-	public void openPosition(long time, String symbol, PositionSide positionSide, BigDecimal price, BigDecimal amount,
+	public void openPosition(long time, String symbol, PositionSide positionSide, BigDecimal price, BigDecimal volumn,
 			BigDecimal takePrice, BigDecimal stopPrice) throws Throwable;
 
 	public void closePosition(long time, TransactionInfo transactionInfo, BigDecimal price) throws Throwable;

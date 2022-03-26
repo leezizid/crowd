@@ -32,8 +32,8 @@ public class ProductInfo {
 		return productDefine.isDelivery();
 	}
 
-	public BigDecimal getMinAmount() {
-		return productDefine.getMinAmount();
+	public BigDecimal getMinVolumn() {
+		return productDefine.getMinVolumn();
 	}
 
 	public BigDecimal getMultiplier() {
@@ -54,6 +54,10 @@ public class ProductInfo {
 
 	public BigDecimal getCloseTakerCostRate() {
 		return closeTakerCostRate;
+	}
+	
+	public int getPriceScale() {
+		return productDefine.getPriceScale();
 	}
 
 	/**

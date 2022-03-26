@@ -20,7 +20,7 @@ public class TickInfo {
 
 	private BigDecimal volumn;
 
-	private BigDecimal amount;
+	private BigDecimal value;
 
 	private BigDecimal openInterest;
 
@@ -112,12 +112,12 @@ public class TickInfo {
 		this.volumn = volumn;
 	}
 
-	public BigDecimal getAmount() {
-		return amount;
+	public BigDecimal getValue() {
+		return value;
 	}
 
-	public void setAmount(BigDecimal amount) {
-		this.amount = amount;
+	public void setValue(BigDecimal value) {
+		this.value = value;
 	}
 
 	public BigDecimal getOpenInterest() {
@@ -324,7 +324,7 @@ public class TickInfo {
 ////		buffer.append(",");
 //		buffer.append(volumn.intValue());
 //		buffer.append(",");
-////		buffer.append(tickInfo.getAmount().setScale(2, RoundingMode.HALF_UP));
+////		buffer.append(tickInfo.getValue().setScale(2, RoundingMode.HALF_UP));
 ////		buffer.append(",");
 //		buffer.append(openInterest.intValue());
 //		buffer.append(",");

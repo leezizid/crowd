@@ -187,7 +187,7 @@ public abstract class CtpTradeAPI extends CtpBaseApi {
 	}
 
 	public synchronized String postOrder(String exchangeID, String symbol, OrderType type, PositionSide positionSide,
-			float price, int amount) throws Throwable {
+			float price, int volumn) throws Throwable {
 		if (!login) {
 			throw new IllegalStateException("账户未登录");
 		}
@@ -204,7 +204,7 @@ public abstract class CtpTradeAPI extends CtpBaseApi {
 		locks.put(requestID, lock);
 		try {
 			int rtnCode = CtpApiLibrary.instance.reqPostOrder(id, requestID, String.valueOf(serverOrderCount + 1),
-					exchangeID, symbol, String.valueOf(type.ordinal()).charAt(0), direction, price, amount);
+					exchangeID, symbol, String.valueOf(type.ordinal()).charAt(0), direction, price, volumn);
 			if (rtnCode != 0) {
 				throw new IllegalStateException("调用CTP接口错误：" + rtnCode);
 			}
@@ -302,8 +302,8 @@ public abstract class CtpTradeAPI extends CtpBaseApi {
 								messageObject.optString("ExchangeID") + "." + messageObject.optString("InstrumentID"));
 						info.setPositionSide(PositionSide.values()[messageObject.getInt("PosiDirection") - 50]);
 						info.setMarketPrice(new BigDecimal(messageObject.getDouble("SettlementPrice")));
-						info.setTotalAmount(messageObject.getInt("Position"));
-						info.setTodayAmount(messageObject.getInt("TodayPosition"));
+						info.setTotalVolumn(messageObject.getInt("Position"));
+						info.setTodayVolumn(messageObject.getInt("TodayPosition"));
 						positionList.add(info);
 					}
 					if (messageObject.getBoolean("bIsLast")) {
@@ -389,7 +389,7 @@ public abstract class CtpTradeAPI extends CtpBaseApi {
 							OrderInfo orderInfo = orderMap.get(orderId);
 							if (orderInfo != null) {
 								orderInfo.setCanceled(true);
-								handleOrderUpdated(orderId, orderInfo.getSymbol(), orderInfo.getExecAmount(),
+								handleOrderUpdated(orderId, orderInfo.getSymbol(), orderInfo.getExecVolumn(),
 										orderInfo.getExecValue(), true);
 							}
 						} else {
@@ -418,12 +418,12 @@ public abstract class CtpTradeAPI extends CtpBaseApi {
 				// 尝试更新OrderInfo
 				String tradeId = messageObject.getString("TradeID");
 				String orderId = messageObject.getString("ExchangeID") + "." + messageObject.getString("OrderSysID");
-				int amount = messageObject.getInt("Volume");
+				int volumn = messageObject.getInt("Volume");
 				BigDecimal price = new BigDecimal(messageObject.getDouble("Price"));
 				OrderInfo orderInfo = orderMap.get(orderId);
 				if (orderInfo != null) {
-					orderInfo.addTrade(new TradeInfo(tradeId, orderId, amount, price));
-					handleOrderUpdated(orderId, orderInfo.getSymbol(), orderInfo.getExecAmount(),
+					orderInfo.addTrade(new TradeInfo(tradeId, orderId, volumn, price));
+					handleOrderUpdated(orderId, orderInfo.getSymbol(), orderInfo.getExecVolumn(),
 							orderInfo.getExecValue(), orderInfo.isCanceled());
 				}
 			} else if ("T_OnRspError".equals(type)) {
@@ -446,7 +446,7 @@ public abstract class CtpTradeAPI extends CtpBaseApi {
 		info.setSymbol(messageObject.optString("ExchangeID") + "." + messageObject.optString("InstrumentID"));
 		info.setType(OrderType.values()[messageObject.getInt("CombOffsetFlag")]);
 		info.setPrice(messageObject.getDouble("LimitPrice"));
-		info.setAmount(messageObject.getInt("VolumeTotalOriginal"));
+		info.setVolumn(messageObject.getInt("VolumeTotalOriginal"));
 		int direction = messageObject.getInt("Direction") - 48;
 		if (info.getType() == OrderType.Open) {
 			info.setPositionSide(direction == 0 ? PositionSide.Long : PositionSide.Short);
@@ -477,12 +477,12 @@ public abstract class CtpTradeAPI extends CtpBaseApi {
 	public void synchronizeOrder(String serverOrderId) throws Throwable {
 		OrderInfo orderInfo = this.orderMap.get(serverOrderId);
 		if (orderInfo != null) {
-			handleOrderUpdated(serverOrderId, orderInfo.getSymbol(), orderInfo.getExecAmount(),
+			handleOrderUpdated(serverOrderId, orderInfo.getSymbol(), orderInfo.getExecVolumn(),
 					orderInfo.getExecValue(), orderInfo.isCanceled());
 		}
 	}
 
-	protected abstract void handleOrderUpdated(String serverOrderId, String symbol, int execAmount,
+	protected abstract void handleOrderUpdated(String serverOrderId, String symbol, int execVolumn,
 			BigDecimal execValue, boolean canceled);
 }
 

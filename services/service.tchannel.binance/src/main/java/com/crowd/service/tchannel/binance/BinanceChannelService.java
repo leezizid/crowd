@@ -198,7 +198,7 @@ public class BinanceChannelService implements CrowdService {
 					}
 
 					@Override
-					protected void handleOrderUpdated(String serverOrderId, String symbol, BigDecimal execAmount,
+					protected void handleOrderUpdated(String serverOrderId, String symbol, BigDecimal execVolumn,
 							BigDecimal execValue, boolean canceled) {
 						// XXX:并不是所有交易接口都可以直接拿到clientOrderId，这时候通道自己需要维护一个映射表来查找
 //						String[] arr = StringUtils.split(clientOrderId, "_");
@@ -207,7 +207,7 @@ public class BinanceChannelService implements CrowdService {
 						updateMessageObject.put("channelId", id);
 						updateMessageObject.put("serverOrderId", serverOrderId);
 						updateMessageObject.put("symbol", symbol);
-						updateMessageObject.put("execAmount", execAmount.doubleValue());
+						updateMessageObject.put("execVolumn", execVolumn.doubleValue());
 						updateMessageObject.put("execValue", execValue.doubleValue());
 						updateMessageObject.put("canceled", canceled);
 						try {
@@ -251,9 +251,9 @@ public class BinanceChannelService implements CrowdService {
 		OrderType type = OrderType.valueOf(inputObject.getString("type"));
 		String symbol = inputObject.getString("symbol");
 		PositionSide positionSide = PositionSide.valueOf(inputObject.getString("positionSide"));
-		BigDecimal amount = new BigDecimal(inputObject.getString("amount"));
+		BigDecimal volumn = new BigDecimal(inputObject.getString("volumn"));
 		BigDecimal price = new BigDecimal(inputObject.getString("price"));
-		outputObject.put("serverOrderId", tradeAPI.postOrder(clientOrderId, type, symbol, positionSide, amount, price));
+		outputObject.put("serverOrderId", tradeAPI.postOrder(clientOrderId, type, symbol, positionSide, volumn, price));
 	}
 
 	@CrowdMethod

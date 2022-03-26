@@ -43,8 +43,8 @@ public final class BacktestStrategyEnv extends BaseStrategyEnv {
 	}
 
 	public void onTick(String symbol, long time, BigDecimal lowerLimitPrice, BigDecimal upperLimitPrice,
-			BigDecimal price, BigDecimal amount) {
-		super.onTick(symbol, time, lowerLimitPrice, upperLimitPrice, price, amount);
+			BigDecimal price, BigDecimal volumn) {
+		super.onTick(symbol, time, lowerLimitPrice, upperLimitPrice, price, volumn);
 		//
 		for (int i = 0; i < orderList.size(); i++) {
 			OrderInfoImpl orderInfo = orderList.get(i);
@@ -64,14 +64,14 @@ public final class BacktestStrategyEnv extends BaseStrategyEnv {
 				}
 				if (matched) {
 					// XXX：先简化成交量，假设价格到了就可以全部成交，后续应该优化
-					BigDecimal execAmount = orderInfo.getAmount();
-					orderInfo.setExecAmount(execAmount);
+					BigDecimal execVolumn = orderInfo.getVolumn();
+					orderInfo.setExecVolumn(execVolumn);
 					OrderInfoImpl matchOrderInfo = (OrderInfoImpl) strategyInfo.findOrder(orderInfo.getClientOrderId());
-					handleOrderUpdated(time, matchOrderInfo, false, execAmount,
+					handleOrderUpdated(time, matchOrderInfo, false, execVolumn,
 							productInfo.isDelivery()
-									? execAmount.multiply(findProduct(symbol).getMultiplier()).divide(price, 8,
+									? execVolumn.multiply(findProduct(symbol).getMultiplier()).divide(price, 8,
 											RoundingMode.HALF_UP)
-									: execAmount.multiply(findProduct(symbol).getMultiplier()).multiply(price));
+									: execVolumn.multiply(findProduct(symbol).getMultiplier()).multiply(price));
 				}
 			}
 		}

@@ -163,7 +163,7 @@ public class CTPTickDataFileProcessor {
 			tickInfo.setHighestPrice(new BigDecimal(info[3]));
 			tickInfo.setLowestPrice(new BigDecimal(info[4]));
 			tickInfo.setVolumn(new BigDecimal(info[5]));
-			tickInfo.setAmount(new BigDecimal(info[6]));
+			tickInfo.setValue(new BigDecimal(info[6]));
 			tickInfo.setOpenInterest(new BigDecimal(info[7]));
 			tickInfo.setBidPrice1(getBidOrAskValue(info[8]));
 			tickInfo.setBidVolumn1(getBidOrAskValue(info[9]));

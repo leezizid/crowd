@@ -8,15 +8,15 @@ public class TradeInfo {
 
 	private String orderId;
 
-	private int amount;
+	private int volumn;
 
 	private BigDecimal price;
 
-	public TradeInfo(String id, String orderId, int amount, BigDecimal price) {
+	public TradeInfo(String id, String orderId, int volumn, BigDecimal price) {
 		super();
 		this.id = id;
 		this.orderId = orderId;
-		this.amount = amount;
+		this.volumn = volumn;
 		this.price = price;
 	}
 
@@ -36,12 +36,12 @@ public class TradeInfo {
 		this.orderId = orderId;
 	}
 
-	public int getAmount() {
-		return amount;
+	public int getVolumn() {
+		return volumn;
 	}
 
-	public void setAmount(int amount) {
-		this.amount = amount;
+	public void setVolumn(int volumn) {
+		this.volumn = volumn;
 	}
 
 	public BigDecimal getPrice() {

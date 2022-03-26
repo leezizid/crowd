@@ -61,10 +61,10 @@ public abstract class CtpMarketAPI extends CtpBaseApi {
 				BigDecimal lowerLimitPrice = new BigDecimal(messageObject.getDouble("LowerLimitPrice"));
 				BigDecimal upperLimitPrice = new BigDecimal(messageObject.getDouble("UpperLimitPrice"));
 				BigDecimal price = new BigDecimal(messageObject.getDouble("LastPrice"));
-				BigDecimal amount = new BigDecimal(messageObject.getInt("Volume"));
-				handleMarketData(symbol, System.currentTimeMillis(), lowerLimitPrice, upperLimitPrice, price, amount);
+				BigDecimal volumn = new BigDecimal(messageObject.getInt("Volume"));
+				handleMarketData(symbol, System.currentTimeMillis(), lowerLimitPrice, upperLimitPrice, price, volumn);
 
-				if (amount.compareTo(BigDecimal.ZERO) > 0) {
+				if (volumn.compareTo(BigDecimal.ZERO) > 0) {
 					try {
 						String actionDay = messageObject.getString("ActionDay");
 						String timeString = actionDay.substring(0, 4) + "-" + actionDay.substring(4, 6) + "-"
@@ -120,7 +120,7 @@ public abstract class CtpMarketAPI extends CtpBaseApi {
 	}
 
 	protected abstract void handleMarketData(String symbol, long time, BigDecimal lowerLimitPrice,
-			BigDecimal upperLimitPrice, BigDecimal price, BigDecimal amount);
+			BigDecimal upperLimitPrice, BigDecimal price, BigDecimal volumn);
 
 	protected void doInit(String flowDir) {
 		CtpApiLibrary.instance.initMarket(id, flowDir, front, this);
@@ -157,9 +157,9 @@ public abstract class CtpMarketAPI extends CtpBaseApi {
 
 			@Override
 			protected void handleMarketData(String symbol, long time, BigDecimal lowerLimitPrice,
-					BigDecimal upperLimitPrice, BigDecimal price, BigDecimal amount) {
+					BigDecimal upperLimitPrice, BigDecimal price, BigDecimal volumn) {
 				if (symbol.endsWith("a2203")) {
-					System.out.println(price + "----" + amount);
+					System.out.println(price + "----" + volumn);
 				}
 				if (symbol.endsWith("a2202")) {
 					System.out.println("bbbbbbbbbbbbbbbbbbbbbbbbbbbbb");

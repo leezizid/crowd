@@ -20,13 +20,13 @@ public interface IStrategy {
 	 * @param price
 	 * @return
 	 */
-	public BigDecimal calcTransactionAmount(StrategyContext context, String symbol, BigDecimal price);
+	public BigDecimal calcTransactionVolumn(StrategyContext context, String symbol, BigDecimal price);
 
 	/**
 	 * 
 	 * @param context
 	 * @param tickerInfo
 	 */
-	public void onTick(StrategyContext context, TickerInfo tickerInfo);
+	public void onTick(StrategyContext context, TickInfo tickerInfo);
 
 }

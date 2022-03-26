@@ -51,7 +51,7 @@ public abstract class BaseStrategyEnv implements StrategyContext, StrategyEnv {
 	protected abstract void init(CrowdContext crowdContext) throws Throwable;
 
 	public void onTick(String symbol, long time, BigDecimal lowerLimitPrice, BigDecimal upperLimitPrice,
-			BigDecimal price, BigDecimal amount) {
+			BigDecimal price, BigDecimal volumn) {
 		synchronized (strategyInfo) {
 			//
 //			calendar.setTimeInMillis(time);
@@ -76,7 +76,7 @@ public abstract class BaseStrategyEnv implements StrategyContext, StrategyEnv {
 				if (transaction.getSymbol().equals(symbol)) {
 					try {
 						ProductInfo productInfo = findProduct(transaction.getSymbol());
-						if (transaction.getPositionAmount().compareTo(BigDecimal.ZERO) > 0) {
+						if (transaction.getPositionVolumn().compareTo(BigDecimal.ZERO) > 0) {
 							if (transaction.getForceCloseFlag()) {
 								if (transaction.getPositionSide() == PositionSide.Long) {
 									if (lowerLimitPrice.compareTo(BigDecimal.ZERO) == 0) {
@@ -149,11 +149,11 @@ public abstract class BaseStrategyEnv implements StrategyContext, StrategyEnv {
 				}
 			}
 			this.strategyInstance.onTick(this,
-					new TickerInfoImpl(symbol, time, lowerLimitPrice, upperLimitPrice, price, amount));
+					new TickInfoImpl(symbol, time, lowerLimitPrice, upperLimitPrice, price, volumn));
 		}
 	}
 
-	public void openPosition(long time, String symbol, PositionSide positionSide, BigDecimal price, BigDecimal amount,
+	public void openPosition(long time, String symbol, PositionSide positionSide, BigDecimal price, BigDecimal volumn,
 			BigDecimal takePrice, BigDecimal stopPrice) throws Throwable {
 
 		// 交易时间是否合理：收盘30分钟内不交易，
@@ -221,7 +221,7 @@ public abstract class BaseStrategyEnv implements StrategyContext, StrategyEnv {
 			transactionInfo.setBalance(BigDecimal.ZERO);
 			transactionInfo.setCost(BigDecimal.ZERO);
 			transactionInfo.setPositionSide(positionSide);
-			transactionInfo.setPositionAmount(BigDecimal.ZERO);
+			transactionInfo.setPositionVolumn(BigDecimal.ZERO);
 			transactionInfo.setOpenTime(time);
 			transactionInfo.setOrderPrice(price);
 			transactionInfo.setTakePrice(takePrice);
@@ -232,9 +232,9 @@ public abstract class BaseStrategyEnv implements StrategyContext, StrategyEnv {
 			orderInfo.setSymbol(symbol);
 			orderInfo.setPositionSide(positionSide);
 			orderInfo.setType(OrderType.Open);
-			orderInfo.setAmount(amount);
+			orderInfo.setVolumn(volumn);
 			orderInfo.setPrice(price);
-			orderInfo.setExecAmount(BigDecimal.ZERO);
+			orderInfo.setExecVolumn(BigDecimal.ZERO);
 			orderInfo.setExecValue(BigDecimal.ZERO);
 			orderInfo.setCostValue(BigDecimal.ZERO);
 			orderInfo.setAvgPrice(BigDecimal.ZERO);
@@ -267,8 +267,8 @@ public abstract class BaseStrategyEnv implements StrategyContext, StrategyEnv {
 	public void closePosition(long time, TransactionInfo transactionInfo, BigDecimal price) throws Throwable {
 		synchronized (strategyInfo) {
 			TransactionInfoImpl transactionInfoImpl = (TransactionInfoImpl) transactionInfo;
-			BigDecimal amount = transactionInfoImpl.getPositionAmount().subtract(transactionInfoImpl.getLockAmount());
-			if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+			BigDecimal volumn = transactionInfoImpl.getPositionVolumn().subtract(transactionInfoImpl.getLockVolumn());
+			if (volumn.compareTo(BigDecimal.ZERO) <= 0) {
 				return;
 			}
 			// 开仓
@@ -278,9 +278,9 @@ public abstract class BaseStrategyEnv implements StrategyContext, StrategyEnv {
 			orderInfo.setSymbol(transactionInfo.getSymbol());
 			orderInfo.setPositionSide(transactionInfoImpl.getPositionSide());
 			orderInfo.setType(OrderType.Close);
-			orderInfo.setAmount(amount);
+			orderInfo.setVolumn(volumn);
 			orderInfo.setPrice(price);
-			orderInfo.setExecAmount(BigDecimal.ZERO);
+			orderInfo.setExecVolumn(BigDecimal.ZERO);
 			orderInfo.setExecValue(BigDecimal.ZERO);
 			orderInfo.setCostValue(BigDecimal.ZERO);
 			orderInfo.setAvgPrice(BigDecimal.ZERO);
@@ -310,7 +310,7 @@ public abstract class BaseStrategyEnv implements StrategyContext, StrategyEnv {
 		}
 	}
 
-	public final void handleOrderUpdated(long time, OrderInfo orderInfo, boolean canceled, BigDecimal execAmount,
+	public final void handleOrderUpdated(long time, OrderInfo orderInfo, boolean canceled, BigDecimal execVolumn,
 			BigDecimal execValue) {
 		synchronized (strategyInfo) {
 			OrderInfoImpl matchOrderInfo = (OrderInfoImpl) orderInfo;
@@ -320,19 +320,19 @@ public abstract class BaseStrategyEnv implements StrategyContext, StrategyEnv {
 				matchOrderInfo.setCanceled(true);
 			}
 			ProductInfo productInfo = findProduct(transactionInfo.getSymbol()); // XXX：productInfo可能为空（下单时信息错误）
-			if (execAmount.compareTo(matchOrderInfo.getExecAmount()) > 0) {
+			if (execVolumn.compareTo(matchOrderInfo.getExecVolumn()) > 0) {
 				// 处理交易持仓变化和盈亏情况
-				BigDecimal newExecAmount = execAmount.subtract(matchOrderInfo.getExecAmount());
+				BigDecimal newExecVolumn = execVolumn.subtract(matchOrderInfo.getExecVolumn());
 				BigDecimal newExecValue = execValue.subtract(matchOrderInfo.getExecValue());
 				//
-				BigDecimal newPrice = newExecValue.divide(newExecAmount.multiply(productInfo.getMultiplier()), 2,
+				BigDecimal newPrice = newExecValue.divide(newExecVolumn.multiply(productInfo.getMultiplier()), 2,
 						RoundingMode.HALF_UP);
-				BigDecimal avgPrice = execValue.divide(execAmount.multiply(productInfo.getMultiplier()), 16,
+				BigDecimal avgPrice = execValue.divide(execVolumn.multiply(productInfo.getMultiplier()), 16,
 						RoundingMode.HALF_UP);
 				if (productInfo.isDelivery()) {
-					newPrice = newExecAmount.multiply(productInfo.getMultiplier()).divide(newExecValue, 2,
+					newPrice = newExecVolumn.multiply(productInfo.getMultiplier()).divide(newExecValue, 2,
 							RoundingMode.HALF_UP);
-					avgPrice = execAmount.multiply(productInfo.getMultiplier()).divide(execValue, 16,
+					avgPrice = execVolumn.multiply(productInfo.getMultiplier()).divide(execValue, 16,
 							RoundingMode.HALF_UP);
 				}
 				//
@@ -351,7 +351,7 @@ public abstract class BaseStrategyEnv implements StrategyContext, StrategyEnv {
 					}
 				}
 				//
-				matchOrderInfo.setExecAmount(execAmount);
+				matchOrderInfo.setExecVolumn(execVolumn);
 				matchOrderInfo.setExecValue(execValue);
 				matchOrderInfo.setAvgPrice(avgPrice);
 				matchOrderInfo.setCostValue(matchOrderInfo.getCostValue().add(costValue));
@@ -366,21 +366,21 @@ public abstract class BaseStrategyEnv implements StrategyContext, StrategyEnv {
 					transactionInfo.setBalance(transactionInfo.getBalance().add(newExecValue));
 				}
 				if (matchOrderInfo.getType() == OrderType.Open) {
-					transactionInfo.setPositionAmount(transactionInfo.getPositionAmount().add(newExecAmount));
+					transactionInfo.setPositionVolumn(transactionInfo.getPositionVolumn().add(newExecVolumn));
 					transactionInfo.setPositionTime(time);
 				} else {
-					transactionInfo.setPositionAmount(transactionInfo.getPositionAmount().subtract(newExecAmount));
+					transactionInfo.setPositionVolumn(transactionInfo.getPositionVolumn().subtract(newExecVolumn));
 				}
-				if (transactionInfo.getPositionAmount().compareTo(BigDecimal.ZERO) > 0) {
+				if (transactionInfo.getPositionVolumn().compareTo(BigDecimal.ZERO) > 0) {
 					if (productInfo.isDelivery()) {
 						transactionInfo.setPositionPrice(
-								transactionInfo.getPositionAmount().multiply(productInfo.getMultiplier())
+								transactionInfo.getPositionVolumn().multiply(productInfo.getMultiplier())
 										.divide(transactionInfo.getBalance(), 4, RoundingMode.HALF_UP).abs());
 					} else {
 						transactionInfo
 								.setPositionPrice(
 										transactionInfo.getBalance()
-												.divide(transactionInfo.getPositionAmount()
+												.divide(transactionInfo.getPositionVolumn()
 														.multiply(productInfo.getMultiplier()), 4, RoundingMode.HALF_UP)
 												.abs());
 					}
@@ -410,7 +410,7 @@ public abstract class BaseStrategyEnv implements StrategyContext, StrategyEnv {
 			BigDecimal stopPrice) throws Throwable {
 		synchronized (strategyInfo) {
 			this.openPosition(System.currentTimeMillis(), symbol, side, price,
-					strategyInstance.calcTransactionAmount(this, symbol, price), targetpPrice, stopPrice);
+					strategyInstance.calcTransactionVolumn(this, symbol, price), targetpPrice, stopPrice);
 		}
 	}
 

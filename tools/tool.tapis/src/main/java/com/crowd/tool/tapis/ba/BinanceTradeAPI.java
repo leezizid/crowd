@@ -12,7 +12,7 @@ public interface BinanceTradeAPI {
 
 	public JSONObject getAccountInfo() throws Throwable;
 
-	public String postOrder(String clientOrderId, OrderType type, String symbol, PositionSide positionSide, BigDecimal amount,
+	public String postOrder(String clientOrderId, OrderType type, String symbol, PositionSide positionSide, BigDecimal volumn,
 			BigDecimal price) throws Throwable;
 
 	public void cancelOrder(String symbol, String serverOrderId) throws Throwable;

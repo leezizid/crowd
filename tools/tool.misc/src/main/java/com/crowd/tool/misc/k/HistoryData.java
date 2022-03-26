@@ -3,7 +3,11 @@ package com.crowd.tool.misc.k;
 import java.io.File;
 import java.io.RandomAccessFile;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import com.crowd.tool.misc.TradeDays;
 
@@ -12,6 +16,11 @@ public class HistoryData {
 	private final static int DAY_MILLIS = 24 * 60 * 60 * 1000;
 
 	private final static String HistoryDataDir;
+	
+	
+	private final static Map<String,byte[]> cache = new HashMap<String, byte[]>();
+	private final static List<String> keyList = new ArrayList<String>();
+	
 
 	static {
 		HistoryDataDir = System.getProperty("HistoryDataDir");
@@ -43,14 +52,25 @@ public class HistoryData {
 		return new String(content);
 	}
 
-	public final static byte[] readTradeDayTickData(String symbol, String tradeDay) throws Throwable {
-		File dataFile = new File(HistoryDataDir + File.separator + symbol + File.separator + "daytick" + File.separator
-				+ tradeDay + ".dat");
-		RandomAccessFile raf = new RandomAccessFile(dataFile, "r");
-		byte[] content = new byte[(int) dataFile.length()];
-		raf.read(content);
-		raf.close();
-		return content;
+	public final synchronized static byte[] readTradeDayTickData(String symbol, String tradeDay) throws Throwable {
+		String path = HistoryDataDir + File.separator + symbol + File.separator + "daytick" + File.separator
+				+ tradeDay + ".dat";
+		if(!cache.containsKey(path)) {
+			//
+			while(cache.size() >= 256) {
+				cache.remove(keyList.remove(0));
+			}
+			//
+			File dataFile = new File(path);
+			RandomAccessFile raf = new RandomAccessFile(dataFile, "r");
+			byte[] content = new byte[(int) dataFile.length()];
+			raf.read(content);
+			raf.close();
+			//
+			keyList.add(path);
+			cache.put(path, content);
+		}
+		return cache.get(path);
 	}
 
 	public final static String[] readKLineData(String symbol, String type, String startDay, String endDay)

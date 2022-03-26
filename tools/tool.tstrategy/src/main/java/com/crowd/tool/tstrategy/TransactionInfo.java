@@ -18,9 +18,9 @@ public interface TransactionInfo {
 
 	public PositionSide getPositionSide();
 
-	public BigDecimal getPositionAmount();
+	public BigDecimal getPositionVolumn();
 
-	public BigDecimal getLockAmount();
+	public BigDecimal getLockVolumn();
 
 	public BigDecimal getPositionPrice();
 

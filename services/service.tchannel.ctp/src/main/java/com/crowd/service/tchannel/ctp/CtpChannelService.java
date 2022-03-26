@@ -94,12 +94,12 @@ public class CtpChannelService implements CrowdService {
 				JSONArray positionArray = new JSONArray();
 				try {
 					for (PositionInfo positionInfo : tradeAPI.getPositions()) {
-						if (positionInfo.getTotalAmount() > 0) {
+						if (positionInfo.getTotalVolumn() > 0) {
 							JSONObject positionObj = new JSONObject();
 							positionObj.put("symbol", positionInfo.getSymbol());
-							positionObj.put("amount",
-									positionInfo.getPositionSide() == PositionSide.Long ? positionInfo.getTotalAmount()
-											: -positionInfo.getTotalAmount());
+							positionObj.put("volumn",
+									positionInfo.getPositionSide() == PositionSide.Long ? positionInfo.getTotalVolumn()
+											: -positionInfo.getTotalVolumn());
 							positionObj.put("marketPrice", positionInfo.getMarketPrice());
 							positionArray.put(positionObj);
 						}
@@ -125,15 +125,15 @@ public class CtpChannelService implements CrowdService {
 				JSONArray orderArray = new JSONArray();
 				try {
 					for (OrderInfo orderInfo : tradeAPI.getOrders()) {
-						if (orderInfo.getAmount() == orderInfo.getExecAmount() || orderInfo.isCanceled()) {
+						if (orderInfo.getVolumn() == orderInfo.getExecVolumn() || orderInfo.isCanceled()) {
 							continue;
 						}
 						JSONObject orderObj = new JSONObject();
 						orderObj.put("symbol", orderInfo.getSymbol());
 						orderObj.put("serverOrderId", orderInfo.getServerOrderId());
 						// orderObj.put("clientOrderId", orderInfo.getClientOrderId());
-						orderObj.put("amount", orderInfo.getAmount());
-						orderObj.put("execAmount", orderInfo.getExecAmount());
+						orderObj.put("volumn", orderInfo.getVolumn());
+						orderObj.put("execVolumn", orderInfo.getExecVolumn());
 						orderObj.put("price", orderInfo.getPrice());
 						orderObj.put("type", orderInfo.getType());
 						orderObj.put("positionSide", orderInfo.getPositionSide());
@@ -175,13 +175,13 @@ public class CtpChannelService implements CrowdService {
 				}
 
 				@Override
-				protected void handleOrderUpdated(String serverOrderId, String symbol, int execAmount, BigDecimal execValue,
+				protected void handleOrderUpdated(String serverOrderId, String symbol, int execVolumn, BigDecimal execValue,
 						boolean canceled) {
 					JSONObject updateMessageObject = new JSONObject();
 					updateMessageObject.put("channelId", id);
 					updateMessageObject.put("serverOrderId", serverOrderId);
 					updateMessageObject.put("symbol", symbol);
-					updateMessageObject.put("execAmount", execAmount);
+					updateMessageObject.put("execVolumn", execVolumn);
 					updateMessageObject.put("execValue", execValue.doubleValue());
 					updateMessageObject.put("canceled", canceled);
 					try {
@@ -222,9 +222,9 @@ public class CtpChannelService implements CrowdService {
 		PositionSide positionSide = PositionSide.valueOf(inputObject.getString("positionSide"));
 		OrderType orderType = OrderType.valueOf(inputObject.getString("type"));
 		float price = Float.parseFloat(inputObject.getString("price"));
-		int amount = Integer.parseInt(inputObject.getString("amount"));
+		int volumn = Integer.parseInt(inputObject.getString("volumn"));
 		outputObject.put("serverOrderId",
-				ctpTradeAPI.postOrder(symbolInfo[0], symbolInfo[1], orderType, positionSide, price, amount));
+				ctpTradeAPI.postOrder(symbolInfo[0], symbolInfo[1], orderType, positionSide, price, volumn));
 	}
 
 	@CrowdMethod

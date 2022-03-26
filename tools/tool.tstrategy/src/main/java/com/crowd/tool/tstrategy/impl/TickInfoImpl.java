@@ -2,9 +2,9 @@ package com.crowd.tool.tstrategy.impl;
 
 import java.math.BigDecimal;
 
-import com.crowd.tool.tstrategy.TickerInfo;
+import com.crowd.tool.tstrategy.TickInfo;
 
-public class TickerInfoImpl implements TickerInfo {
+public class TickInfoImpl implements TickInfo {
 
 	private String symbol;
 
@@ -14,19 +14,19 @@ public class TickerInfoImpl implements TickerInfo {
 
 	private BigDecimal upperLimitPrice;
 
-	private BigDecimal price;
+	private BigDecimal newPrice;
 
-	private BigDecimal amount;
+	private BigDecimal newVolumn;
 
-	public TickerInfoImpl(String symbol, long time, BigDecimal lowerLimitPrice, BigDecimal upperLimitPrice,
-			BigDecimal price, BigDecimal amount) {
+	public TickInfoImpl(String symbol, long time, BigDecimal lowerLimitPrice, BigDecimal upperLimitPrice,
+			BigDecimal newPrice, BigDecimal newVolumn) {
 		super();
 		this.symbol = symbol;
 		this.time = time;
 		this.lowerLimitPrice = lowerLimitPrice;
 		this.upperLimitPrice = upperLimitPrice;
-		this.price = price;
-		this.amount = amount;
+		this.newPrice = newPrice;
+		this.newVolumn = newVolumn;
 	}
 
 	public String getSymbol() {
@@ -45,12 +45,12 @@ public class TickerInfoImpl implements TickerInfo {
 		return upperLimitPrice;
 	}
 
-	public BigDecimal getPrice() {
-		return price;
+	public BigDecimal getNewPrice() {
+		return newPrice;
 	}
 
-	public BigDecimal getAmount() {
-		return amount;
+	public BigDecimal getNewVolumn() {
+		return newVolumn;
 	}
 
 }

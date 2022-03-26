@@ -146,8 +146,8 @@ public abstract class StrategyServiceBase implements CrowdService {
 						int timeIndex = info.optInt("timeIndex", -1);
 						int nanoTimeIndex = info.optInt("nanoTimeIndex", -1);
 						int priceIndex = info.optInt("priceIndex", -1);
-						int amountIndex = info.optInt("amountIndex", -1);
-						int totalAmountIndex = info.optInt("totalAmountIndex", -1);
+						int volumnIndex = info.optInt("volumnIndex", -1);
+						int totalVolumnIndex = info.optInt("totalVolumnIndex", -1);
 						//
 
 						JSONArray fileNameArray = info.getJSONArray("files");
@@ -157,7 +157,7 @@ public abstract class StrategyServiceBase implements CrowdService {
 							raf = new RandomAccessFile(new File(file.getParentFile(), fileNameArray.getString(i)), "r");
 							try {
 								String line = null;
-								BigDecimal lastTotalAmount = BigDecimal.ZERO;
+								BigDecimal lastTotalVolumn = BigDecimal.ZERO;
 								while ((line = raf.readLine()) != null) {
 									if (crowdContext.isDisposed()) {
 										break;
@@ -165,27 +165,27 @@ public abstract class StrategyServiceBase implements CrowdService {
 									try {
 										String[] arr = StringUtils.split(line, ",");
 										long time = 0;
-										BigDecimal amount = BigDecimal.ZERO;
+										BigDecimal volumn = BigDecimal.ZERO;
 										if (timeIndex >= 0) {
 											time = Long.parseLong(arr[timeIndex]);
 										} else if (nanoTimeIndex >= 0) {
 											time = Long.parseLong(arr[nanoTimeIndex]) / 1000000;
 										}
-										if (amountIndex >= 0) {
-											amount = new BigDecimal(arr[amountIndex]);
-										} else if (totalAmountIndex >= 0) {
-											BigDecimal newTotalAmount = new BigDecimal(arr[totalAmountIndex]);
-											if (newTotalAmount.compareTo(lastTotalAmount) < 0) {
-												amount = newTotalAmount;
+										if (volumnIndex >= 0) {
+											volumn = new BigDecimal(arr[volumnIndex]);
+										} else if (totalVolumnIndex >= 0) {
+											BigDecimal newTotalVolumn = new BigDecimal(arr[totalVolumnIndex]);
+											if (newTotalVolumn.compareTo(lastTotalVolumn) < 0) {
+												volumn = newTotalVolumn;
 											} else {
-												amount = newTotalAmount.subtract(lastTotalAmount);
+												volumn = newTotalVolumn.subtract(lastTotalVolumn);
 											}
-											lastTotalAmount = newTotalAmount;
+											lastTotalVolumn = newTotalVolumn;
 										}
 										BigDecimal price = new BigDecimal(arr[priceIndex]);
 										//
 										strategyEnv.onTick(symbol, time, BigDecimal.ZERO, BigDecimal.ZERO, price,
-												amount);
+												volumn);
 										reportCount++;
 										finishCount++;
 										if (reportCount >= (totalCount * 0.01)) {
@@ -217,9 +217,9 @@ public abstract class StrategyServiceBase implements CrowdService {
 									String symbol = messageObject.getString("s");
 									long time = messageObject.getLong("T");
 									BigDecimal price = new BigDecimal(messageObject.optString("p"));
-									BigDecimal amount = new BigDecimal(messageObject.optString("q"));
+									BigDecimal volumn = new BigDecimal(messageObject.optString("q"));
 									crowdContext.reportWork(1, price.toString());
-									strategyEnv.onTick(symbol, time, BigDecimal.ZERO, BigDecimal.ZERO, price, amount);
+									strategyEnv.onTick(symbol, time, BigDecimal.ZERO, BigDecimal.ZERO, price, volumn);
 								}
 							}
 
@@ -240,9 +240,9 @@ public abstract class StrategyServiceBase implements CrowdService {
 
 							@Override
 							protected void handleMarketData(String symbol, long time, BigDecimal lowerLimitPrice,
-									BigDecimal upperLimitPrice, BigDecimal price, BigDecimal amount) {
+									BigDecimal upperLimitPrice, BigDecimal price, BigDecimal volumn) {
 								crowdContext.reportWork(1, String.valueOf(price.doubleValue()));
-								strategyEnv.onTick(symbol, time, lowerLimitPrice, upperLimitPrice, price, amount);
+								strategyEnv.onTick(symbol, time, lowerLimitPrice, upperLimitPrice, price, volumn);
 							}
 						}.run();
 					} else if (marketDataSource.startsWith("CTPTEST:")) {
@@ -257,9 +257,9 @@ public abstract class StrategyServiceBase implements CrowdService {
 
 							@Override
 							protected void handleMarketData(String symbol, long time, BigDecimal lowerLimitPrice,
-									BigDecimal upperLimitPrice, BigDecimal price, BigDecimal amount) {
+									BigDecimal upperLimitPrice, BigDecimal price, BigDecimal volumn) {
 								crowdContext.reportWork(1, String.valueOf(price.doubleValue()));
-								strategyEnv.onTick(symbol, time, lowerLimitPrice, upperLimitPrice, price, amount);
+								strategyEnv.onTick(symbol, time, lowerLimitPrice, upperLimitPrice, price, volumn);
 							}
 						}.run();
 					} else if (marketDataSource.startsWith("CTPMOCK:")) {
@@ -274,9 +274,9 @@ public abstract class StrategyServiceBase implements CrowdService {
 
 							@Override
 							protected void handleMarketData(String symbol, long time, BigDecimal lowerLimitPrice,
-									BigDecimal upperLimitPrice, BigDecimal price, BigDecimal amount) {
+									BigDecimal upperLimitPrice, BigDecimal price, BigDecimal volumn) {
 								crowdContext.reportWork(1, String.valueOf(price.doubleValue()));
-								strategyEnv.onTick(symbol, time, lowerLimitPrice, upperLimitPrice, price, amount);
+								strategyEnv.onTick(symbol, time, lowerLimitPrice, upperLimitPrice, price, volumn);
 							}
 						}.run();
 					} else {

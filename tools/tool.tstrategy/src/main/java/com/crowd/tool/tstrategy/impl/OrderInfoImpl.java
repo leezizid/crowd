@@ -47,7 +47,7 @@ class OrderInfoImpl implements OrderInfo {
 	/**
 	 * 数量
 	 */
-	private BigDecimal amount;
+	private BigDecimal volumn;
 
 	/**
 	 * 价格
@@ -57,7 +57,7 @@ class OrderInfoImpl implements OrderInfo {
 	/**
 	 * 完成数量
 	 */
-	private BigDecimal execAmount;
+	private BigDecimal execVolumn;
 
 	/**
 	 * 完成金额
@@ -137,12 +137,12 @@ class OrderInfoImpl implements OrderInfo {
 		this.type = type;
 	}
 
-	public BigDecimal getAmount() {
-		return amount;
+	public BigDecimal getVolumn() {
+		return volumn;
 	}
 
-	public void setAmount(BigDecimal amount) {
-		this.amount = amount;
+	public void setVolumn(BigDecimal volumn) {
+		this.volumn = volumn;
 	}
 
 	public BigDecimal getPrice() {
@@ -153,12 +153,12 @@ class OrderInfoImpl implements OrderInfo {
 		this.price = price;
 	}
 
-	public BigDecimal getExecAmount() {
-		return execAmount;
+	public BigDecimal getExecVolumn() {
+		return execVolumn;
 	}
 
-	public void setExecAmount(BigDecimal execAmount) {
-		this.execAmount = execAmount;
+	public void setExecVolumn(BigDecimal execVolumn) {
+		this.execVolumn = execVolumn;
 	}
 
 	public BigDecimal getExecValue() {
@@ -203,7 +203,7 @@ class OrderInfoImpl implements OrderInfo {
 
 	@Override
 	public boolean isFinished() {
-		return this.getExecAmount().compareTo(this.getAmount()) == 0 || this.isCanceled();
+		return this.getExecVolumn().compareTo(this.getVolumn()) == 0 || this.isCanceled();
 	}
 
 	public long getLastCancelTime() {
@@ -222,9 +222,9 @@ class OrderInfoImpl implements OrderInfo {
 		this.positionSide = o.optString("positionSide").equalsIgnoreCase("Long") ? PositionSide.Long
 				: PositionSide.Short;
 		this.type = o.optString("type").equalsIgnoreCase("Open") ? OrderType.Open : OrderType.Close;
-		this.amount = new BigDecimal(o.optDouble("amount"));
+		this.volumn = new BigDecimal(o.optDouble("volumn"));
 		this.price = new BigDecimal(o.optDouble("price"));
-		this.execAmount = new BigDecimal(o.optDouble("execAmount"));
+		this.execVolumn = new BigDecimal(o.optDouble("execVolumn"));
 		this.execValue = new BigDecimal(o.optDouble("execValue"));
 		this.costValue = new BigDecimal(o.optDouble("costValue"));
 		this.avgPrice = new BigDecimal(o.optDouble("avgPrice"));
@@ -241,9 +241,9 @@ class OrderInfoImpl implements OrderInfo {
 		o.put("symbol", symbol);
 		o.put("positionSide", positionSide.name());
 		o.put("type", type.name());
-		o.put("amount", amount.doubleValue());
+		o.put("volumn", volumn.doubleValue());
 		o.put("price", price.doubleValue());
-		o.put("execAmount", execAmount.doubleValue());
+		o.put("execVolumn", execVolumn.doubleValue());
 		o.put("execValue", execValue.doubleValue());
 		o.put("costValue", costValue.doubleValue());
 		o.put("avgPrice", avgPrice.doubleValue());

@@ -84,6 +84,10 @@ public class KLineData {
 //		this.baseTime = baseTime;
 //	}
 
+	public long getBaseTime() {
+		return this.baseTime;
+	}
+
 	public BigDecimal getOpenPrice() {
 		return this.openPrice;
 	}

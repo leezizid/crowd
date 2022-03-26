@@ -328,9 +328,6 @@ export default class AnalyseView extends BaseComponent {
             }
         }
         while(dataIndex < chartData.length) {
-            if(matches == null || matchIndex == matches.length) {
-                break;
-            }
             if(isInMatch) {
                 //alert(matches[matchIndex][1] + "--" + chartData[dataIndex][0]) 
                 if(matches[matchIndex][2] <= chartData[dataIndex][0]) {
@@ -357,6 +354,9 @@ export default class AnalyseView extends BaseComponent {
                     markLines.push([{xAxis:chartData[dataIndex][1], yAxis:matches[matchIndex][5], symbol:'none', lineStyle: {color: 'orange'}}]);
                     //markLines.push([{x:100, yAxis:matches[matchIndex][5], symbol:'none'}, {x:400, yAxis:matches[matchIndex][5], symbol:'none'}]);
                 }
+            }
+            if(matches == null || matchIndex == matches.length) {
+                break;
             }
             if(dataIndex > 0 && matches[matchIndex][1] >= chartData[dataIndex - 1][0] && matches[matchIndex][1] <= chartData[dataIndex][0]) {
                 //alert(dataIndex)

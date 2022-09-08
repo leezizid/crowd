@@ -49,7 +49,7 @@ public class BacktestManageService extends SManageServiceBase {
 			for (int j = 0; j < testArray.length(); j++) {
 				JSONObject testObject = testArray.getJSONObject(j);
 				childNodes.put(new JSONObject("{key: \"" + testObject.getString("id") + "\", label: \""
-						+ testObject.getString("name") + "\", type: 1}"));
+						+ testObject.getString("arguments") + "\", type: 1}"));
 			}
 			groupNode.put("children", childNodes);
 			treeNodes.put(groupNode);
@@ -143,6 +143,7 @@ public class BacktestManageService extends SManageServiceBase {
 				JSONObject testObj = new JSONObject();
 				testObj.put("id", testId);
 				testObj.put("name", testName);
+				testObj.put("arguments", arguments);
 				testArray.put(testObj);
 			}
 		}
@@ -152,7 +153,7 @@ public class BacktestManageService extends SManageServiceBase {
 		//
 		JSONObject treeNode = new JSONObject();
 		treeNode.put("key", testId);
-		treeNode.put("label", testName);
+		treeNode.put("label", arguments);
 		treeNode.put("type", 1);
 		output.put("newTreeNode", treeNode);
 

@@ -169,7 +169,7 @@ public abstract class BaseStrategyEnv implements StrategyContext, StrategyEnv {
 
 		// 上次交易时间30分钟内不交易，不交易
 		if (time - strategyInfo.getLastTransactionTime() < 30 * 60 * 1000) {
-			throw new IllegalStateException("离上次交易不超过30分钟，不允许开仓");
+//			throw new IllegalStateException("离上次交易不超过30分钟，不允许开仓");
 		}
 
 		// 当前有活动交易，不交易
@@ -430,7 +430,7 @@ public abstract class BaseStrategyEnv implements StrategyContext, StrategyEnv {
 	public final void forceClose(long time, int transactionId) throws Throwable {
 		synchronized (strategyInfo) {
 			for (TransactionInfo transactionInfo : strategyInfo.getTransactions()) {
-				if (transactionInfo.getId() == transactionId) {
+				if (transactionInfo.getId() == transactionId && !transactionInfo.getForceCloseFlag()) {
 					try {
 						// 标记交易为强平标记
 						((TransactionInfoImpl) transactionInfo).setForceCloseFlag(true);

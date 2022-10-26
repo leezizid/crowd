@@ -138,3 +138,11 @@ const int reqPostOrder(char* id, int requestID, const char* orderRef, const char
 {
 	return traderApis[id]->reqPostOrder(requestID, orderRef, exchangeID, instrumentID, type, direction, price, volumn);
 }
+
+
+//²éÑ¯ºÏÔ¼
+extern "C" __declspec(dllexport)const int reqQryClassifiedInstrument(char* id, int requestID);
+const int reqQryClassifiedInstrument(char* id, int requestID)
+{
+	return traderApis[id]->reqQryClassifiedInstrument(requestID);
+}

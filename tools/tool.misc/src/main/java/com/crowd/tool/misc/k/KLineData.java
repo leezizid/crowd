@@ -22,6 +22,8 @@ public class KLineData {
 
 	private BigDecimal volumn;
 
+	private BigDecimal openInterest; // 收盘开仓量
+
 	private int count;
 
 	private long baseTime;
@@ -34,7 +36,8 @@ public class KLineData {
 
 	private String label;
 
-	public KLineData(int interval, int priceScale, long time, BigDecimal price, BigDecimal volumn) {
+	public KLineData(int interval, int priceScale, long time, BigDecimal price, BigDecimal volumn,
+			BigDecimal openInterest) {
 		this.interval = interval;
 		this.priceScale = priceScale;
 		this.baseTime = (time / (interval * 1000)) * interval * 1000;
@@ -44,11 +47,12 @@ public class KLineData {
 		this.lowPrice = price;
 		this.avgPrice = price;
 		this.volumn = volumn;
+		this.openInterest = openInterest;
 		this.count = 1;
 		this.label = DateHelper.dateTime2String(new Date(this.baseTime));
 	}
 
-	public KLineData(int priceScale, long baseTime, BigDecimal price, BigDecimal volumn) {
+	public KLineData(int priceScale, long baseTime, BigDecimal price, BigDecimal volumn, BigDecimal openInterest) {
 		this.priceScale = priceScale;
 		this.openPrice = price;
 		this.closePrice = price;
@@ -57,21 +61,23 @@ public class KLineData {
 		this.avgPrice = price;
 		this.volumn = volumn;
 		this.count = 1;
+		this.openInterest = openInterest;
 		this.baseTime = baseTime;
 		this.label = DateHelper.dateTime2String(new Date(this.baseTime));
 	}
 
 	public boolean isIn(long time) {
-		return this.baseTime == (time / (interval * 1000)) * interval * 1000;
+		return this.baseTime == (time / (interval * 1000)) * interval * 1000 || this.baseTime == time - interval * 1000;
 	}
 
-	public void put(BigDecimal price, BigDecimal volumn) {
+	public void put(BigDecimal price, BigDecimal volumn, BigDecimal openInterest) {
 		this.closePrice = price;
 		this.highPrice = this.highPrice.max(price);
 		this.lowPrice = this.lowPrice.min(price);
 		this.avgPrice = this.avgPrice.multiply(new BigDecimal(count)).add(price).divide(new BigDecimal(count + 1),
 				priceScale, RoundingMode.HALF_UP);
 		this.volumn = this.volumn.add(volumn);
+		this.openInterest = openInterest;
 		this.count++;
 	}
 
@@ -110,6 +116,10 @@ public class KLineData {
 
 	public BigDecimal getVolumn() {
 		return this.volumn;
+	}
+
+	public BigDecimal getOpenInterest() {
+		return this.openInterest;
 	}
 
 	public int getCount() {
@@ -160,6 +170,7 @@ public class KLineData {
 		output.writeFloat(this.getLowPrice().floatValue());
 		output.writeFloat(this.getAvgPrice().floatValue());
 		output.writeInt(this.getVolumn().intValue());
+		output.writeInt(this.getOpenInterest().intValue());
 	}
 
 }

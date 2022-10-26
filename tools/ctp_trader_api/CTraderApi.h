@@ -74,6 +74,11 @@ public:
 	//请求委托接口
 	virtual const int reqPostOrder(int requestID, const char* orderRef, const char* exchangeID, const char* instrumentID, char type, char direction, float price, int volumn);
 
+
+	//查询合约接口
+	virtual const int reqQryClassifiedInstrument(int requestID);
+
+	//
 	virtual const char* getApiVersion();
 
 

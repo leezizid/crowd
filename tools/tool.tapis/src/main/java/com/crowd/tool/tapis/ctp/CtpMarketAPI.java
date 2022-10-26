@@ -57,7 +57,7 @@ public abstract class CtpMarketAPI extends CtpBaseApi {
 				CtpApiLibrary.instance.subscribe(id, symbols, symbols.length);
 			} else if ("M_OnRtnDepthMarketData".equals(type)) {
 				String instrumentID = messageObject.getString("InstrumentID");
-				String symbol = CTPInstruments.find(instrumentID).getExchange() + "." + instrumentID;
+				String symbol = CTPProducts.find(instrumentID).getExchange() + "." + instrumentID;
 				BigDecimal lowerLimitPrice = new BigDecimal(messageObject.getDouble("LowerLimitPrice"));
 				BigDecimal upperLimitPrice = new BigDecimal(messageObject.getDouble("UpperLimitPrice"));
 				BigDecimal price = new BigDecimal(messageObject.getDouble("LastPrice"));
@@ -139,7 +139,7 @@ public abstract class CtpMarketAPI extends CtpBaseApi {
 						"rr", "v", "y" },
 				{ "ag", "al", "au", "bu", "cu", "fu", "hc", "ni", "pb", "rb", "ru", "sn", "sp", "ss", "wr", "zn" },
 				{ "IF", "IH", "IC", "T", "TS", "TF" }, { "bc", "lu", "nr", "sc" } };
-		String[] monthes = new String[] { "2201", "2202", "2203", "2204", "2205", "2206", "2207", "2208" };
+		String[] monthes = new String[] { "2212", "2211" };
 		List<String> symbolList = new ArrayList<String>();
 		for (int i = 0; i < EX_NAMES.length; i++) {
 			for (int j = 0; j < EX_PRODUCTS[i].length; j++) {

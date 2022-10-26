@@ -42,6 +42,8 @@ public interface CtpApiLibrary extends Library {
 			char type, char direction, float price, int volumn);
 
 	public int reqCancelOrder(String id, int requestID, String exchangeID, String instrumentID, String orderID);
+	
+	public int reqQryClassifiedInstrument(String id, int requestID);
 
 }
 

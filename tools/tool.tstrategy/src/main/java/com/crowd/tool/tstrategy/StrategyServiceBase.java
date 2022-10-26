@@ -26,7 +26,7 @@ import com.crowd.tool.misc.TradeDays;
 import com.crowd.tool.misc.k.HistoryData;
 import com.crowd.tool.misc.k.TickInfo;
 import com.crowd.tool.tapis.ba.BinanceDeliveryMarketAPI;
-import com.crowd.tool.tapis.ctp.CTPInstruments;
+import com.crowd.tool.tapis.ctp.CTPProducts;
 import com.crowd.tool.tapis.ctp.CtpMarketAPI;
 import com.crowd.tool.tstrategy.impl.BacktestStrategyEnv;
 import com.crowd.tool.tstrategy.impl.RealStrategyEnv;
@@ -38,7 +38,7 @@ public abstract class StrategyServiceBase implements CrowdService {
 
 	@Override
 	public void init(CrowdInitContext context) throws Throwable {
-		CTPInstruments.init();
+		CTPProducts.init();
 	}
 
 	/**

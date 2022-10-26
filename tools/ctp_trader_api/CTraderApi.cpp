@@ -186,6 +186,16 @@ const int CTraderApi::reqPostOrder(int requestID, const char* orderRef, const ch
 	return ctpApi->ReqOrderInsert(&a, requestID);
 }
 
+
+//查询期货合约列表
+const int CTraderApi::reqQryClassifiedInstrument(int requestID)
+{
+	CThostFtdcQryClassifiedInstrumentField  a = { 0 };
+	a.ClassType = '1';
+	a.TradingType = '1';
+	return ctpApi->ReqQryClassifiedInstrument(&a, requestID);
+}
+
 const char* CTraderApi::getApiVersion()
 {
 	return ctpApi->GetApiVersion();

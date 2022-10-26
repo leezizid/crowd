@@ -1,7 +1,16 @@
 package com.crowd.service.tchannel.ctp;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.math.BigDecimal;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -16,7 +25,10 @@ import com.crowd.service.base.CrowdWorker;
 import com.crowd.service.base.CrowdWorkerContext;
 import com.crowd.tool.misc.OrderType;
 import com.crowd.tool.misc.PositionSide;
+import com.crowd.tool.misc.ProductDefine;
 import com.crowd.tool.tapis.ctp.AccountInfo;
+import com.crowd.tool.tapis.ctp.CTPInstrument;
+import com.crowd.tool.tapis.ctp.CTPProducts;
 import com.crowd.tool.tapis.ctp.ConnectInfo;
 import com.crowd.tool.tapis.ctp.CtpTradeAPI;
 import com.crowd.tool.tapis.ctp.OrderInfo;
@@ -33,6 +45,149 @@ public class CtpChannelService implements CrowdService {
 	@Override
 	public String getName() {
 		return "tchannel.ctp";
+	}
+
+	/**
+	 * 更新合约列表中的合约最新持仓和交易量等数据
+	 */
+	@CrowdMethod
+	public void updateInstrumentData(CrowdContext context, JSONObject inputObject, JSONObject outputObject)
+			throws Throwable {
+		JSONArray arr = new JSONArray(context.load("instruments.info"));
+		String[] quoteCodes = new String[arr.length()];
+		for (int i = 0; i < arr.length(); i++) {
+			JSONObject o = arr.getJSONObject(i);
+			String productId = o.getString("productId");
+			quoteCodes[i] = "nf_" + productId.toUpperCase() + o.getString("deliveryYear").substring(2)
+					+ o.getString("deliveryMonth");
+		}
+		String[] results = quoteSina(quoteCodes);
+		for (int i = 0; i < arr.length(); i++) {
+			JSONObject o = arr.getJSONObject(i);
+			String[] result = StringUtils.splitPreserveAllTokens(results[i], ",");
+			if (result.length == 50) {
+				// 股指：0开盘,1最高,2最低,3最新,4成交量,5成交金额,6持仓量 ,-14日期,-13时间
+//				System.out.println(result[result.length - 1] + "#" + result[result.length - 14] + ":"
+//						+ result[result.length - 13] + "," + result[6] + ":" + result[4]);
+				o.put("sinaName", result[result.length - 1]);
+				o.put("timeInfo", result[result.length - 14] + "." + result[result.length - 13]);
+				o.put("positionVolumn", result[6]);
+				o.put("tradeVolumn", result[4]);
+			} else if (result.length == 44) {
+				// 商品：0名称,1时间,2开盘,3最低,4最高,5结算,6最新,7卖1,8买1,9,10昨结算,11买1量,12卖1量,13持仓量,14成交量,15交易所,16品种,17日期,1,,,,,,,,,均价,买2价,买2量,买3价,买3量,买4价,买4量,买5价,买5量,卖2价,卖2量,卖3价,卖3量,卖4价,卖4量,卖5价,卖5量
+//				System.out
+//						.println(result[0] + "#" + result[17] + ":" + result[1] + "," + result[13] + ":" + result[14]);
+				o.put("sinaName", result[0]);
+				o.put("timeInfo", result[17] + "." + result[1].substring(0, 2) + ":" + result[1].substring(2, 4) + ":"
+						+ result[1].substring(4, 6));
+				o.put("positionVolumn", result[13]);
+				o.put("tradeVolumn", result[14]);
+			} else {
+				System.out.println("--------");
+				o.put("sinaName", "");
+				o.put("timeInfo", "");
+				o.put("positionVolumn", "");
+				o.put("tradeVolumn", "");
+			}
+		}
+		//
+		context.save("instruments.data", arr.toString(4));
+		instruments(context, inputObject, outputObject);
+	}
+
+	private String[] quoteSina(String[] codes) throws Throwable {
+		int limit = 50;
+		int current = 0;
+		List<String> allResultList = new ArrayList<String>();
+		while (true) {
+			if (current == codes.length) {
+				break;
+			}
+			List<String> codeList = new ArrayList<String>();
+			for (int i = 0; i < limit; i++) {
+				codeList.add(codes[current++]);
+				if (current == codes.length) {
+					break;
+				}
+			}
+			String[] results = StringUtils.split(quoteSina(StringUtils.join(codeList, ",")), ";");
+			for (int i = 0; i < results.length; i++) {
+				String result = results[i];
+				allResultList.add(result.substring(result.indexOf("\"") + 1, result.length() - 1));
+			}
+		}
+		return allResultList.toArray(new String[0]);
+	}
+
+	private String quoteSina(String list) throws Throwable {
+		StringBuffer buffer = new StringBuffer();
+		HttpURLConnection connection = (HttpURLConnection) new URL("https://hq.sinajs.cn/list=" + list)
+				.openConnection();
+		try {
+			connection.setRequestMethod("GET");
+			connection.setRequestProperty("User-Agent",
+					"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36");
+			connection.setRequestProperty("Accept-Language", "zh-CN,zh;q=0.9");
+			connection.setRequestProperty("Accept", "*/*");
+			connection.setRequestProperty("Referer", "https://finance.sina.com.cn");
+			connection.connect();
+			if (connection.getResponseCode() == 200) {
+				InputStream is = connection.getInputStream();
+				try {
+					BufferedReader reader = new BufferedReader(new InputStreamReader(is, "GBK"));
+					String line = null;
+					while ((line = reader.readLine()) != null) {
+						buffer.append(line);
+					}
+				} finally {
+					is.close();
+				}
+			}
+		} finally {
+			connection.disconnect();
+		}
+		return buffer.toString();
+	}
+
+	@CrowdMethod
+	public void instruments(CrowdContext context, JSONObject inputObject, JSONObject outputObject) throws Throwable {
+		String targetExchangeId = inputObject.optString("exchangeId");
+		List<JSONObject> instruments = new ArrayList<JSONObject>();
+		JSONArray arr = null;
+		try {
+			arr = new JSONArray(context.load("instruments.data"));
+		} catch (Throwable t) {
+			arr = new JSONArray(context.load("instruments.info"));
+		}
+		for (int i = 0; i < arr.length(); i++) {
+			JSONObject o = arr.getJSONObject(i);
+			String id = o.getString("id");
+			String exchangeId = o.getString("exchangeId");
+			if (exchangeId.equals(targetExchangeId)) {
+				String productId = o.getString("productId");
+				ProductDefine productDefine = CTPProducts.find(productId);
+				if (productDefine != null) {
+					o.put("name", id.replace(productId, productDefine.getTitle() + "-"));
+				} else {
+					o.put("name", "--");
+				}
+				o.put("id", exchangeId + "." + id);
+				o.put("positionVolumn", o.opt("positionVolumn"));
+				o.put("tradeVolumn", o.opt("tradeVolumn"));
+				o.put("timeInfo", o.opt("timeInfo"));
+				o.put("title", o.opt("sinaName"));
+				instruments.add(o);
+			}
+		}
+		//
+		Collections.sort(instruments, new Comparator<JSONObject>() {
+			@Override
+			public int compare(JSONObject o1, JSONObject o2) {
+				return o1.getString("id").compareTo(o2.getString("id"));
+			}
+		});
+		//
+		outputObject.put("instruments", new JSONArray(instruments));
 	}
 
 	@CrowdMethod
@@ -175,8 +330,8 @@ public class CtpChannelService implements CrowdService {
 				}
 
 				@Override
-				protected void handleOrderUpdated(String serverOrderId, String symbol, int execVolumn, BigDecimal execValue,
-						boolean canceled) {
+				protected void handleOrderUpdated(String serverOrderId, String symbol, int execVolumn,
+						BigDecimal execValue, boolean canceled) {
 					JSONObject updateMessageObject = new JSONObject();
 					updateMessageObject.put("channelId", id);
 					updateMessageObject.put("serverOrderId", serverOrderId);
@@ -188,6 +343,25 @@ public class CtpChannelService implements CrowdService {
 						crowdContext.sendMessage("serverOrderUpdated", updateMessageObject);
 					} catch (Throwable e) {
 						e.printStackTrace();
+					}
+				}
+
+				protected void handleInstrumentQueryFinished(CTPInstrument[] instruments) {
+					JSONArray arr = new JSONArray();
+					for (CTPInstrument instrument : instruments) {
+						JSONObject o = new JSONObject();
+						o.put("id", instrument.getId());
+						o.put("name", instrument.getName());
+						o.put("exchangeId", instrument.getExchangeId());
+						o.put("productId", instrument.getProductId());
+						o.put("deliveryYear", instrument.getDeliveryYear());
+						o.put("deliveryMonth", instrument.getDeliveryMonth());
+						arr.put(o);
+					}
+					try {
+						crowdContext.save("instruments.info", arr.toString(4));
+					} catch (Throwable t) {
+
 					}
 				}
 

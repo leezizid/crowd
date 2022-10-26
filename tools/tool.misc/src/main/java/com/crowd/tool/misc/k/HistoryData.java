@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.crowd.tool.misc.TradeDays;
 
 public class HistoryData {
@@ -16,21 +18,81 @@ public class HistoryData {
 	private final static int DAY_MILLIS = 24 * 60 * 60 * 1000;
 
 	private final static String HistoryDataDir;
-	
-	
-	private final static Map<String,byte[]> cache = new HashMap<String, byte[]>();
+
+	private final static Map<String, byte[]> cache = new HashMap<String, byte[]>();
 	private final static List<String> keyList = new ArrayList<String>();
-	
 
 	static {
 		HistoryDataDir = System.getProperty("HistoryDataDir");
 	}
 
 	public final static void main(String[] args) throws Throwable {
-		String[] dataArray = readKLineData("SHFE.au", "1h", "2016-01-01", "2022-12-31");
-		for (String s : dataArray) {
-			System.out.println(s);
+		String pname = "SHFE.cu";
+		String period = "5m";
+		String[][] dataArray = readKLineData(pname, period, "2016-01-01", "2021-12-31");
+		StringBuffer stringBuffer = new StringBuffer();
+		for (int i = 0; i < dataArray.length; i++) {
+			String[] dataRow = dataArray[i];
+			long time = Long.parseLong(dataRow[0]);
+			String openPrice = dataRow[1];
+			String closePrice = dataRow[2];
+			String highPrice = dataRow[3];
+			String lowPrice = dataRow[4];
+			String avgPrice = dataRow[5];
+			String volumn = dataRow[6];
+			String openInterest1 = "0";
+			String openInterest2 = dataRow[7];
+			if (i > 0) {
+				String[] prevDataRow = dataArray[i - 1];
+				openInterest1 = prevDataRow[7];
+				//
+				if (volumn.equals("0")) {
+					// 如果当前量为0，则价格全部取上一数据的收盘价格
+					openPrice = dataRow[1] = closePrice = dataRow[2] = highPrice = dataRow[3] = lowPrice = dataRow[4] = avgPrice = dataRow[5] = prevDataRow[2];
+					openInterest2 = dataRow[7] = openInterest1;
+				} else {
+					int n = i - 1;
+					// 如果数据跨度属于正常周期，则开盘价格取上次收盘价格
+					while (true) {
+						if (n < 0 || (time - Long.parseLong(dataArray[n][0])) > (1000 * 60 * 5 * (i - n))) {
+							break;
+						}
+						if (!dataArray[n][6].equals("0")) {
+							openPrice = dataArray[n][2];
+							break;
+						}
+						n--;
+					}
+				}
+			}
+			stringBuffer.append("[");
+			stringBuffer.append(time);
+			stringBuffer.append(",");
+			stringBuffer.append(openPrice);
+			stringBuffer.append(",");
+			stringBuffer.append(closePrice);
+			stringBuffer.append(",");
+			stringBuffer.append(highPrice);
+			stringBuffer.append(",");
+			stringBuffer.append(lowPrice);
+			stringBuffer.append(",");
+			stringBuffer.append(avgPrice);
+			stringBuffer.append(",");
+			stringBuffer.append(volumn);
+			stringBuffer.append(",");
+			stringBuffer.append(openInterest1);
+			stringBuffer.append(",");
+			stringBuffer.append(openInterest2);
+			stringBuffer.append("]");
+			if (i < dataArray.length - 1) {
+				stringBuffer.append(",");
+			}
 		}
+		RandomAccessFile klineRAF = new RandomAccessFile(new File("Z:\\MD\\kline\\" + pname + "." + period + ".txt"),
+				"rw");
+		klineRAF.setLength(0);
+		klineRAF.write(stringBuffer.toString().getBytes());
+		klineRAF.close();
 	}
 
 	public final static void writeDaytimeData(String symbol, TradeDayData tradeDayData) throws Throwable {
@@ -53,11 +115,11 @@ public class HistoryData {
 	}
 
 	public final synchronized static byte[] readTradeDayTickData(String symbol, String tradeDay) throws Throwable {
-		String path = HistoryDataDir + File.separator + symbol + File.separator + "daytick" + File.separator
-				+ tradeDay + ".dat";
-		if(!cache.containsKey(path)) {
+		String path = HistoryDataDir + File.separator + symbol + File.separator + "daytick" + File.separator + tradeDay
+				+ ".dat";
+		if (!cache.containsKey(path)) {
 			//
-			while(cache.size() >= 256) {
+			while (cache.size() >= 256) {
 				cache.remove(keyList.remove(0));
 			}
 			//
@@ -73,7 +135,7 @@ public class HistoryData {
 		return cache.get(path);
 	}
 
-	public final static String[] readKLineData(String symbol, String type, String startDay, String endDay)
+	public final static String[][] readKLineData(String symbol, String type, String startDay, String endDay)
 			throws Throwable {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		long startTime = sdf.parse(startDay).getTime();
@@ -111,25 +173,24 @@ public class HistoryData {
 			endIndex = validSize;
 		}
 		//
-		if (type.equals("1d")) {
-			sdf = new SimpleDateFormat("yyyy-MM-dd");
-		} else {
-			sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-		}
-		String[] dataArray = new String[(endIndex - startIndex) / 32];
+//		if (type.equals("1d")) {
+//			sdf = new SimpleDateFormat("yyyy-MM-dd");
+//		} else {
+//			sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+//		}
+		String[][] dataArray = new String[(endIndex - startIndex) / 36][];
 		raf.seek(startIndex);
 		for (int i = 0; i < dataArray.length; i++) {
 			StringBuffer buffer = new StringBuffer();
 			long time = raf.readLong();
 			int upOrDown = (int) (time % 10);
 			time = (time / 10) * 10;
-			buffer.append("[");
 			buffer.append(time);
 			buffer.append(",");
-			buffer.append("'");
-			buffer.append(sdf.format(new Date(time)));
-			buffer.append("'");
-			buffer.append(",");
+//			buffer.append("'");
+//			buffer.append(sdf.format(new Date(time)));
+//			buffer.append("'");
+//			buffer.append(",");
 			buffer.append(raf.readFloat());
 			buffer.append(",");
 			buffer.append(raf.readFloat());
@@ -142,9 +203,10 @@ public class HistoryData {
 			buffer.append(",");
 			buffer.append(raf.readInt());
 			buffer.append(",");
+			buffer.append(raf.readInt()); // 收盘持仓量
+			buffer.append(",");
 			buffer.append(upOrDown);
-			buffer.append("]");
-			dataArray[i] = buffer.toString();
+			dataArray[i] = StringUtils.split(buffer.toString(), ',');
 		}
 		raf.close();
 		return dataArray;

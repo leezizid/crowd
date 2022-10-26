@@ -24,7 +24,7 @@ public class CTPTickDataFileProcessor {
 
 	public final static void main(String[] args) throws Throwable {
 		String exName = "SHFE";
-		String productName = "al";
+		String productName = "cu";
 		String symbol = exName + "." + productName;
 		File sourceDir = new File("Z:\\MD\\" + symbol);
 		List<String> fileNameList = new ArrayList<String>();
@@ -37,7 +37,7 @@ public class CTPTickDataFileProcessor {
 
 		//
 //		String[] info = StringUtils.split(sourceDir.getName(), ".");
-		ProductDefine ctpProduct = CTPInstruments.find(productName);
+		ProductDefine ctpProduct = CTPProducts.find(productName);
 		if (ctpProduct == null || !ctpProduct.getExchange().equals(exName)) {
 			return;
 		}
@@ -86,7 +86,7 @@ public class CTPTickDataFileProcessor {
 							// 保存数据
 							save(symbol, tradeDayData, sourceDir);
 							// 创建新数据
-							tradeDayData = new TradeDayData(tradeDay, ctpProduct.getPriceScale());
+							tradeDayData = new TradeDayData(tradeDay, ctpProduct);
 							System.out.print("开始处理" + tradeDay + "...");
 						}
 						tradeDayData.onTick(tickInfo);
@@ -156,9 +156,10 @@ public class CTPTickDataFileProcessor {
 	private static TickInfo convertToTickInfo(String line) {
 		try {
 			String[] info = StringUtils.split(line, ",");
+			long time = Long.parseLong(info[1]);
 			TickInfo tickInfo = new TickInfo();
 			tickInfo.setLabel(info[0].substring(0, info[0].length() - 6));
-			tickInfo.setTime(Long.parseLong(info[1]) / 1000000);
+			tickInfo.setTime(time / 1000000 + ((time / 1000000) % 1000 > 0 ? 0 : (time % 1000000) / 1000)); // 某些tick数据时间有问题，毫秒数为0，但是后面有更小的精度数值
 			tickInfo.setLastPrice(new BigDecimal(info[2]));
 			tickInfo.setHighestPrice(new BigDecimal(info[3]));
 			tickInfo.setLowestPrice(new BigDecimal(info[4]));

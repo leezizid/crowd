@@ -93,6 +93,100 @@ public abstract class CtpTradeAPI extends CtpBaseApi {
 		return (PositionInfo[]) lock.result;
 	}
 
+	public synchronized void queryInstruments() throws Throwable {
+		// 查询委托数据
+		int requestID = getRequestID();
+		LockObject lock = new LockObject();
+		locks.put(requestID, lock);
+		try {
+			int rtnCode = CtpApiLibrary.instance.reqQryClassifiedInstrument(id, requestID);
+			if (rtnCode != 0) {
+				Thread.sleep(1000);
+				rtnCode = CtpApiLibrary.instance.reqQryClassifiedInstrument(id, requestID);
+			}
+			if (rtnCode != 0) {
+				throw new IllegalStateException("调用CTP接口错误：" + rtnCode);
+			}
+			synchronized (lock) {
+				if (lock.result == null) {
+					lock.wait(5000);
+				}
+			}
+		} finally {
+			locks.remove(requestID);
+		}
+		if (lock.result == null) {
+			throw new IllegalStateException("获取合约列表超时");
+		}
+		CTPInstrument[] instruments = (CTPInstrument[]) lock.result;
+		this.handleInstrumentQueryFinished(instruments);
+	}
+
+	public void cancelOrder(String symbol, String orderId) throws Throwable {
+		if (!login) {
+			throw new IllegalStateException("账户未登录");
+		}
+		if (orderMap.containsKey(orderId)) {
+			String[] symbolInfo = StringUtils.split(symbol, ".");
+			String[] orderIdInfo = StringUtils.split(orderId, ".");
+			CtpApiLibrary.instance.reqCancelOrder(id, getRequestID(), symbolInfo[0], symbolInfo[1], orderIdInfo[1]);
+		} else {
+			// XXX：对于缓存查询不到的委托，直接生成撤单消息
+			handleOrderUpdated(orderId, symbol, 0, BigDecimal.ZERO, true);
+		}
+	}
+
+	public synchronized String postOrder(String exchangeID, String symbol, OrderType type, PositionSide positionSide,
+			float price, int volumn) throws Throwable {
+		if (!login) {
+			throw new IllegalStateException("账户未登录");
+		}
+		char direction;
+		if (type == OrderType.Open) {
+			direction = positionSide == PositionSide.Long ? '0' : '1';
+		} else {
+			direction = positionSide == PositionSide.Long ? '1' : '0';
+			type = OrderType.CloseToday; // XXX：暂时强制为平今操作
+		}
+		//
+		int requestID = getRequestID();
+		LockObject lock = new LockObject();
+		locks.put(requestID, lock);
+		try {
+			int rtnCode = CtpApiLibrary.instance.reqPostOrder(id, requestID, String.valueOf(serverOrderCount + 1),
+					exchangeID, symbol, String.valueOf(type.ordinal()).charAt(0), direction, price, volumn);
+			if (rtnCode != 0) {
+				throw new IllegalStateException("调用CTP接口错误：" + rtnCode);
+			}
+			synchronized (lock) {
+				if (lock.result == null) {
+					lock.wait(5000);
+				}
+			}
+		} finally {
+			locks.remove(requestID);
+		}
+		if (lock.result != null) {
+			OrderInfo orderInfo = (OrderInfo) lock.result;
+			this.serverOrderCount++;
+			if (lock.error != null) {
+				// 委托成功后立即撤单，既有结果又有错误
+				throw new IllegalStateException(lock.error);
+			} else {
+				// 正常结果
+				this.orderMap.put(orderInfo.getServerOrderId(), orderInfo); // 新委托加入缓存
+				return orderInfo.getServerOrderId();
+			}
+		} else {
+			if (lock.error != null) {
+				throw new IllegalStateException(lock.error);
+			} else {
+				// result和error都为空，则为超时
+				throw new IllegalStateException("下单超时");
+			}
+		}
+	}
+
 	public synchronized OrderInfo[] getOrders() throws Throwable {
 		if (!login) {
 			throw new IllegalStateException("账户未登录");
@@ -172,71 +266,6 @@ public abstract class CtpTradeAPI extends CtpBaseApi {
 		return orders;
 	}
 
-	public void cancelOrder(String symbol, String orderId) throws Throwable {
-		if (!login) {
-			throw new IllegalStateException("账户未登录");
-		}
-		if (orderMap.containsKey(orderId)) {
-			String[] symbolInfo = StringUtils.split(symbol, ".");
-			String[] orderIdInfo = StringUtils.split(orderId, ".");
-			CtpApiLibrary.instance.reqCancelOrder(id, getRequestID(), symbolInfo[0], symbolInfo[1], orderIdInfo[1]);
-		} else {
-			// XXX：对于缓存查询不到的委托，直接生成撤单消息
-			handleOrderUpdated(orderId, symbol, 0, BigDecimal.ZERO, true);
-		}
-	}
-
-	public synchronized String postOrder(String exchangeID, String symbol, OrderType type, PositionSide positionSide,
-			float price, int volumn) throws Throwable {
-		if (!login) {
-			throw new IllegalStateException("账户未登录");
-		}
-		char direction;
-		if (type == OrderType.Open) {
-			direction = positionSide == PositionSide.Long ? '0' : '1';
-		} else {
-			direction = positionSide == PositionSide.Long ? '1' : '0';
-			type = OrderType.CloseToday; // XXX：暂时强制为平今操作
-		}
-		//
-		int requestID = getRequestID();
-		LockObject lock = new LockObject();
-		locks.put(requestID, lock);
-		try {
-			int rtnCode = CtpApiLibrary.instance.reqPostOrder(id, requestID, String.valueOf(serverOrderCount + 1),
-					exchangeID, symbol, String.valueOf(type.ordinal()).charAt(0), direction, price, volumn);
-			if (rtnCode != 0) {
-				throw new IllegalStateException("调用CTP接口错误：" + rtnCode);
-			}
-			synchronized (lock) {
-				if (lock.result == null) {
-					lock.wait(5000);
-				}
-			}
-		} finally {
-			locks.remove(requestID);
-		}
-		if (lock.result != null) {
-			OrderInfo orderInfo = (OrderInfo) lock.result;
-			this.serverOrderCount++;
-			if (lock.error != null) {
-				// 委托成功后立即撤单，既有结果又有错误
-				throw new IllegalStateException(lock.error);
-			} else {
-				// 正常结果
-				this.orderMap.put(orderInfo.getServerOrderId(), orderInfo); // 新委托加入缓存
-				return orderInfo.getServerOrderId();
-			}
-		} else {
-			if (lock.error != null) {
-				throw new IllegalStateException(lock.error);
-			} else {
-				// result和error都为空，则为超时
-				throw new IllegalStateException("下单超时");
-			}
-		}
-	}
-
 	@SuppressWarnings("unchecked")
 	public void handleMessage(String type, String message) {
 		JSONObject messageObject;
@@ -271,6 +300,10 @@ public abstract class CtpTradeAPI extends CtpBaseApi {
 							getOrders();
 						} catch (Throwable t) {
 							dispose("初始化委托缓存失败");
+						}
+						try {
+							queryInstruments();
+						} catch (Throwable t) {
 						}
 					}
 				}).start();
@@ -426,6 +459,34 @@ public abstract class CtpTradeAPI extends CtpBaseApi {
 					handleOrderUpdated(orderId, orderInfo.getSymbol(), orderInfo.getExecVolumn(),
 							orderInfo.getExecValue(), orderInfo.isCanceled());
 				}
+			} else if ("T_OnRspQryClassifiedInstrument".equals(type)) {
+				int requestID = messageObject.optInt("nRequestID");
+				LockObject lock = locks.get(requestID);
+				if (lock != null) {
+					if (lock.temp == null) {
+						lock.temp = new ArrayList<CTPInstrument>();
+					}
+					List<CTPInstrument> instrumentList = (List<CTPInstrument>) lock.temp;
+					if (StringUtils.isNotEmpty(messageObject.optString("InstrumentID"))) { // 用于处理空数据情况
+						CTPInstrument o = new CTPInstrument();
+						o.setId(messageObject.getString("InstrumentID"));
+						o.setName(messageObject.getString("InstrumentName"));
+						o.setExchangeId(messageObject.getString("ExchangeID"));
+						o.setProductId(messageObject.getString("ProductID"));
+						o.setDeliveryYear(messageObject.getInt("DeliveryYear"));
+						o.setDeliveryMonth(messageObject.getInt("DeliveryMonth"));
+						if(!o.getId().endsWith("efp") && !o.getId().endsWith("TAS")) {
+							instrumentList.add(o);
+						}
+					}
+					if (messageObject.getBoolean("bIsLast")) {
+						lock.result = instrumentList.toArray(new CTPInstrument[0]);
+						synchronized (lock) {
+							lock.notify();
+						}
+					}
+				}
+//				System.out.println(messageObject);
 			} else if ("T_OnRspError".equals(type)) {
 				int requestID = messageObject.optInt("nRequestID");
 				LockObject lock = locks.get(requestID);
@@ -484,6 +545,8 @@ public abstract class CtpTradeAPI extends CtpBaseApi {
 
 	protected abstract void handleOrderUpdated(String serverOrderId, String symbol, int execVolumn,
 			BigDecimal execValue, boolean canceled);
+
+	protected abstract void handleInstrumentQueryFinished(CTPInstrument[] instruments);
 }
 
 class LockObject {

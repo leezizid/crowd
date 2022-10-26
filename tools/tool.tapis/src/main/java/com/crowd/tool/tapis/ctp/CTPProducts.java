@@ -3,7 +3,7 @@ package com.crowd.tool.tapis.ctp;
 import com.crowd.tool.misc.ProductDefine;
 import com.crowd.tool.misc.ProductDefineRegistry;
 
-public class CTPInstruments {
+public class CTPProducts {
 
 	static final String SHFE = "SHFE";
 	static final String CFFEX = "CFFEX";
@@ -13,13 +13,14 @@ public class CTPInstruments {
 	static final String MARKET_TIME_1 = "01:00-02:15~02:30-03:30~05:30-07:00";
 	static final String MARKET_TIME_2 = "01:30-03:30~05:00-07:00,";
 	static final String MARKET_TIME_3 = "01:00-02:15~02:30-03:30~05:30-07:00,13:00-15:00";
-	static final String MARKET_TIME_4 = "01:00-02:15~02:30-03:30~05:30-07:00,13:00-18:30";
+	static final String MARKET_TIME_4 = "01:00-02:15~02:30-03:30~05:30-07:00,13:00-17:00";
+	static final String MARKET_TIME_5 = "01:00-02:15~02:30-03:30~05:30-07:00,13:00-18:30";
 
 	static {
 		// SHFE
-		ProductDefineRegistry.register(new ProductDefine("au", SHFE, "沪金", 1000, 2, MARKET_TIME_4));
-		ProductDefineRegistry.register(new ProductDefine("ag", SHFE, "沪银", 15, 0, MARKET_TIME_4));
-		ProductDefineRegistry.register(new ProductDefine("cu", SHFE, "沪铜", 5, 0, ""));
+		ProductDefineRegistry.register(new ProductDefine("au", SHFE, "沪金", 1000, 2, MARKET_TIME_5));
+		ProductDefineRegistry.register(new ProductDefine("ag", SHFE, "沪银", 15, 0, MARKET_TIME_5));
+		ProductDefineRegistry.register(new ProductDefine("cu", SHFE, "沪铜", 5, 0, MARKET_TIME_4));
 		ProductDefineRegistry.register(new ProductDefine("al", SHFE, "沪铝", 5, 0, ""));
 		ProductDefineRegistry.register(new ProductDefine("zn", SHFE, "沪锌", 5, 0, ""));
 		ProductDefineRegistry.register(new ProductDefine("ni", SHFE, "沪镍", 1, 0, ""));
@@ -102,7 +103,7 @@ public class CTPInstruments {
 		
 	}
 
-	final static ProductDefine find(String name) {
+	public final static ProductDefine find(String name) {
 		ProductDefine product = ProductDefineRegistry.find(name);
 		if (product != null) {
 			return product;

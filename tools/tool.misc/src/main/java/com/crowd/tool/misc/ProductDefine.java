@@ -78,7 +78,7 @@ public class ProductDefine {
 	 */
 	public boolean isInMarket(long time) {
 		if (marketRegions == null || marketRegions.length == 0) {
-			return true;
+			return false;
 		}
 		time = processTime(time);
 		for (MarketRegion region : marketRegions) {
@@ -92,6 +92,29 @@ public class ProductDefine {
 		}
 		return false;
 	}
+	
+	/**
+	 * 距离在当前交易时段多久，如果不在任何一个交易时段内，返回-1
+	 * 
+	 * @param time单位秒
+	 * @return
+	 */
+	public long afterMarketPhase(long time) {
+		if (marketRegions == null || marketRegions.length == 0) {
+			throw new IllegalArgumentException();
+		}
+		time = processTime(time);
+		for (MarketRegion region : marketRegions) {
+			if (time >= region.start && time < region.end) {
+				for (MarketPhase phase : region.phases) {
+					if (time >= phase.start && time < phase.end) {
+						return time - phase.start;
+					}
+				}
+			}
+		}
+		return -1;
+	}
 
 	/**
 	 * 开盘后多久，如果不在开盘时间内，返回距离开盘的时间(负数）
@@ -101,7 +124,7 @@ public class ProductDefine {
 	 */
 	public long afterOpenMarket(long time) {
 		if (marketRegions == null || marketRegions.length == 0) {
-			return Long.MAX_VALUE;
+			throw new IllegalArgumentException();
 		}
 		time = processTime(time);
 		for (MarketRegion region : marketRegions) {
@@ -120,7 +143,7 @@ public class ProductDefine {
 	 */
 	public long beforeCloseMarket(long time) {
 		if (marketRegions == null || marketRegions.length == 0) {
-			return Long.MAX_VALUE;
+			throw new IllegalArgumentException();
 		}
 		time = processTime(time);
 		for (MarketRegion region : marketRegions) {

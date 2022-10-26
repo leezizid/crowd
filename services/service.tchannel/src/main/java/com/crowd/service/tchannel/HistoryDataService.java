@@ -1,6 +1,7 @@
 package com.crowd.service.tchannel;
 
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,15 +30,25 @@ public class HistoryDataService implements CrowdService {
 	@CrowdMethod
 	public void dayKLine(CrowdContext context, JSONObject input, JSONObject output) throws Throwable {
 		try {
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 			String symbol = input.getString("symbol");
 			String startDay = input.getString("startDay");
 			String endDay = input.getString("endDay");
 			String[] tradeDays = TradeDays.getTradeDayList(startDay, endDay);
-			String[] dataList = HistoryData.readKLineData(symbol, "1d", startDay, endDay);
+			String[][] dataList = HistoryData.readKLineData(symbol, "1d", startDay, endDay);
 			Map<String, JSONArray> datas = new HashMap<String, JSONArray>();
 			for (int i = 0; i < dataList.length; i++) {
-				JSONArray data = new JSONArray(dataList[i]);
-				String day = data.getString(1);
+				JSONArray data = new JSONArray();
+				String day = sdf.format(new Date(Long.parseLong(dataList[i][0]))); 
+				data.put(dataList[i][0]);
+				data.put(day);
+				data.put(Float.parseFloat(dataList[i][1]));
+				data.put(Float.parseFloat(dataList[i][2]));
+				data.put(Float.parseFloat(dataList[i][3]));
+				data.put(Float.parseFloat(dataList[i][4]));
+				data.put(Float.parseFloat(dataList[i][5]));
+				data.put(Integer.parseInt(dataList[i][6]));
+				data.put(Integer.parseInt(dataList[i][8]));
 				datas.put(day, data);
 			}
 			JSONArray klineArray = new JSONArray();
@@ -47,7 +58,7 @@ public class HistoryDataService implements CrowdService {
 				} else {
 					// XXX：由于K线数据可能不完整
 					JSONArray data = new JSONArray();
-					data.put(new SimpleDateFormat("yyyy-MM-dd").parse(day).getTime());
+					data.put(sdf.parse(day).getTime());
 					data.put(day);
 					data.put("-");
 					data.put("-");

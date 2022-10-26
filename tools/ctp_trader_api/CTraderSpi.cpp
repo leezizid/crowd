@@ -4572,3 +4572,51 @@ void CTraderSpi::OnRtnChangeAccountByBank(CThostFtdcChangeAccountField* pChangeA
 	}
 	jnaResCallback("T_OnRtnChangeAccountByBank", Base64_Encode(out.toStyledString()).c_str());
 };
+
+
+void CTraderSpi::OnRspQryClassifiedInstrument(CThostFtdcInstrumentField* pInstrument, CThostFtdcRspInfoField* pRspInfo, int nRequestID, bool bIsLast)
+{
+	Json::Value out;
+	if (pInstrument)
+	{
+		out["InstrumentID"] = pInstrument->InstrumentID;
+		out["ExchangeID"] = pInstrument->ExchangeID;
+		out["InstrumentName"] = pInstrument->InstrumentName;
+		out["ExchangeInstID"] = pInstrument->ExchangeInstID;
+		out["ProductID"] = pInstrument->ProductID;
+		out["CreateDate"] = pInstrument->CreateDate;
+		out["OpenDate"] = pInstrument->OpenDate;
+		out["ExpireDate"] = pInstrument->ExpireDate;
+		out["StartDelivDate"] = pInstrument->StartDelivDate;
+		out["EndDelivDate"] = pInstrument->EndDelivDate;
+		out["UnderlyingInstrID"] = pInstrument->UnderlyingInstrID;
+		out["DeliveryYear"] = pInstrument->DeliveryYear;
+		out["DeliveryMonth"] = pInstrument->DeliveryMonth;
+		out["MaxMarketOrderVolume"] = pInstrument->MaxMarketOrderVolume;
+		out["MinMarketOrderVolume"] = pInstrument->MinMarketOrderVolume;
+		out["MaxLimitOrderVolume"] = pInstrument->MaxLimitOrderVolume;
+		out["MinLimitOrderVolume"] = pInstrument->MinLimitOrderVolume;
+		out["VolumeMultiple"] = pInstrument->VolumeMultiple;
+		out["IsTrading"] = pInstrument->IsTrading;
+		out["ProductClass"] = pInstrument->ProductClass;
+		out["InstLifePhase"] = pInstrument->InstLifePhase;
+		out["PositionType"] = pInstrument->PositionType;
+		out["PositionDateType"] = pInstrument->PositionDateType;
+		out["MaxMarginSideAlgorithm"] = pInstrument->MaxMarginSideAlgorithm;
+		out["OptionsType"] = pInstrument->OptionsType;
+		out["CombinationType"] = pInstrument->CombinationType;
+		out["PriceTick"] = pInstrument->PriceTick;
+		out["LongMarginRatio"] = pInstrument->LongMarginRatio;
+		out["ShortMarginRatio"] = pInstrument->ShortMarginRatio;
+		out["StrikePrice"] = pInstrument->StrikePrice;
+		out["UnderlyingMultiple"] = pInstrument->UnderlyingMultiple;
+	}
+	if (pRspInfo)
+	{
+		out["ErrorMsg"] = pRspInfo->ErrorMsg;
+		out["ErrorID"] = pRspInfo->ErrorID;
+	}
+	out["nRequestID"] = nRequestID;
+	out["bIsLast"] = bIsLast;
+	jnaResCallback("T_OnRspQryClassifiedInstrument", Base64_Encode(out.toStyledString()).c_str());
+};

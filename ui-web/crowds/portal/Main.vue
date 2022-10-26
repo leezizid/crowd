@@ -68,6 +68,7 @@
         menuDatas: [
           {appId: 'ActiveWorker', appName: 'ActiveWorker', appTitle: '后台服务监控', icon: {type: 'KIcon', class: 'ion-ios-timer'}},
           {appId: 'ChannelManage', appName: 'ChannelManage', appTitle: '通道管理', icon: {type: 'KIcon', class: 'ion-playstation'}},
+          {appId: 'FuturesInfoView', appName: 'FuturesInfoView', appTitle: '期货合约信息', icon: {type: 'KIcon', class: 'ion-ios-paper-outline'}},
           {appId: 'StrategyManage', appName: 'StrategyManage', appTitle: '策略管理', icon: {type: 'KIcon', class: 'ion-ios-cog'}},
           {appId: 'BacktestManage', appName: 'BacktestManage', appTitle: '回测管理', icon: {type: 'KIcon', class: 'ion-clipboard'}},
           // {appId: 'query', appTitle: '查询', icon: {type: 'KIcon', class: 'ion-ios-search-strong'},

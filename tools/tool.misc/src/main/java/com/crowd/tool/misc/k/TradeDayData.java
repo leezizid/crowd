@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.crowd.tool.misc.ProductDefine;
 import com.crowd.tool.misc.TradeDays;
 
 public class TradeDayData {
@@ -32,9 +33,12 @@ public class TradeDayData {
 
 	private BigDecimal lastTickVolumn = BigDecimal.ZERO;
 
-	public TradeDayData(String tradeDay, int priceScale) {
+	private ProductDefine productDefine;
+
+	public TradeDayData(String tradeDay, ProductDefine productDefine) {
+		this.productDefine = productDefine;
 		this.tradeDay = tradeDay;
-		this.priceScale = priceScale;
+		this.priceScale = productDefine.getPriceScale();
 		this.tradeDayTime = TradeDays.getTradeDayTime(tradeDay);
 	}
 
@@ -59,34 +63,58 @@ public class TradeDayData {
 		long time = tickInfo.getTime();
 		BigDecimal price = tickInfo.getLastPrice();
 		BigDecimal volumn = tickInfo.getVolumn().subtract(lastTickVolumn);
+		BigDecimal openInterest = tickInfo.getOpenInterest();
 		//
-		pushKLineData(_1mKLineDataList, time, price, volumn, 60);
-		pushKLineData(_5mKLineDataList, time, price, volumn, 60 * 5);
-		pushKLineData(_15mKLineDataList, time, price, volumn, 60 * 15);
-		pushKLineData(_1hKLineDataList, time, price, volumn, 60 * 60);
-		pushKLineData(_4hKLineDataList, time, price, volumn, 60 * 60 * 4);
+		pushKLineData(_1mKLineDataList, time, price, volumn, openInterest, 60);
+		pushKLineData(_5mKLineDataList, time, price, volumn, openInterest, 60 * 5);
+		pushKLineData(_15mKLineDataList, time, price, volumn, openInterest, 60 * 15);
+		pushKLineData(_1hKLineDataList, time, price, volumn, openInterest, 60 * 60);
+		pushKLineData(_4hKLineDataList, time, price, volumn, openInterest, 60 * 60 * 4);
 		if (_1dKLineData == null) {
-			_1dKLineData = new KLineData(priceScale, TradeDays.getTradeDayTime(tradeDay), price, volumn);
+			_1dKLineData = new KLineData(priceScale, TradeDays.getTradeDayTime(tradeDay), price, volumn, openInterest);
 		} else {
-			_1dKLineData.put(price, volumn);
+			_1dKLineData.put(price, volumn, openInterest);
 		}
 		//
 		lastTickVolumn = tickInfo.getVolumn();
 	}
 
 	private final void pushKLineData(List<KLineData> dataList, long time, BigDecimal price, BigDecimal volumn,
-			int interval) {
+			BigDecimal openInterest, int interval) {
 		if (dataList.size() > 0) {
 			KLineData klineData = dataList.get(dataList.size() - 1);
 			if (klineData.isIn(time)) {
-				klineData.put(price, volumn);
+				klineData.put(price, volumn, openInterest);
 				return;
 			} else {
 				klineData.finish();
 			}
 		}
 		//
-		dataList.add(new KLineData(interval, priceScale, time, price, volumn));
+		KLineData newData = new KLineData(interval, priceScale, time, price, volumn, openInterest);
+		// 判断是否有缺失数据，补全缺失的K线（仅处理小于30分钟的K线）
+		if (interval < 60 * 30) {
+			long t = this.productDefine.afterMarketPhase(newData.getBaseTime());
+			if (t > 0) {
+				long prevKlineTime = 0;
+				if(dataList.size() > 0) {
+					prevKlineTime = dataList.get(dataList.size() - 1).getBaseTime();
+				}
+				if (newData.getBaseTime() - prevKlineTime > t * 1000) {
+					prevKlineTime = newData.getBaseTime() - t * 1000;
+					dataList.add(new KLineData(interval, priceScale, prevKlineTime, BigDecimal.ZERO, BigDecimal.ZERO,
+							BigDecimal.ZERO));
+					System.out.println(dataList.get(dataList.size() - 1));
+				}
+				while (newData.getBaseTime() - prevKlineTime > interval * 1000) {
+					prevKlineTime = prevKlineTime + interval * 1000;
+					dataList.add(new KLineData(interval, priceScale, prevKlineTime, BigDecimal.ZERO, BigDecimal.ZERO,
+							BigDecimal.ZERO));
+					System.out.println(dataList.get(dataList.size() - 1));
+				}
+			}
+		}
+		dataList.add(newData);
 	}
 
 	public String get1mKLineDataString() {

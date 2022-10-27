@@ -6,9 +6,11 @@ import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +32,7 @@ import com.crowd.tool.tapis.ctp.AccountInfo;
 import com.crowd.tool.tapis.ctp.CTPInstrument;
 import com.crowd.tool.tapis.ctp.CTPProducts;
 import com.crowd.tool.tapis.ctp.ConnectInfo;
+import com.crowd.tool.tapis.ctp.CtpMarketAPI;
 import com.crowd.tool.tapis.ctp.CtpTradeAPI;
 import com.crowd.tool.tapis.ctp.OrderInfo;
 import com.crowd.tool.tapis.ctp.PositionInfo;
@@ -40,6 +43,58 @@ public class CtpChannelService implements CrowdService {
 
 	@Override
 	public void init(CrowdInitContext context) throws Throwable {
+
+	}
+
+	@Override
+	public void postInit(CrowdInitContext context) throws Throwable {
+		JSONArray arr = new JSONArray(context.load("instruments.data"));
+		List<String> idList = new ArrayList<String>();
+		for (int i = 0; i < arr.length(); i++) {
+			JSONObject o = arr.getJSONObject(i);
+			boolean isMain = o.optBoolean("isMain");
+			if (isMain) {
+				idList.add(o.getString("id"));
+			}
+		}
+
+//		try {
+//			File file = new File("F:\\mdstream\\20220107.txt");
+//			if (!file.exists()) {
+//				file.createNewFile();
+//			}
+//			raf = new RandomAccessFile(file, "rw");
+//			raf.setLength(0);
+//		} catch (Throwable t) {
+//
+//		}
+		final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
+		//
+		CtpMarketAPI market = new CtpMarketAPI("1", "tcp://180.168.146.187:10211", idList.toArray(new String[0])) {
+
+			@Override
+			protected void handleMarketData(String symbol, BigDecimal lowerLimitPrice, BigDecimal upperLimitPrice,
+					long time, BigDecimal price, int volumn, int openInterest, BigDecimal bidPrice1,
+					int bidVolumn1, BigDecimal askPrice1, int askVolumn1) {
+				System.out.println(symbol + ":" + sdf.format(new Date(time)) + "," + time + "," + price + "," + volumn
+						+ "," + openInterest + "," + bidPrice1 + "," + bidVolumn1 + "," + askPrice1 + "," + askVolumn1);
+			}
+
+			protected void handleConnected() {
+
+			}
+
+			protected void handleDisconnected() {
+
+			}
+
+			@Override
+			protected boolean checkContextDisposed() {
+				return false;
+			}
+
+		};
+		market.run();
 	}
 
 	@Override
@@ -89,7 +144,7 @@ public class CtpChannelService implements CrowdService {
 				o.put("lastPrice", result[6]);
 				tradeVolumn = Integer.parseInt(result[14]);
 			} else {
-				//System.out.println("--------");
+				// System.out.println("--------");
 				o.put("sinaName", "--");
 				o.put("timeInfo", "--");
 				o.put("positionVolumn", "--");
@@ -183,7 +238,7 @@ public class CtpChannelService implements CrowdService {
 			String id = o.getString("id");
 			String exchangeId = o.getString("exchangeId");
 			boolean isMain = o.optBoolean("isMain");
-			if (targetExchangeId.equals("main") ?  isMain : exchangeId.equals(targetExchangeId)) {
+			if (targetExchangeId.equals("main") ? isMain : exchangeId.equals(targetExchangeId)) {
 				String productId = o.getString("productId");
 				ProductDefine productDefine = CTPProducts.find(productId);
 				if (productDefine != null) {

@@ -11,6 +11,12 @@ public class ProductsManageService implements CrowdService {
 	}
 
 	@Override
+	public void postInit(CrowdInitContext context) throws Throwable {
+		
+	}
+
+	
+	@Override
 	public String getName() {
 		return "products";
 	}

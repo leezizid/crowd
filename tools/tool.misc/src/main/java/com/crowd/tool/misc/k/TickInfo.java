@@ -14,13 +14,7 @@ public class TickInfo {
 
 	private BigDecimal lastPrice;
 
-	private BigDecimal highestPrice;
-
-	private BigDecimal lowestPrice;
-
 	private BigDecimal volumn;
-
-	private BigDecimal value;
 
 	private BigDecimal openInterest;
 
@@ -31,38 +25,6 @@ public class TickInfo {
 	private BigDecimal askPrice1;
 
 	private BigDecimal askVolumn1;
-
-	private BigDecimal bidPrice2;
-
-	private BigDecimal bidVolumn2;
-
-	private BigDecimal askPrice2;
-
-	private BigDecimal askVolumn2;
-
-	private BigDecimal bidPrice3;
-
-	private BigDecimal bidVolumn3;
-
-	private BigDecimal askPrice3;
-
-	private BigDecimal askVolumn3;
-
-	private BigDecimal bidPrice4;
-
-	private BigDecimal bidVolumn4;
-
-	private BigDecimal askPrice4;
-
-	private BigDecimal askVolumn4;
-
-	private BigDecimal bidPrice5;
-
-	private BigDecimal bidVolumn5;
-
-	private BigDecimal askPrice5;
-
-	private BigDecimal askVolumn5;
 
 	public String getLabel() {
 		return label;
@@ -88,36 +50,12 @@ public class TickInfo {
 		this.lastPrice = lastPrice;
 	}
 
-	public BigDecimal getHighestPrice() {
-		return highestPrice;
-	}
-
-	public void setHighestPrice(BigDecimal highestPrice) {
-		this.highestPrice = highestPrice;
-	}
-
-	public BigDecimal getLowestPrice() {
-		return lowestPrice;
-	}
-
-	public void setLowestPrice(BigDecimal lowestPrice) {
-		this.lowestPrice = lowestPrice;
-	}
-
 	public BigDecimal getVolumn() {
 		return volumn;
 	}
 
 	public void setVolumn(BigDecimal volumn) {
 		this.volumn = volumn;
-	}
-
-	public BigDecimal getValue() {
-		return value;
-	}
-
-	public void setValue(BigDecimal value) {
-		this.value = value;
 	}
 
 	public BigDecimal getOpenInterest() {
@@ -160,134 +98,6 @@ public class TickInfo {
 		this.askVolumn1 = askVolumn1;
 	}
 
-	public BigDecimal getBidPrice2() {
-		return bidPrice2;
-	}
-
-	public void setBidPrice2(BigDecimal bidPrice2) {
-		this.bidPrice2 = bidPrice2;
-	}
-
-	public BigDecimal getBidVolumn2() {
-		return bidVolumn2;
-	}
-
-	public void setBidVolumn2(BigDecimal bidVolumn2) {
-		this.bidVolumn2 = bidVolumn2;
-	}
-
-	public BigDecimal getAskPrice2() {
-		return askPrice2;
-	}
-
-	public void setAskPrice2(BigDecimal askPrice2) {
-		this.askPrice2 = askPrice2;
-	}
-
-	public BigDecimal getAskVolumn2() {
-		return askVolumn2;
-	}
-
-	public void setAskVolumn2(BigDecimal askVolumn2) {
-		this.askVolumn2 = askVolumn2;
-	}
-
-	public BigDecimal getBidPrice3() {
-		return bidPrice3;
-	}
-
-	public void setBidPrice3(BigDecimal bidPrice3) {
-		this.bidPrice3 = bidPrice3;
-	}
-
-	public BigDecimal getBidVolumn3() {
-		return bidVolumn3;
-	}
-
-	public void setBidVolumn3(BigDecimal bidVolumn3) {
-		this.bidVolumn3 = bidVolumn3;
-	}
-
-	public BigDecimal getAskPrice3() {
-		return askPrice3;
-	}
-
-	public void setAskPrice3(BigDecimal askPrice3) {
-		this.askPrice3 = askPrice3;
-	}
-
-	public BigDecimal getAskVolumn3() {
-		return askVolumn3;
-	}
-
-	public void setAskVolumn3(BigDecimal askVolumn3) {
-		this.askVolumn3 = askVolumn3;
-	}
-
-	public BigDecimal getBidPrice4() {
-		return bidPrice4;
-	}
-
-	public void setBidPrice4(BigDecimal bidPrice4) {
-		this.bidPrice4 = bidPrice4;
-	}
-
-	public BigDecimal getBidVolumn4() {
-		return bidVolumn4;
-	}
-
-	public void setBidVolumn4(BigDecimal bidVolumn4) {
-		this.bidVolumn4 = bidVolumn4;
-	}
-
-	public BigDecimal getAskPrice4() {
-		return askPrice4;
-	}
-
-	public void setAskPrice4(BigDecimal askPrice4) {
-		this.askPrice4 = askPrice4;
-	}
-
-	public BigDecimal getAskVolumn4() {
-		return askVolumn4;
-	}
-
-	public void setAskVolumn4(BigDecimal askVolumn4) {
-		this.askVolumn4 = askVolumn4;
-	}
-
-	public BigDecimal getBidPrice5() {
-		return bidPrice5;
-	}
-
-	public void setBidPrice5(BigDecimal bidPrice5) {
-		this.bidPrice5 = bidPrice5;
-	}
-
-	public BigDecimal getBidVolumn5() {
-		return bidVolumn5;
-	}
-
-	public void setBidVolumn5(BigDecimal bidVolumn5) {
-		this.bidVolumn5 = bidVolumn5;
-	}
-
-	public BigDecimal getAskPrice5() {
-		return askPrice5;
-	}
-
-	public void setAskPrice5(BigDecimal askPrice5) {
-		this.askPrice5 = askPrice5;
-	}
-
-	public BigDecimal getAskVolumn5() {
-		return askVolumn5;
-	}
-
-	public void setAskVolumn5(BigDecimal askVolumn5) {
-		this.askVolumn5 = askVolumn5;
-	}
-
 	public void writeToStream(DataOutput dout, int priceScale) throws IOException {
 		dout.writeLong(time);
 		dout.writeFloat(lastPrice.setScale(priceScale, RoundingMode.HALF_UP).floatValue());
@@ -298,16 +108,16 @@ public class TickInfo {
 		dout.writeFloat(askPrice1.setScale(priceScale, RoundingMode.HALF_UP).floatValue());
 		dout.writeInt(askVolumn1.intValue());
 	}
-	
+
 	public void readFromStream(DataInput din) throws IOException {
 		this.time = din.readLong();
 		this.lastPrice = new BigDecimal(din.readFloat());
 		this.volumn = new BigDecimal(din.readInt());
-		this.openInterest = new BigDecimal(din.readInt()); 
-		this.bidPrice1 =  new BigDecimal(din.readFloat());
-		this.bidVolumn1 = new BigDecimal(din.readInt()); 
+		this.openInterest = new BigDecimal(din.readInt());
+		this.bidPrice1 = new BigDecimal(din.readFloat());
+		this.bidVolumn1 = new BigDecimal(din.readInt());
 		this.askPrice1 = new BigDecimal(din.readFloat());
-		this.askVolumn1 = new BigDecimal(din.readInt()); 
+		this.askVolumn1 = new BigDecimal(din.readInt());
 	}
 
 //	public String toString(int priceScale) {

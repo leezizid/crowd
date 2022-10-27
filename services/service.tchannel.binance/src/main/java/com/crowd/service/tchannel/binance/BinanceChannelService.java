@@ -28,6 +28,12 @@ public class BinanceChannelService implements CrowdService {
 	public void init(CrowdInitContext context) throws Throwable {
 
 	}
+	
+	@Override
+	public void postInit(CrowdInitContext context) throws Throwable {
+		
+	}
+
 
 	public String getName() {
 		return "tchannel.binance";

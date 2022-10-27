@@ -21,6 +21,12 @@ public class HistoryDataService implements CrowdService {
 	public void init(CrowdInitContext context) throws Throwable {
 
 	}
+	
+	@Override
+	public void postInit(CrowdInitContext context) throws Throwable {
+		
+	}
+
 
 	@Override
 	public String getName() {

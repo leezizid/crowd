@@ -39,9 +39,9 @@ public class WSChannelWrapper implements Runnable {
 	private final static int TIME_WS_CHECK = 30 * 1000; // 检查WS状态的间隔
 	private final static int TIME_WS_CHECK_TIMEOUT = 45 * 1000; // 检查时间出现异常的时间（即最后消息时间不应该超过这个时间，超过即认为掉线自动重连）
 
-	private final static int WS_CLOSE = 0; // 已经关闭，属于稳定状态，可能由关闭时间定时或者在APP转到前台时触发转至WS_WAIT_CONNECTING，
-	private final static int WS_CONNECTING = 10; // 正在连接；属于临时状态，一定会在短期内转至WS_CONNECTED或者WS_CLOSE
-	private final static int WS_CONNECTED = 100; // 已经连接；属于稳定状态，在关闭后转为WS_CLOSE
+	final static int WS_CLOSE = 0; // 已经关闭，属于稳定状态，可能由关闭时间定时或者在APP转到前台时触发转至WS_WAIT_CONNECTING，
+	final static int WS_CONNECTING = 10; // 正在连接；属于临时状态，一定会在短期内转至WS_CONNECTED或者WS_CLOSE
+	final static int WS_CONNECTED = 100; // 已经连接；属于稳定状态，在关闭后转为WS_CLOSE
 
 	private int WS_status = WS_CLOSE;
 	private long WS_lastMessageTime = 0;
@@ -63,6 +63,10 @@ public class WSChannelWrapper implements Runnable {
 		this.registerInfo = registerInfo;
 	}
 
+	int getStatus() {
+		return this.WS_status;
+	}
+	
 	public void run() {
 		while (true) {
 			try {

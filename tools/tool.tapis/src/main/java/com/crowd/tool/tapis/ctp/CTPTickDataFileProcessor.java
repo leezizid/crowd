@@ -161,39 +161,39 @@ public class CTPTickDataFileProcessor {
 			tickInfo.setLabel(info[0].substring(0, info[0].length() - 6));
 			tickInfo.setTime(time / 1000000 + ((time / 1000000) % 1000 > 0 ? 0 : (time % 1000000) / 1000)); // 某些tick数据时间有问题，毫秒数为0，但是后面有更小的精度数值
 			tickInfo.setLastPrice(new BigDecimal(info[2]));
-			tickInfo.setHighestPrice(new BigDecimal(info[3]));
-			tickInfo.setLowestPrice(new BigDecimal(info[4]));
+//			tickInfo.setHighestPrice(new BigDecimal(info[3]));
+//			tickInfo.setLowestPrice(new BigDecimal(info[4]));
 			tickInfo.setVolumn(new BigDecimal(info[5]));
-			tickInfo.setValue(new BigDecimal(info[6]));
+//			tickInfo.setValue(new BigDecimal(info[6]));
 			tickInfo.setOpenInterest(new BigDecimal(info[7]));
 			tickInfo.setBidPrice1(getBidOrAskValue(info[8]));
 			tickInfo.setBidVolumn1(getBidOrAskValue(info[9]));
 			tickInfo.setAskPrice1(getBidOrAskValue(info[10]));
 			tickInfo.setAskVolumn1(getBidOrAskValue(info[11]));
-			if (info.length > 12) {
-				tickInfo.setBidPrice2(getBidOrAskValue(info[12]));
-				tickInfo.setBidVolumn2(getBidOrAskValue(info[13]));
-				tickInfo.setAskPrice2(getBidOrAskValue(info[14]));
-				tickInfo.setAskVolumn2(getBidOrAskValue(info[15]));
-			}
-			if (info.length > 16) {
-				tickInfo.setBidPrice3(getBidOrAskValue(info[16]));
-				tickInfo.setBidVolumn3(getBidOrAskValue(info[17]));
-				tickInfo.setAskPrice3(getBidOrAskValue(info[18]));
-				tickInfo.setAskVolumn3(getBidOrAskValue(info[19]));
-			}
-			if (info.length > 20) {
-				tickInfo.setBidPrice4(getBidOrAskValue(info[20]));
-				tickInfo.setBidVolumn4(getBidOrAskValue(info[21]));
-				tickInfo.setAskPrice4(getBidOrAskValue(info[22]));
-				tickInfo.setAskVolumn4(getBidOrAskValue(info[23]));
-			}
-			if (info.length > 24) {
-				tickInfo.setBidPrice5(getBidOrAskValue(info[24]));
-				tickInfo.setBidVolumn5(getBidOrAskValue(info[25]));
-				tickInfo.setAskPrice5(getBidOrAskValue(info[26]));
-				tickInfo.setAskVolumn5(getBidOrAskValue(info[27]));
-			}
+//			if (info.length > 12) {
+//				tickInfo.setBidPrice2(getBidOrAskValue(info[12]));
+//				tickInfo.setBidVolumn2(getBidOrAskValue(info[13]));
+//				tickInfo.setAskPrice2(getBidOrAskValue(info[14]));
+//				tickInfo.setAskVolumn2(getBidOrAskValue(info[15]));
+//			}
+//			if (info.length > 16) {
+//				tickInfo.setBidPrice3(getBidOrAskValue(info[16]));
+//				tickInfo.setBidVolumn3(getBidOrAskValue(info[17]));
+//				tickInfo.setAskPrice3(getBidOrAskValue(info[18]));
+//				tickInfo.setAskVolumn3(getBidOrAskValue(info[19]));
+//			}
+//			if (info.length > 20) {
+//				tickInfo.setBidPrice4(getBidOrAskValue(info[20]));
+//				tickInfo.setBidVolumn4(getBidOrAskValue(info[21]));
+//				tickInfo.setAskPrice4(getBidOrAskValue(info[22]));
+//				tickInfo.setAskVolumn4(getBidOrAskValue(info[23]));
+//			}
+//			if (info.length > 24) {
+//				tickInfo.setBidPrice5(getBidOrAskValue(info[24]));
+//				tickInfo.setBidVolumn5(getBidOrAskValue(info[25]));
+//				tickInfo.setAskPrice5(getBidOrAskValue(info[26]));
+//				tickInfo.setAskVolumn5(getBidOrAskValue(info[27]));
+//			}
 			return tickInfo;
 		} catch (Throwable t) {
 			return null;

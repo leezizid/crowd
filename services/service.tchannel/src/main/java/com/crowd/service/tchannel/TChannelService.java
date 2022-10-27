@@ -34,6 +34,11 @@ public class TChannelService implements CrowdService {
 		CTPProducts.init();
 	}
 
+	@Override
+	public void postInit(CrowdInitContext context) throws Throwable {
+		
+	}
+	
 	public String getName() {
 		return "tchannel";
 	}

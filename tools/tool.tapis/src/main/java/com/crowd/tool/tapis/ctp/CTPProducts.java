@@ -37,8 +37,9 @@ public class CTPProducts {
 
 		// CFFEX
 		ProductDefineRegistry.register(new ProductDefine("IF", CFFEX, "沪深300", 300, 1, ""));
-		ProductDefineRegistry.register(new ProductDefine("IH", CFFEX, "上证50", 200, 1, ""));
+		ProductDefineRegistry.register(new ProductDefine("IH", CFFEX, "上证50", 300, 1, ""));
 		ProductDefineRegistry.register(new ProductDefine("IC", CFFEX, "中证500", 200, 1, ""));
+		ProductDefineRegistry.register(new ProductDefine("IM", CFFEX, "中证1000", 200, 1, ""));
 		ProductDefineRegistry.register(new ProductDefine("TS", CFFEX, "二债", 10000, 3, ""));
 		ProductDefineRegistry.register(new ProductDefine("TF", CFFEX, "五债", 10000, 3, ""));
 		ProductDefineRegistry.register(new ProductDefine("T", CFFEX, "十债", 10000, 3, ""));

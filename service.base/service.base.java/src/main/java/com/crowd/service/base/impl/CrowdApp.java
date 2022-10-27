@@ -73,7 +73,7 @@ public class CrowdApp {
 		while (it.hasNext()) {
 			CrowdService crowdService = it.next();
 			// 初始化服务
-			CrowdInitContextImpl initContext = new CrowdInitContextImpl();
+			CrowdInitContextImpl initContext = new CrowdInitContextImpl(crowdService.getName());
 			crowdService.init(initContext);
 			//
 			for (TableDefine tableDefine : initContext.getRegisterTables()) {
@@ -107,7 +107,29 @@ public class CrowdApp {
 		new Thread(channelWrapper).start();
 
 		//
+		int tryCount = 50;
+		while (true) {
+			if (channelWrapper.getStatus() == WSChannelWrapper.WS_CONNECTED) {
+				break;
+			}
+			Thread.sleep(100);
+			tryCount--;
+			if(tryCount == 0) {
+				System.out.println("连接核心服务超时，App Exited...");
+				System.exit(-1);
+			}
+		}
+		
+		//
 		System.out.println("App Started...");
+
+		//
+		it = shapeLoader.iterator();
+		while (it.hasNext()) {
+			CrowdService crowdService = it.next();
+			CrowdInitContextImpl initContext = new CrowdInitContextImpl(crowdService.getName());
+			crowdService.postInit(initContext);
+		}
 	}
 
 	static final JSONObject invokeLocalMethod(CrowdContextImpl contextImpl, String apiPath, JSONObject inputObject) {

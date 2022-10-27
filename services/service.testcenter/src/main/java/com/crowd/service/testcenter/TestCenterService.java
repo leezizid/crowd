@@ -16,6 +16,12 @@ public class TestCenterService implements CrowdService {
 		agentServer = new AgentServer();
 		new Thread(agentServer).start(); 
 	}
+	
+	@Override
+	public void postInit(CrowdInitContext context) throws Throwable {
+		
+	}
+
 
 	public String getName() {
 		return "testserver";

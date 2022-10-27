@@ -20,6 +20,11 @@ public class PortalService implements CrowdService {
 	@Override
 	public void init(CrowdInitContext context) throws Throwable {
 	}
+	
+	@Override
+	public void postInit(CrowdInitContext context) throws Throwable {
+	}
+
 
 	@CrowdMethod
 	public void login(CrowdContext context, JSONObject input, JSONObject output) throws Throwable {

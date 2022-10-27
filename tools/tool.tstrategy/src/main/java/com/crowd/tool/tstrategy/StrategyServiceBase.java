@@ -41,6 +41,11 @@ public abstract class StrategyServiceBase implements CrowdService {
 		CTPProducts.init();
 	}
 
+	@Override
+	public void postInit(CrowdInitContext context) throws Throwable {
+
+	}
+
 	/**
 	 * 策略启动
 	 */
@@ -62,7 +67,7 @@ public abstract class StrategyServiceBase implements CrowdService {
 				if (test) {
 					strategyEnv = StrategyEnv.createTest(crowdContext,
 							createStrategyInstance(strategyInfo.getArguments()), strategyInfo, products);
-					//XXX：
+					// XXX：
 //					String marketDataSource = strategyInfo.getMarketDataSource();
 //					if (marketDataSource.startsWith("history:")) {
 //						String[] info = StringUtils.split(marketDataSource.substring("history:".length()), ",");
@@ -239,10 +244,13 @@ public abstract class StrategyServiceBase implements CrowdService {
 							}
 
 							@Override
-							protected void handleMarketData(String symbol, long time, BigDecimal lowerLimitPrice,
-									BigDecimal upperLimitPrice, BigDecimal price, BigDecimal volumn) {
+							protected void handleMarketData(String symbol, BigDecimal lowerLimitPrice,
+									BigDecimal upperLimitPrice, long time, BigDecimal price, int volumn,
+									int openInterest, BigDecimal bidPrice1, int bidVolumn1, BigDecimal askPrice1,
+									int askVolumn1) {
 								crowdContext.reportWork(1, String.valueOf(price.doubleValue()));
-								strategyEnv.onTick(symbol, time, lowerLimitPrice, upperLimitPrice, price, volumn);
+								strategyEnv.onTick(symbol, time, lowerLimitPrice, upperLimitPrice, price,
+										new BigDecimal(volumn));
 							}
 						}.run();
 					} else if (marketDataSource.startsWith("CTPTEST:")) {
@@ -256,10 +264,13 @@ public abstract class StrategyServiceBase implements CrowdService {
 							}
 
 							@Override
-							protected void handleMarketData(String symbol, long time, BigDecimal lowerLimitPrice,
-									BigDecimal upperLimitPrice, BigDecimal price, BigDecimal volumn) {
+							protected void handleMarketData(String symbol, BigDecimal lowerLimitPrice,
+									BigDecimal upperLimitPrice, long time, BigDecimal price, int volumn,
+									int openInterest, BigDecimal bidPrice1, int bidVolumn1, BigDecimal askPrice1,
+									int askVolumn1) {
 								crowdContext.reportWork(1, String.valueOf(price.doubleValue()));
-								strategyEnv.onTick(symbol, time, lowerLimitPrice, upperLimitPrice, price, volumn);
+								strategyEnv.onTick(symbol, time, lowerLimitPrice, upperLimitPrice, price,
+										new BigDecimal(volumn));
 							}
 						}.run();
 					} else if (marketDataSource.startsWith("CTPMOCK:")) {
@@ -273,10 +284,13 @@ public abstract class StrategyServiceBase implements CrowdService {
 							}
 
 							@Override
-							protected void handleMarketData(String symbol, long time, BigDecimal lowerLimitPrice,
-									BigDecimal upperLimitPrice, BigDecimal price, BigDecimal volumn) {
+							protected void handleMarketData(String symbol, BigDecimal lowerLimitPrice,
+									BigDecimal upperLimitPrice, long time, BigDecimal price, int volumn,
+									int openInterest, BigDecimal bidPrice1, int bidVolumn1, BigDecimal askPrice1,
+									int askVolumn1) {
 								crowdContext.reportWork(1, String.valueOf(price.doubleValue()));
-								strategyEnv.onTick(symbol, time, lowerLimitPrice, upperLimitPrice, price, volumn);
+								strategyEnv.onTick(symbol, time, lowerLimitPrice, upperLimitPrice, price,
+										new BigDecimal(volumn));
 							}
 						}.run();
 					} else {

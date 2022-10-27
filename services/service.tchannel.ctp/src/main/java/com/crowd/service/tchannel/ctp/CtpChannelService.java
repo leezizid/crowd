@@ -61,10 +61,12 @@ public class CtpChannelService implements CrowdService {
 			quoteCodes[i] = "nf_" + productId.toUpperCase() + o.getString("deliveryYear").substring(2)
 					+ o.getString("deliveryMonth");
 		}
+		Map<String, Integer> mainInstruments = new HashMap<String, Integer>();
 		String[] results = quoteSina(quoteCodes);
 		for (int i = 0; i < arr.length(); i++) {
 			JSONObject o = arr.getJSONObject(i);
 			String[] result = StringUtils.splitPreserveAllTokens(results[i], ",");
+			int tradeVolumn = 0;
 			if (result.length == 50) {
 				// 股指：0开盘,1最高,2最低,3最新,4成交量,5成交金额,6持仓量 ,-14日期,-13时间
 //				System.out.println(result[result.length - 1] + "#" + result[result.length - 14] + ":"
@@ -73,6 +75,8 @@ public class CtpChannelService implements CrowdService {
 				o.put("timeInfo", result[result.length - 14] + "." + result[result.length - 13]);
 				o.put("positionVolumn", result[6]);
 				o.put("tradeVolumn", result[4]);
+				o.put("lastPrice", result[3]);
+				tradeVolumn = Integer.parseInt(result[4]);
 			} else if (result.length == 44) {
 				// 商品：0名称,1时间,2开盘,3最低,4最高,5结算,6最新,7卖1,8买1,9,10昨结算,11买1量,12卖1量,13持仓量,14成交量,15交易所,16品种,17日期,1,,,,,,,,,均价,买2价,买2量,买3价,买3量,买4价,买4量,买5价,买5量,卖2价,卖2量,卖3价,卖3量,卖4价,卖4量,卖5价,卖5量
 //				System.out
@@ -82,13 +86,28 @@ public class CtpChannelService implements CrowdService {
 						+ result[1].substring(4, 6));
 				o.put("positionVolumn", result[13]);
 				o.put("tradeVolumn", result[14]);
+				o.put("lastPrice", result[6]);
+				tradeVolumn = Integer.parseInt(result[14]);
 			} else {
-				System.out.println("--------");
-				o.put("sinaName", "");
-				o.put("timeInfo", "");
-				o.put("positionVolumn", "");
-				o.put("tradeVolumn", "");
+				//System.out.println("--------");
+				o.put("sinaName", "--");
+				o.put("timeInfo", "--");
+				o.put("positionVolumn", "--");
+				o.put("tradeVolumn", "0");
+				o.put("lastPrice", "--");
 			}
+			if (tradeVolumn > 0) {
+				String productId = o.getString("productId");
+				if (!mainInstruments.containsKey(productId) || tradeVolumn > mainInstruments.get(productId)) {
+					mainInstruments.put(productId, tradeVolumn);
+				}
+			}
+		}
+		for (int i = 0; i < arr.length(); i++) {
+			JSONObject o = arr.getJSONObject(i);
+			String productId = o.getString("productId");
+			int tradeVolumn = Integer.parseInt(o.getString("tradeVolumn"));
+			o.put("isMain", mainInstruments.get(productId) != null && mainInstruments.get(productId) == tradeVolumn);
 		}
 		//
 		context.save("instruments.data", arr.toString(4));
@@ -163,7 +182,8 @@ public class CtpChannelService implements CrowdService {
 			JSONObject o = arr.getJSONObject(i);
 			String id = o.getString("id");
 			String exchangeId = o.getString("exchangeId");
-			if (exchangeId.equals(targetExchangeId)) {
+			boolean isMain = o.optBoolean("isMain");
+			if (targetExchangeId.equals("main") ?  isMain : exchangeId.equals(targetExchangeId)) {
 				String productId = o.getString("productId");
 				ProductDefine productDefine = CTPProducts.find(productId);
 				if (productDefine != null) {
@@ -172,10 +192,7 @@ public class CtpChannelService implements CrowdService {
 					o.put("name", "--");
 				}
 				o.put("id", exchangeId + "." + id);
-				o.put("positionVolumn", o.opt("positionVolumn"));
-				o.put("tradeVolumn", o.opt("tradeVolumn"));
-				o.put("timeInfo", o.opt("timeInfo"));
-				o.put("title", o.opt("sinaName"));
+				o.put("isMain", o.optBoolean("isMain") ? "是" : "");
 				instruments.add(o);
 			}
 		}

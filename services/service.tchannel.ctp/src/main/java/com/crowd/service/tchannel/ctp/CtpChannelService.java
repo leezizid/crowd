@@ -48,6 +48,11 @@ public class CtpChannelService implements CrowdService {
 
 	@Override
 	public void postInit(CrowdInitContext context) throws Throwable {
+		
+		
+		//TODO：开启一个守护线程，开盘前更新合约数据，连接行情节点，记录行情tick数据；收盘后关闭行情连接。
+		
+		
 		JSONArray arr = new JSONArray(context.load("instruments.data"));
 		List<String> idList = new ArrayList<String>();
 		for (int i = 0; i < arr.length(); i++) {
@@ -74,18 +79,18 @@ public class CtpChannelService implements CrowdService {
 
 			@Override
 			protected void handleMarketData(String symbol, BigDecimal lowerLimitPrice, BigDecimal upperLimitPrice,
-					long time, BigDecimal price, int volumn, int openInterest, BigDecimal bidPrice1,
-					int bidVolumn1, BigDecimal askPrice1, int askVolumn1) {
-				System.out.println(symbol + ":" + sdf.format(new Date(time)) + "," + time + "," + price + "," + volumn
-						+ "," + openInterest + "," + bidPrice1 + "," + bidVolumn1 + "," + askPrice1 + "," + askVolumn1);
+					long time, BigDecimal price, int volume, int openInterest, BigDecimal bidPrice1,
+					int bidVolume1, BigDecimal askPrice1, int askVolume1) {
+//				System.out.println(symbol + ":" + sdf.format(new Date(time)) + "," + time + "," + price + "," + volume
+//						+ "," + openInterest + "," + bidPrice1 + "," + bidVolume1 + "," + askPrice1 + "," + askVolume1);
 			}
 
 			protected void handleConnected() {
-
+				System.out.print("CTP Market Connected...");
 			}
 
 			protected void handleDisconnected() {
-
+				System.out.print("CTP Market Disconnected...");
 			}
 
 			@Override
@@ -121,17 +126,17 @@ public class CtpChannelService implements CrowdService {
 		for (int i = 0; i < arr.length(); i++) {
 			JSONObject o = arr.getJSONObject(i);
 			String[] result = StringUtils.splitPreserveAllTokens(results[i], ",");
-			int tradeVolumn = 0;
+			int tradeVolume = 0;
 			if (result.length == 50) {
 				// 股指：0开盘,1最高,2最低,3最新,4成交量,5成交金额,6持仓量 ,-14日期,-13时间
 //				System.out.println(result[result.length - 1] + "#" + result[result.length - 14] + ":"
 //						+ result[result.length - 13] + "," + result[6] + ":" + result[4]);
 				o.put("sinaName", result[result.length - 1]);
 				o.put("timeInfo", result[result.length - 14] + "." + result[result.length - 13]);
-				o.put("positionVolumn", result[6]);
-				o.put("tradeVolumn", result[4]);
+				o.put("positionVolume", result[6]);
+				o.put("tradeVolume", result[4]);
 				o.put("lastPrice", result[3]);
-				tradeVolumn = Integer.parseInt(result[4]);
+				tradeVolume = Integer.parseInt(result[4]);
 			} else if (result.length == 44) {
 				// 商品：0名称,1时间,2开盘,3最低,4最高,5结算,6最新,7卖1,8买1,9,10昨结算,11买1量,12卖1量,13持仓量,14成交量,15交易所,16品种,17日期,1,,,,,,,,,均价,买2价,买2量,买3价,买3量,买4价,买4量,买5价,买5量,卖2价,卖2量,卖3价,卖3量,卖4价,卖4量,卖5价,卖5量
 //				System.out
@@ -139,30 +144,30 @@ public class CtpChannelService implements CrowdService {
 				o.put("sinaName", result[0]);
 				o.put("timeInfo", result[17] + "." + result[1].substring(0, 2) + ":" + result[1].substring(2, 4) + ":"
 						+ result[1].substring(4, 6));
-				o.put("positionVolumn", result[13]);
-				o.put("tradeVolumn", result[14]);
+				o.put("positionVolume", result[13]);
+				o.put("tradeVolume", result[14]);
 				o.put("lastPrice", result[6]);
-				tradeVolumn = Integer.parseInt(result[14]);
+				tradeVolume = Integer.parseInt(result[14]);
 			} else {
 				// System.out.println("--------");
 				o.put("sinaName", "--");
 				o.put("timeInfo", "--");
-				o.put("positionVolumn", "--");
-				o.put("tradeVolumn", "0");
+				o.put("positionVolume", "--");
+				o.put("tradeVolume", "0");
 				o.put("lastPrice", "--");
 			}
-			if (tradeVolumn > 0) {
+			if (tradeVolume > 0) {
 				String productId = o.getString("productId");
-				if (!mainInstruments.containsKey(productId) || tradeVolumn > mainInstruments.get(productId)) {
-					mainInstruments.put(productId, tradeVolumn);
+				if (!mainInstruments.containsKey(productId) || tradeVolume > mainInstruments.get(productId)) {
+					mainInstruments.put(productId, tradeVolume);
 				}
 			}
 		}
 		for (int i = 0; i < arr.length(); i++) {
 			JSONObject o = arr.getJSONObject(i);
 			String productId = o.getString("productId");
-			int tradeVolumn = Integer.parseInt(o.getString("tradeVolumn"));
-			o.put("isMain", mainInstruments.get(productId) != null && mainInstruments.get(productId) == tradeVolumn);
+			int tradeVolume = Integer.parseInt(o.getString("tradeVolume"));
+			o.put("isMain", mainInstruments.get(productId) != null && mainInstruments.get(productId) == tradeVolume);
 		}
 		//
 		context.save("instruments.data", arr.toString(4));
@@ -321,12 +326,12 @@ public class CtpChannelService implements CrowdService {
 				JSONArray positionArray = new JSONArray();
 				try {
 					for (PositionInfo positionInfo : tradeAPI.getPositions()) {
-						if (positionInfo.getTotalVolumn() > 0) {
+						if (positionInfo.getTotalVolume() > 0) {
 							JSONObject positionObj = new JSONObject();
 							positionObj.put("symbol", positionInfo.getSymbol());
-							positionObj.put("volumn",
-									positionInfo.getPositionSide() == PositionSide.Long ? positionInfo.getTotalVolumn()
-											: -positionInfo.getTotalVolumn());
+							positionObj.put("volume",
+									positionInfo.getPositionSide() == PositionSide.Long ? positionInfo.getTotalVolume()
+											: -positionInfo.getTotalVolume());
 							positionObj.put("marketPrice", positionInfo.getMarketPrice());
 							positionArray.put(positionObj);
 						}
@@ -352,15 +357,15 @@ public class CtpChannelService implements CrowdService {
 				JSONArray orderArray = new JSONArray();
 				try {
 					for (OrderInfo orderInfo : tradeAPI.getOrders()) {
-						if (orderInfo.getVolumn() == orderInfo.getExecVolumn() || orderInfo.isCanceled()) {
+						if (orderInfo.getVolume() == orderInfo.getExecVolume() || orderInfo.isCanceled()) {
 							continue;
 						}
 						JSONObject orderObj = new JSONObject();
 						orderObj.put("symbol", orderInfo.getSymbol());
 						orderObj.put("serverOrderId", orderInfo.getServerOrderId());
 						// orderObj.put("clientOrderId", orderInfo.getClientOrderId());
-						orderObj.put("volumn", orderInfo.getVolumn());
-						orderObj.put("execVolumn", orderInfo.getExecVolumn());
+						orderObj.put("volume", orderInfo.getVolume());
+						orderObj.put("execVolume", orderInfo.getExecVolume());
 						orderObj.put("price", orderInfo.getPrice());
 						orderObj.put("type", orderInfo.getType());
 						orderObj.put("positionSide", orderInfo.getPositionSide());
@@ -402,13 +407,13 @@ public class CtpChannelService implements CrowdService {
 				}
 
 				@Override
-				protected void handleOrderUpdated(String serverOrderId, String symbol, int execVolumn,
+				protected void handleOrderUpdated(String serverOrderId, String symbol, int execVolume,
 						BigDecimal execValue, boolean canceled) {
 					JSONObject updateMessageObject = new JSONObject();
 					updateMessageObject.put("channelId", id);
 					updateMessageObject.put("serverOrderId", serverOrderId);
 					updateMessageObject.put("symbol", symbol);
-					updateMessageObject.put("execVolumn", execVolumn);
+					updateMessageObject.put("execVolume", execVolume);
 					updateMessageObject.put("execValue", execValue.doubleValue());
 					updateMessageObject.put("canceled", canceled);
 					try {
@@ -468,9 +473,9 @@ public class CtpChannelService implements CrowdService {
 		PositionSide positionSide = PositionSide.valueOf(inputObject.getString("positionSide"));
 		OrderType orderType = OrderType.valueOf(inputObject.getString("type"));
 		float price = Float.parseFloat(inputObject.getString("price"));
-		int volumn = Integer.parseInt(inputObject.getString("volumn"));
+		int volume = Integer.parseInt(inputObject.getString("volume"));
 		outputObject.put("serverOrderId",
-				ctpTradeAPI.postOrder(symbolInfo[0], symbolInfo[1], orderType, positionSide, price, volumn));
+				ctpTradeAPI.postOrder(symbolInfo[0], symbolInfo[1], orderType, positionSide, price, volume));
 	}
 
 	@CrowdMethod

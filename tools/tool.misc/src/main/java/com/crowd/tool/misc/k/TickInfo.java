@@ -14,17 +14,17 @@ public class TickInfo {
 
 	private BigDecimal lastPrice;
 
-	private BigDecimal volumn;
+	private BigDecimal volume;
 
 	private BigDecimal openInterest;
 
 	private BigDecimal bidPrice1;
 
-	private BigDecimal bidVolumn1;
+	private BigDecimal bidVolume1;
 
 	private BigDecimal askPrice1;
 
-	private BigDecimal askVolumn1;
+	private BigDecimal askVolume1;
 
 	public String getLabel() {
 		return label;
@@ -50,12 +50,12 @@ public class TickInfo {
 		this.lastPrice = lastPrice;
 	}
 
-	public BigDecimal getVolumn() {
-		return volumn;
+	public BigDecimal getVolume() {
+		return volume;
 	}
 
-	public void setVolumn(BigDecimal volumn) {
-		this.volumn = volumn;
+	public void setVolume(BigDecimal volume) {
+		this.volume = volume;
 	}
 
 	public BigDecimal getOpenInterest() {
@@ -74,12 +74,12 @@ public class TickInfo {
 		this.bidPrice1 = bidPrice1;
 	}
 
-	public BigDecimal getBidVolumn1() {
-		return bidVolumn1;
+	public BigDecimal getBidVolume1() {
+		return bidVolume1;
 	}
 
-	public void setBidVolumn1(BigDecimal bidVolumn1) {
-		this.bidVolumn1 = bidVolumn1;
+	public void setBidVolume1(BigDecimal bidVolume1) {
+		this.bidVolume1 = bidVolume1;
 	}
 
 	public BigDecimal getAskPrice1() {
@@ -90,34 +90,34 @@ public class TickInfo {
 		this.askPrice1 = askPrice1;
 	}
 
-	public BigDecimal getAskVolumn1() {
-		return askVolumn1;
+	public BigDecimal getAskVolume1() {
+		return askVolume1;
 	}
 
-	public void setAskVolumn1(BigDecimal askVolumn1) {
-		this.askVolumn1 = askVolumn1;
+	public void setAskVolume1(BigDecimal askVolume1) {
+		this.askVolume1 = askVolume1;
 	}
 
 	public void writeToStream(DataOutput dout, int priceScale) throws IOException {
 		dout.writeLong(time);
 		dout.writeFloat(lastPrice.setScale(priceScale, RoundingMode.HALF_UP).floatValue());
-		dout.writeInt(volumn.intValue());
+		dout.writeInt(volume.intValue());
 		dout.writeInt(openInterest.intValue());
 		dout.writeFloat(bidPrice1.setScale(priceScale, RoundingMode.HALF_UP).floatValue());
-		dout.writeInt(bidVolumn1.intValue());
+		dout.writeInt(bidVolume1.intValue());
 		dout.writeFloat(askPrice1.setScale(priceScale, RoundingMode.HALF_UP).floatValue());
-		dout.writeInt(askVolumn1.intValue());
+		dout.writeInt(askVolume1.intValue());
 	}
 
 	public void readFromStream(DataInput din) throws IOException {
 		this.time = din.readLong();
 		this.lastPrice = new BigDecimal(din.readFloat());
-		this.volumn = new BigDecimal(din.readInt());
+		this.volume = new BigDecimal(din.readInt());
 		this.openInterest = new BigDecimal(din.readInt());
 		this.bidPrice1 = new BigDecimal(din.readFloat());
-		this.bidVolumn1 = new BigDecimal(din.readInt());
+		this.bidVolume1 = new BigDecimal(din.readInt());
 		this.askPrice1 = new BigDecimal(din.readFloat());
-		this.askVolumn1 = new BigDecimal(din.readInt());
+		this.askVolume1 = new BigDecimal(din.readInt());
 	}
 
 //	public String toString(int priceScale) {
@@ -132,7 +132,7 @@ public class TickInfo {
 ////		buffer.append(",");
 ////		buffer.append(tickInfo.getLowestPrice().setScale(priceScale, RoundingMode.HALF_UP));
 ////		buffer.append(",");
-//		buffer.append(volumn.intValue());
+//		buffer.append(volume.intValue());
 //		buffer.append(",");
 ////		buffer.append(tickInfo.getValue().setScale(2, RoundingMode.HALF_UP));
 ////		buffer.append(",");
@@ -140,44 +140,44 @@ public class TickInfo {
 //		buffer.append(",");
 //		buffer.append(bidPrice1.setScale(priceScale, RoundingMode.HALF_UP));
 //		buffer.append(",");
-//		buffer.append(bidVolumn1.intValue());
+//		buffer.append(bidVolume1.intValue());
 //		buffer.append(",");
 //		buffer.append(askPrice1.setScale(priceScale, RoundingMode.HALF_UP));
 //		buffer.append(",");
-//		buffer.append(askVolumn1.intValue());
+//		buffer.append(askVolume1.intValue());
 //		if (bidPrice2 != null) {
 //			buffer.append(",");
 //			buffer.append(bidPrice2.setScale(priceScale, RoundingMode.HALF_UP));
 //			buffer.append(",");
-//			buffer.append(bidVolumn2.intValue());
+//			buffer.append(bidVolume2.intValue());
 //			buffer.append(",");
 //			buffer.append(askPrice2.setScale(priceScale, RoundingMode.HALF_UP));
 //			buffer.append(",");
-//			buffer.append(askVolumn2.intValue());
+//			buffer.append(askVolume2.intValue());
 //			buffer.append(",");
 //			buffer.append(bidPrice3.setScale(priceScale, RoundingMode.HALF_UP));
 //			buffer.append(",");
-//			buffer.append(bidVolumn3.intValue());
+//			buffer.append(bidVolume3.intValue());
 //			buffer.append(",");
 //			buffer.append(askPrice3.setScale(priceScale, RoundingMode.HALF_UP));
 //			buffer.append(",");
-//			buffer.append(askVolumn3.intValue());
+//			buffer.append(askVolume3.intValue());
 //			buffer.append(",");
 //			buffer.append(bidPrice4.setScale(priceScale, RoundingMode.HALF_UP));
 //			buffer.append(",");
-//			buffer.append(bidVolumn4.intValue());
+//			buffer.append(bidVolume4.intValue());
 //			buffer.append(",");
 //			buffer.append(askPrice4.setScale(priceScale, RoundingMode.HALF_UP));
 //			buffer.append(",");
-//			buffer.append(askVolumn4.intValue());
+//			buffer.append(askVolume4.intValue());
 //			buffer.append(",");
 //			buffer.append(bidPrice5.setScale(priceScale, RoundingMode.HALF_UP));
 //			buffer.append(",");
-//			buffer.append(bidVolumn5.intValue());
+//			buffer.append(bidVolume5.intValue());
 //			buffer.append(",");
 //			buffer.append(askPrice5.setScale(priceScale, RoundingMode.HALF_UP));
 //			buffer.append(",");
-//			buffer.append(askVolumn5.intValue());
+//			buffer.append(askVolume5.intValue());
 //		}
 //		return buffer.toString();
 //	}

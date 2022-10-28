@@ -24,9 +24,9 @@ public class OrderInfo {
 
 	private double price;
 
-	private int volumn;
+	private int volume;
 
-	private int execVolumn;
+	private int execVolume;
 
 	private BigDecimal execValue = new BigDecimal(0);
 
@@ -92,20 +92,20 @@ public class OrderInfo {
 		this.price = price;
 	}
 
-	public int getVolumn() {
-		return volumn;
+	public int getVolume() {
+		return volume;
 	}
 
-	public void setVolumn(int volumn) {
-		this.volumn = volumn;
+	public void setVolume(int volume) {
+		this.volume = volume;
 	}
 
-	public int getExecVolumn() {
-		return execVolumn;
+	public int getExecVolume() {
+		return execVolume;
 	}
 
-//	public void setExecVolumn(int execVolumn) {
-//		this.execVolumn = execVolumn;
+//	public void setExecVolume(int execVolume) {
+//		this.execVolume = execVolume;
 //	}
 
 //	public int getOrderStatus() {
@@ -135,8 +135,8 @@ public class OrderInfo {
 	public void addTrade(TradeInfo tradeInfo) {
 		if (!this.tradeIds.contains(tradeInfo.getId())) {
 			this.tradeIds.add(tradeInfo.getId());
-			this.execVolumn = this.execVolumn + tradeInfo.getVolumn();
-			this.execValue = this.execValue.add(tradeInfo.getPrice().multiply(new BigDecimal(tradeInfo.getVolumn()))
+			this.execVolume = this.execVolume + tradeInfo.getVolume();
+			this.execValue = this.execValue.add(tradeInfo.getPrice().multiply(new BigDecimal(tradeInfo.getVolume()))
 					.multiply(CTPProducts.find(symbol).getMultiplier()));
 		}
 	}

@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.RandomAccessFile;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,14 +38,14 @@ public class HistoryData {
 			String highPrice = dataRow[3];
 			String lowPrice = dataRow[4];
 			String avgPrice = dataRow[5];
-			String volumn = dataRow[6];
+			String volume = dataRow[6];
 			String openInterest1 = "0";
 			String openInterest2 = dataRow[7];
 			if (i > 0) {
 				String[] prevDataRow = dataArray[i - 1];
 				openInterest1 = prevDataRow[7];
 				//
-				if (volumn.equals("0")) {
+				if (volume.equals("0")) {
 					// 如果当前量为0，则价格全部取上一数据的收盘价格
 					openPrice = dataRow[1] = closePrice = dataRow[2] = highPrice = dataRow[3] = lowPrice = dataRow[4] = avgPrice = dataRow[5] = prevDataRow[2];
 					openInterest2 = dataRow[7] = openInterest1;
@@ -78,7 +77,7 @@ public class HistoryData {
 			stringBuffer.append(",");
 			stringBuffer.append(avgPrice);
 			stringBuffer.append(",");
-			stringBuffer.append(volumn);
+			stringBuffer.append(volume);
 			stringBuffer.append(",");
 			stringBuffer.append(openInterest1);
 			stringBuffer.append(",");

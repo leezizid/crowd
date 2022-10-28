@@ -53,7 +53,7 @@ public final class RealStrategyEnv extends BaseStrategyEnv {
 						if (StringUtils.isNotEmpty(matchOrderInfo.getServerOrderId())) {
 							handleOrderUpdated(System.currentTimeMillis(), matchOrderInfo,
 									messageObject.optBoolean("canceled"),
-									new BigDecimal(messageObject.optDouble("execVolumn")),
+									new BigDecimal(messageObject.optDouble("execVolume")),
 									new BigDecimal(messageObject.optDouble("execValue")));
 						}
 					}
@@ -123,7 +123,7 @@ public final class RealStrategyEnv extends BaseStrategyEnv {
 		orderObject.put("type", orderInfo.getType().name());
 		orderObject.put("symbol", orderInfo.getSymbol());
 		orderObject.put("positionSide", orderInfo.getPositionSide().name());
-		orderObject.put("volumn", String.valueOf(orderInfo.getVolumn()));
+		orderObject.put("volume", String.valueOf(orderInfo.getVolume()));
 		orderObject.put("price", String.valueOf(orderInfo.getPrice()));
 		JSONObject result = context.invoke("/tchannel/postOrder", orderObject);
 		return result.getString("serverOrderId");

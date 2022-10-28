@@ -105,7 +105,7 @@ export default class StrategyInfoView extends BaseComponent {
                   <TableColumn key="symbol" title="交易标的"/>
                   <TableColumn key="openTime" title="开始时间" />
                   <TableColumn key="positionSide" title="持仓方向" />
-                  <TableColumn key="positionVolumn" title="持仓数量" />
+                  <TableColumn key="positionVolume" title="持仓数量" />
                   <TableColumn key="positionPrice" title="持仓均价" />
                   <TableColumn key="cost" title="费用" />
                   <TableColumn key="takePrice" title="止盈" />
@@ -133,9 +133,9 @@ export default class StrategyInfoView extends BaseComponent {
                   <TableColumn key="serverOrderId" title="服务端订单ID"/>
                   <TableColumn key="type" title="开平"/>
                   <TableColumn key="positionSide" title="方向"/>
-                  <TableColumn key="volumn" title="委托数量"/>
+                  <TableColumn key="volume" title="委托数量"/>
                   <TableColumn key="price" title="委托价格"/>
-                  <TableColumn key="execVolumn" title="完成数量"/>
+                  <TableColumn key="execVolume" title="完成数量"/>
                   <TableColumn key="avgPrice" title="成交均价"/>
                   <TableColumn key="error" title="错误信息"/>
                   <TableColumn key="op" title="操作" width="50"
@@ -267,9 +267,9 @@ export default class StrategyInfoView extends BaseComponent {
               <TableColumn key="positionSide" title="持仓方向" />
               <TableColumn key="time" title="订单时间" width={180}/>
               <TableColumn key="price" title="委托价格" />
-              <TableColumn key="volumn" title="委托数量" />
+              <TableColumn key="volume" title="委托数量" />
               <TableColumn key="avgPrice" title="成交均价" />
-              <TableColumn key="execVolumn" title="成交数量" />
+              <TableColumn key="execVolume" title="成交数量" />
               <TableColumn key="costValue" title="费用" />
               <TableColumn key="canceled" title="撤单标志" />
               <TableColumn key="error" title="错误信息"  width={180}/>

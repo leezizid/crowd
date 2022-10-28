@@ -12,7 +12,7 @@ public class ProductDefine {
 
 	private String title;
 
-	private BigDecimal minVolumn;
+	private BigDecimal minVolume;
 
 	private BigDecimal multiplier;
 
@@ -26,7 +26,7 @@ public class ProductDefine {
 		this.name = name;
 		this.exchange = exchange;
 		this.title = title;
-		this.minVolumn = new BigDecimal(1);
+		this.minVolume = new BigDecimal(1);
 		this.multiplier = new BigDecimal(multiplier);
 		this.priceScale = priceScale;
 		//
@@ -54,8 +54,8 @@ public class ProductDefine {
 		return title;
 	}
 
-	public BigDecimal getMinVolumn() {
-		return minVolumn;
+	public BigDecimal getMinVolume() {
+		return minVolume;
 	}
 
 	public BigDecimal getMultiplier() {

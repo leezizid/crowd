@@ -10,10 +10,10 @@ public class PositionInfo {
 	private String symbol;
 
 	// 持仓数量
-	private int totalVolumn;
+	private int totalVolume;
 
 	// 今日开仓数量
-	private int todayVolumn;
+	private int todayVolume;
 
 	// 多空方向
 	private PositionSide positionSide;
@@ -21,20 +21,20 @@ public class PositionInfo {
 	// 当前（结算）价
 	private BigDecimal marketPrice;
 
-	public int getTotalVolumn() {
-		return totalVolumn;
+	public int getTotalVolume() {
+		return totalVolume;
 	}
 
-	public void setTotalVolumn(int totalVolumn) {
-		this.totalVolumn = totalVolumn;
+	public void setTotalVolume(int totalVolume) {
+		this.totalVolume = totalVolume;
 	}
 
-	public int getTodayVolumn() {
-		return todayVolumn;
+	public int getTodayVolume() {
+		return todayVolume;
 	}
 
-	public void setTodayVolumn(int todayVolumn) {
-		this.todayVolumn = todayVolumn;
+	public void setTodayVolume(int todayVolume) {
+		this.todayVolume = todayVolume;
 	}
 
 	public String getSymbol() {

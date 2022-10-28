@@ -25,7 +25,7 @@ public abstract class BinanceFuturesTradeAPI extends BinanceFuturesBaseAPI imple
 	}
 
 	@Override
-	public String postOrder(String clientOrderId, OrderType type, String symbol, PositionSide positionSide, BigDecimal volumn,
+	public String postOrder(String clientOrderId, OrderType type, String symbol, PositionSide positionSide, BigDecimal volume,
 			BigDecimal price) throws Throwable {
 		return null;
 	}

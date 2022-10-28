@@ -23,11 +23,11 @@ public interface OrderInfo {
 
 	public OrderType getType();
 
-	public BigDecimal getVolumn();
+	public BigDecimal getVolume();
 
 	public BigDecimal getPrice();
 
-	public BigDecimal getExecVolumn();
+	public BigDecimal getExecVolume();
 
 	public BigDecimal getExecValue();
 

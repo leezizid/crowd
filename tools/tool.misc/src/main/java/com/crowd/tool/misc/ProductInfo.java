@@ -32,8 +32,8 @@ public class ProductInfo {
 		return productDefine.isDelivery();
 	}
 
-	public BigDecimal getMinVolumn() {
-		return productDefine.getMinVolumn();
+	public BigDecimal getMinVolume() {
+		return productDefine.getMinVolume();
 	}
 
 	public BigDecimal getMultiplier() {

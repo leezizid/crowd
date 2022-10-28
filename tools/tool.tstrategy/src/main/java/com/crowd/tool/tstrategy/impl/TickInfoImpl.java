@@ -16,17 +16,20 @@ public class TickInfoImpl implements TickInfo {
 
 	private BigDecimal newPrice;
 
-	private BigDecimal newVolumn;
+	private BigDecimal newVolume;
+	
+	private BigDecimal openInterest;
 
 	public TickInfoImpl(String symbol, long time, BigDecimal lowerLimitPrice, BigDecimal upperLimitPrice,
-			BigDecimal newPrice, BigDecimal newVolumn) {
+			BigDecimal newPrice, BigDecimal newVolume, BigDecimal openInterest) {
 		super();
 		this.symbol = symbol;
 		this.time = time;
 		this.lowerLimitPrice = lowerLimitPrice;
 		this.upperLimitPrice = upperLimitPrice;
 		this.newPrice = newPrice;
-		this.newVolumn = newVolumn;
+		this.newVolume = newVolume;
+		this.openInterest = openInterest;
 	}
 
 	public String getSymbol() {
@@ -49,8 +52,13 @@ public class TickInfoImpl implements TickInfo {
 		return newPrice;
 	}
 
-	public BigDecimal getNewVolumn() {
-		return newVolumn;
+	public BigDecimal getNewVolume() {
+		return newVolume;
 	}
+
+	public BigDecimal getNewOpenInterest() {
+		return openInterest;
+	}
+	
 
 }

@@ -20,7 +20,7 @@ public interface IStrategy {
 	 * @param price
 	 * @return
 	 */
-	public BigDecimal calcTransactionVolumn(StrategyContext context, String symbol, BigDecimal price);
+	public BigDecimal calcTransactionVolume(StrategyContext context, String symbol, BigDecimal price);
 
 	/**
 	 * 

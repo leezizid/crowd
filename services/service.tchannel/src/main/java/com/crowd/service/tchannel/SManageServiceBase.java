@@ -104,9 +104,9 @@ public abstract class SManageServiceBase implements CrowdService {
 			for (int j = 0; j < orderArray.length(); j++) {
 				JSONObject orderObject = orderArray.getJSONObject(j);
 				boolean canceled = orderObject.optBoolean("canceled");
-				float volumn = orderObject.optFloat("volumn");
-				float execVolumn = orderObject.optFloat("execVolumn");
-				if (canceled || execVolumn == volumn) {
+				float volume = orderObject.optFloat("volume");
+				float execVolume = orderObject.optFloat("execVolume");
+				if (canceled || execVolume == volume) {
 					closeOrderCount++;
 				} else {
 					openOrderCount++;

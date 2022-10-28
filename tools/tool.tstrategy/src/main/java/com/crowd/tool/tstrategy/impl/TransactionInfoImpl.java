@@ -36,7 +36,7 @@ class TransactionInfoImpl implements TransactionInfo {
 	/**
 	 * 持仓数量
 	 */
-	private BigDecimal positionVolumn;
+	private BigDecimal positionVolume;
 
 	/**
 	 * 持仓价格
@@ -120,18 +120,18 @@ class TransactionInfoImpl implements TransactionInfo {
 		return this.orders.toArray(new OrderInfo[0]);
 	}
 
-	public BigDecimal getLockVolumn() {
-		BigDecimal lockVolumn = BigDecimal.ZERO;
+	public BigDecimal getLockVolume() {
+		BigDecimal lockVolume = BigDecimal.ZERO;
 		for (OrderInfo orderInfo : this.getOrders()) {
 			if (orderInfo.getType() == OrderType.Close && !orderInfo.isFinished()) {
-				lockVolumn = lockVolumn.add(orderInfo.getVolumn().subtract(orderInfo.getExecVolumn()));
+				lockVolume = lockVolume.add(orderInfo.getVolume().subtract(orderInfo.getExecVolume()));
 			}
 		}
-		return lockVolumn;
+		return lockVolume;
 	}
 
 	public boolean canClose() {
-		if (!this.getPositionVolumn().equals(BigDecimal.ZERO)) {
+		if (!this.getPositionVolume().equals(BigDecimal.ZERO)) {
 			return false;
 		}
 		for (OrderInfo orderInfo : this.getOrders()) {
@@ -166,12 +166,12 @@ class TransactionInfoImpl implements TransactionInfo {
 		this.positionSide = positionSide;
 	}
 
-	public BigDecimal getPositionVolumn() {
-		return positionVolumn;
+	public BigDecimal getPositionVolume() {
+		return positionVolume;
 	}
 
-	public void setPositionVolumn(BigDecimal positionVolumn) {
-		this.positionVolumn = positionVolumn;
+	public void setPositionVolume(BigDecimal positionVolume) {
+		this.positionVolume = positionVolume;
 	}
 
 	public BigDecimal getPositionPrice() {
@@ -260,7 +260,7 @@ class TransactionInfoImpl implements TransactionInfo {
 		this.id = o.optInt("id");
 		this.symbol = o.optString("symbol");
 		this.positionSide = PositionSide.valueOf(o.optString("positionSide"));
-		this.positionVolumn = new BigDecimal(o.optDouble("positionVolumn"));
+		this.positionVolume = new BigDecimal(o.optDouble("positionVolume"));
 		this.positionPrice = new BigDecimal(o.optDouble("positionPrice"));
 		this.balance = new BigDecimal(o.optDouble("balance"));
 		this.cost = new BigDecimal(o.optDouble("cost"));
@@ -287,7 +287,7 @@ class TransactionInfoImpl implements TransactionInfo {
 		o.put("id", id);
 		o.put("symbol", symbol);
 		o.put("positionSide", positionSide.name());
-		o.put("positionVolumn", positionVolumn.doubleValue());
+		o.put("positionVolume", positionVolume.doubleValue());
 		o.put("positionPrice", positionPrice != null ? positionPrice.doubleValue() : 0);
 		o.put("balance", balance.doubleValue());
 		o.put("cost", cost.doubleValue());

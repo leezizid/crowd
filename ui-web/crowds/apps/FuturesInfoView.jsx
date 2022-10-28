@@ -63,8 +63,8 @@ export default class FuturesInfoView extends BaseComponent {
             <TableColumn key="name" title="合约名称" width="100" />
             <TableColumn key="sinaName" title="行情名称" width="100" />
             <TableColumn key="timeInfo" title="行情时间" width="100" />
-            <TableColumn key="positionVolumn" title="持仓量" width="100" align="right"/>
-            <TableColumn key="tradeVolumn" title="交易量" width="100"  align="right"/>
+            <TableColumn key="positionVolume" title="持仓量" width="100" align="right"/>
+            <TableColumn key="tradeVolume" title="交易量" width="100"  align="right"/>
             <TableColumn key="lastPrice" title="最新价" width="100" align="right"/>
             <TableColumn key="isMain" title="是否主力合约" width="100" align="center"/>
           </Table>

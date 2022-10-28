@@ -10,6 +10,8 @@ public interface TickInfo {
 
 	public BigDecimal getNewPrice();
 
-	public BigDecimal getNewVolumn();
+	public BigDecimal getNewVolume();
+	
+	public BigDecimal getNewOpenInterest();
 
 }

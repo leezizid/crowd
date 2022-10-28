@@ -163,36 +163,36 @@ public class CTPTickDataFileProcessor {
 			tickInfo.setLastPrice(new BigDecimal(info[2]));
 //			tickInfo.setHighestPrice(new BigDecimal(info[3]));
 //			tickInfo.setLowestPrice(new BigDecimal(info[4]));
-			tickInfo.setVolumn(new BigDecimal(info[5]));
+			tickInfo.setVolume(new BigDecimal(info[5]));
 //			tickInfo.setValue(new BigDecimal(info[6]));
 			tickInfo.setOpenInterest(new BigDecimal(info[7]));
 			tickInfo.setBidPrice1(getBidOrAskValue(info[8]));
-			tickInfo.setBidVolumn1(getBidOrAskValue(info[9]));
+			tickInfo.setBidVolume1(getBidOrAskValue(info[9]));
 			tickInfo.setAskPrice1(getBidOrAskValue(info[10]));
-			tickInfo.setAskVolumn1(getBidOrAskValue(info[11]));
+			tickInfo.setAskVolume1(getBidOrAskValue(info[11]));
 //			if (info.length > 12) {
 //				tickInfo.setBidPrice2(getBidOrAskValue(info[12]));
-//				tickInfo.setBidVolumn2(getBidOrAskValue(info[13]));
+//				tickInfo.setBidVolume2(getBidOrAskValue(info[13]));
 //				tickInfo.setAskPrice2(getBidOrAskValue(info[14]));
-//				tickInfo.setAskVolumn2(getBidOrAskValue(info[15]));
+//				tickInfo.setAskVolume2(getBidOrAskValue(info[15]));
 //			}
 //			if (info.length > 16) {
 //				tickInfo.setBidPrice3(getBidOrAskValue(info[16]));
-//				tickInfo.setBidVolumn3(getBidOrAskValue(info[17]));
+//				tickInfo.setBidVolume3(getBidOrAskValue(info[17]));
 //				tickInfo.setAskPrice3(getBidOrAskValue(info[18]));
-//				tickInfo.setAskVolumn3(getBidOrAskValue(info[19]));
+//				tickInfo.setAskVolume3(getBidOrAskValue(info[19]));
 //			}
 //			if (info.length > 20) {
 //				tickInfo.setBidPrice4(getBidOrAskValue(info[20]));
-//				tickInfo.setBidVolumn4(getBidOrAskValue(info[21]));
+//				tickInfo.setBidVolume4(getBidOrAskValue(info[21]));
 //				tickInfo.setAskPrice4(getBidOrAskValue(info[22]));
-//				tickInfo.setAskVolumn4(getBidOrAskValue(info[23]));
+//				tickInfo.setAskVolume4(getBidOrAskValue(info[23]));
 //			}
 //			if (info.length > 24) {
 //				tickInfo.setBidPrice5(getBidOrAskValue(info[24]));
-//				tickInfo.setBidVolumn5(getBidOrAskValue(info[25]));
+//				tickInfo.setBidVolume5(getBidOrAskValue(info[25]));
 //				tickInfo.setAskPrice5(getBidOrAskValue(info[26]));
-//				tickInfo.setAskVolumn5(getBidOrAskValue(info[27]));
+//				tickInfo.setAskVolume5(getBidOrAskValue(info[27]));
 //			}
 			return tickInfo;
 		} catch (Throwable t) {

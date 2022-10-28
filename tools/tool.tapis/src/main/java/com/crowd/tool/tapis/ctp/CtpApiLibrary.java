@@ -39,7 +39,7 @@ public interface CtpApiLibrary extends Library {
 	public int reqQryTrade(String id, int requestID);
 
 	public int reqPostOrder(String id, int requestID, String orderRef, String exchangeID, String instrumentID,
-			char type, char direction, float price, int volumn);
+			char type, char direction, float price, int volume);
 
 	public int reqCancelOrder(String id, int requestID, String exchangeID, String instrumentID, String orderID);
 	

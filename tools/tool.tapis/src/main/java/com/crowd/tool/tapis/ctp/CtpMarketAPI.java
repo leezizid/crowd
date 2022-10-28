@@ -33,8 +33,8 @@ public abstract class CtpMarketAPI extends CtpBaseApi {
 			} else if ("M_OnRspUserLogin".equals(type)) {
 				CtpApiLibrary.instance.subscribe(id, symbols, symbols.length);
 			} else if ("M_OnRtnDepthMarketData".equals(type)) {
-				int volumn = messageObject.getInt("Volume");
-				if (volumn > 0) {
+				int volume = messageObject.getInt("Volume");
+				if (volume > 0) {
 					String instrumentID = messageObject.getString("InstrumentID");
 					long time = sdf.parse(messageObject.getString("ActionDay") + messageObject.getString("UpdateTime"))
 							.getTime() + messageObject.getInt("UpdateMillisec");
@@ -47,7 +47,7 @@ public abstract class CtpMarketAPI extends CtpBaseApi {
 					int bidVolume1 = messageObject.getInt("BidVolume1");
 					BigDecimal askPrice1 = convertBigDecimal(messageObject, "AskPrice1");
 					int askVolume1 = messageObject.getInt("AskVolume1");
-					handleMarketData(symbol, lowerLimitPrice, upperLimitPrice, time, price, volumn, openInterest,
+					handleMarketData(symbol, lowerLimitPrice, upperLimitPrice, time, price, volume, openInterest,
 							bidPrice1, bidVolume1, askPrice1, askVolume1);
 //				System.out.println(messageObject);
 				}
@@ -78,8 +78,8 @@ public abstract class CtpMarketAPI extends CtpBaseApi {
 	}
 
 	protected abstract void handleMarketData(String symbol, BigDecimal lowerLimitPrice, BigDecimal upperLimitPrice,
-			long time, BigDecimal price, int volumn, int openInterest, BigDecimal bidPrice1, int bidVolumn1,
-			BigDecimal askPrice1, int askVolumn1);
+			long time, BigDecimal price, int volume, int openInterest, BigDecimal bidPrice1, int bidVolume1,
+			BigDecimal askPrice1, int askVolume1);
 
 	protected void doInit(String flowDir) {
 		CtpApiLibrary.instance.initMarket(id, flowDir, front, this);

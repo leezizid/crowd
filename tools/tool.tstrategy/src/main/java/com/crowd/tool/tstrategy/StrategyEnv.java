@@ -13,9 +13,9 @@ public interface StrategyEnv extends StrategyContext {
 	public void dispose(CrowdContext crowdContext);
 
 	public void onTick(String symbol, long time, BigDecimal lowerLimitPrice, BigDecimal upperLimitPrice,
-			BigDecimal price, BigDecimal volumn);
+			BigDecimal price, BigDecimal volume, BigDecimal openInterest);
 
-	public void handleOrderUpdated(long time, OrderInfo matchOrderInfo, boolean canceled, BigDecimal execVolumn,
+	public void handleOrderUpdated(long time, OrderInfo matchOrderInfo, boolean canceled, BigDecimal execVolume,
 			BigDecimal execValue) throws Throwable;
 
 	public void handleManualOpen(PositionSide side, String symbol, BigDecimal price, BigDecimal takePrice,

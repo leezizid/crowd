@@ -49,12 +49,12 @@ public abstract class BinanceDeliveryTradeAPI extends BinanceDeliveryBaseAPI imp
 						|| orderObject.getString("status").equals("EXPIRED"));
 	}
 
-	protected abstract void handleOrderUpdated(String serverOrderId, String symbol, BigDecimal execVolumn,
+	protected abstract void handleOrderUpdated(String serverOrderId, String symbol, BigDecimal execVolume,
 			BigDecimal execValue, boolean canceled);
 
 	@Override
 	public String postOrder(String clientOrderId, OrderType type, String symbol, PositionSide positionSide,
-			BigDecimal volumn, BigDecimal price) throws Throwable {
+			BigDecimal volume, BigDecimal price) throws Throwable {
 		String side;
 		if (positionSide == PositionSide.Long) {
 			side = type == OrderType.Open ? "BUY" : "SELL";
@@ -69,7 +69,7 @@ public abstract class BinanceDeliveryTradeAPI extends BinanceDeliveryBaseAPI imp
 		urlParams.putToUrl("positionSide", positionSide);
 		urlParams.putToUrl("type", "LIMIT");
 		urlParams.putToUrl("timeInForce", "GTC");
-		urlParams.putToUrl("quantity", volumn);
+		urlParams.putToUrl("quantity", volume);
 		urlParams.putToUrl("price", price);
 		urlParams.putToUrl("newClientOrderId", clientOrderId);
 		JSONObject result = callSyncWithSignature("/dapi/v1/order", urlParams);
@@ -95,7 +95,7 @@ public abstract class BinanceDeliveryTradeAPI extends BinanceDeliveryBaseAPI imp
 				if (o.optInt("positionAmt") != 0) {
 					JSONObject positionObject = new JSONObject();
 					positionObject.put("symbol", o.getString("symbol"));
-					positionObject.put("volumn", o.optInt("positionAmt"));
+					positionObject.put("volume", o.optInt("positionAmt"));
 					positionObject.put("liquidationPrice", o.optDouble("liquidationPrice"));
 					positionObject.put("marketPrice", o.optDouble("markPrice"));
 					positionArray.put(positionObject);
@@ -120,8 +120,8 @@ public abstract class BinanceDeliveryTradeAPI extends BinanceDeliveryBaseAPI imp
 				orderObject.put("time", o.getLong("time"));
 				orderObject.put("type", o.getString("side"));
 				orderObject.put("positionSide", o.getString("positionSide"));
-				orderObject.put("volumn", o.getString("origQty"));
-				orderObject.put("execVolumn", o.getString("executedQty"));
+				orderObject.put("volume", o.getString("origQty"));
+				orderObject.put("execVolume", o.getString("executedQty"));
 				orderObject.put("price", o.getString("price"));
 				orderObject.put("avgPrice", o.getString("avgPrice"));
 				orderArray.put(orderObject);

@@ -233,7 +233,7 @@ public class BinanceChannelService implements CrowdService {
 		}
 	}
 
-	@CrowdWorker
+	@CrowdMethod
 	public void stopWorker(final CrowdContext crowdContext, JSONObject inputObject, JSONObject outputObject)
 			throws Throwable {
 		String id = inputObject.optString("id");

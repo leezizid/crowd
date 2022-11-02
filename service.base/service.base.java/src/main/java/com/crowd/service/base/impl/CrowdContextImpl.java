@@ -34,8 +34,9 @@ public class CrowdContextImpl implements CrowdContext {
 	}
 
 	@Override
-	public JSONObject asyncInvoke(String path, JSONObject inputObject) throws Throwable {
-		return CrowdApp.invokeRemoteService(sid, tid, path, inputObject, true);
+	public String asyncInvoke(String path, JSONObject inputObject) throws Throwable {
+		JSONObject o = CrowdApp.invokeRemoteService(sid, tid, path, inputObject, true);
+		return o.optString("workerHandle"); 
 	}
 
 	@Override

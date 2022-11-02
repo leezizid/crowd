@@ -39,12 +39,7 @@ export default class FuturesInfoView extends BaseComponent {
 
   render() {
     return (
-      <div style={{height:"100%", display:"flex", flexFlow:"column", padding: 10}}>
-        <div style={{marginTop:10, marginBottom:10, display:"flex"}}>
-          <Button style={{width:'80px'}} type="secondary" onClick={()=>(this.refresh())}>刷新</Button>
-          <span style={{width:10}}>&nbsp;&nbsp;</span>
-          <Button style={{width:'150px'}} type="primary" onClick={()=>(this.update())}>更新行情数据</Button>
-        </div>         
+      <div style={{height:"100%", display:"flex", flexFlow:"column", padding: 10}}>        
         <Tabs size="default" type="border-card" value={this.state.activeTab} on$change-value={(c, activeTab) => {
             this.setState({activeTab})
             this.refresh();

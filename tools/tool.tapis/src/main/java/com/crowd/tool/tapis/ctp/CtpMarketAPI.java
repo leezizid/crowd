@@ -21,6 +21,15 @@ public abstract class CtpMarketAPI extends CtpBaseApi {
 		this.symbols = symbols;
 	}
 
+	public void subscribe(String[] symbols) {
+		this.symbols = symbols;
+		try {
+			CtpApiLibrary.instance.subscribe(id, symbols, symbols.length);
+		} catch (Throwable t) {
+
+		}
+	}
+
 	public void handleMessage(String type, String message) {
 		JSONObject messageObject;
 		try {
@@ -54,7 +63,7 @@ public abstract class CtpMarketAPI extends CtpBaseApi {
 			} else if ("M_OnFrontDisconnected".equals(type)) {
 				handleDisconnected();
 			} else if ("M_OnRspError".equals(type)) {
-
+				System.out.print("M_OnRspError:" + messageObject);
 			}
 		} catch (Throwable t) {
 			t.printStackTrace();

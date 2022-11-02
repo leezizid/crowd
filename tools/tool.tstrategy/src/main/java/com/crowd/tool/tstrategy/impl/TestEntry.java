@@ -178,7 +178,7 @@ class TestWorkerContext implements CrowdWorkerContext {
 	}
 
 	@Override
-	public JSONObject asyncInvoke(String path, JSONObject inputObject) throws Throwable {
+	public String asyncInvoke(String path, JSONObject inputObject) throws Throwable {
 		throw new UnsupportedOperationException();
 	}
 

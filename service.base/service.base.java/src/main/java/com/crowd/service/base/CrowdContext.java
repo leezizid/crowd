@@ -11,7 +11,7 @@ public interface CrowdContext {
 
 	public JSONObject invoke(String path, JSONObject inputObject) throws Throwable;
 
-	public JSONObject asyncInvoke(String path, JSONObject inputObject) throws Throwable;
+	public String asyncInvoke(String path, JSONObject inputObject) throws Throwable;
 
 	public void sendMessage(String topic, JSONObject message) throws Throwable;
 

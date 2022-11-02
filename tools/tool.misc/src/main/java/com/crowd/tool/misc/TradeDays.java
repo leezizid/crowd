@@ -103,7 +103,7 @@ public class TradeDays {
 		calendar.setTimeInMillis(time);
 		String day = format(calendar);
 		int hour = calendar.get(Calendar.HOUR_OF_DAY);
-		if (hour <= 15) {
+		if (hour < 18) {   //18点之前都认为是当前交易日，18点之后，往后找
 			if (days.containsKey(day)) {
 				return day;
 			}

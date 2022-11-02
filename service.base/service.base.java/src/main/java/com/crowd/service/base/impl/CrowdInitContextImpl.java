@@ -18,6 +18,7 @@ public final class CrowdInitContextImpl implements CrowdInitContext {
 		this.serviceName = serviceName;
 	}
 
+	@SuppressWarnings("deprecation")
 	public final void registerTable(Class<? extends TableDefine> clazz) throws Throwable {
 		registerTables.add(clazz.newInstance());
 	}
@@ -33,6 +34,11 @@ public final class CrowdInitContextImpl implements CrowdInitContext {
 		JSONObject outputObject = CrowdApp.invokeRemoteService(null, null, CrowdApp.CORE_SERVICE_FILE_LOAD, inputObject,
 				false);
 		return outputObject.getString("content");
+	}
+
+	@Override
+	public void startWorker(String path, JSONObject inputObject) throws Throwable {
+		CrowdApp.invokeRemoteService(null, null, path, inputObject, true);
 	}
 
 }

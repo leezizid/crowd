@@ -122,13 +122,17 @@ public class CTPProducts {
 			return product;
 		}
 		if (name.length() > 4) {
-			product = ProductDefineRegistry.find(name.substring(0, name.length() - 4));
-			if (product != null) {
-				return product;
-			}
-			product = ProductDefineRegistry.find(name.substring(0, name.length() - 3));
-			if (product != null) {
-				return product;
+			try {
+				Integer.parseInt(name.substring(name.length() - 4));
+				product = ProductDefineRegistry.find(name.substring(0, name.length() - 4));
+				if (product != null) {
+					return product;
+				}
+			} catch (Throwable t) {
+				product = ProductDefineRegistry.find(name.substring(0, name.length() - 3));
+				if (product != null) {
+					return product;
+				}
 			}
 		}
 		return null;

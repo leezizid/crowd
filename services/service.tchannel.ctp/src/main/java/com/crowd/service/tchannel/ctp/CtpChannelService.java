@@ -47,9 +47,13 @@ public class CtpChannelService implements CrowdService {
 
 	private static Map<String, CtpTradeAPI> channels = new HashMap<String, CtpTradeAPI>();
 
+	private String marketDataServer;
+	private String marketDataDir;
+
 	@Override
 	public void init(CrowdInitContext context) throws Throwable {
-
+		marketDataServer = System.getProperty("MaketDataServer", "140.206.242.115:42213");
+		marketDataDir = System.getProperty("MaketDataDir", "F:\\mdstream");
 	}
 
 	@Override
@@ -418,8 +422,8 @@ public class CtpChannelService implements CrowdService {
 
 	@CrowdWorker
 	public void marketDataWorker(CrowdWorkerContext context, JSONObject inputObject) throws Throwable {
-		final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
-		market = new CtpMarketAPI("marketDataWorker", "tcp://180.168.146.187:10211", getMainInstruments(context)) {
+		final SimpleDateFormat sdf = new SimpleDateFormat("yyMMddHHmmssSSS");
+		market = new CtpMarketAPI("marketDataWorker", "tcp://" + marketDataServer, getMainInstruments(context)) {
 
 			@Override
 			protected void handleMarketData(String symbol, BigDecimal lowerLimitPrice, BigDecimal upperLimitPrice,
@@ -433,8 +437,8 @@ public class CtpChannelService implements CrowdService {
 					dataBuffer.append(symbol);
 					dataBuffer.append(",");
 					dataBuffer.append(sdf.format(new Date(time)));
-					dataBuffer.append(",");
-					dataBuffer.append(time);
+//					dataBuffer.append(",");
+//					dataBuffer.append(time);
 					dataBuffer.append(",");
 					dataBuffer.append(price);
 					dataBuffer.append(",");
@@ -460,7 +464,7 @@ public class CtpChannelService implements CrowdService {
 					if (tradeDay != null) {
 						int i = 0;
 						while (true) {
-							File file = new File("F:\\mdstream\\" + tradeDay + "_" + i + ".txt");
+							File file = new File(marketDataDir + File.separator + tradeDay + "_" + i + ".txt");
 							if (file.exists()) {
 								i++;
 								continue;

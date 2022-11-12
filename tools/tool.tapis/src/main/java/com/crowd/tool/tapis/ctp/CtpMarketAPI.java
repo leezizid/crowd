@@ -2,8 +2,8 @@ package com.crowd.tool.tapis.ctp;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.SimpleDateFormat;
 import java.util.Base64;
+import java.util.Calendar;
 
 import org.json.JSONObject;
 
@@ -12,8 +12,6 @@ public abstract class CtpMarketAPI extends CtpBaseApi {
 	private String front;
 
 	private String[] symbols;
-
-	private SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHH:mm:ss");
 
 	public CtpMarketAPI(String id, String front, String... symbols) {
 		super(id);
@@ -45,8 +43,8 @@ public abstract class CtpMarketAPI extends CtpBaseApi {
 				int volume = messageObject.getInt("Volume");
 				if (volume > 0) {
 					String instrumentID = messageObject.getString("InstrumentID");
-					long time = sdf.parse(messageObject.getString("ActionDay") + messageObject.getString("UpdateTime"))
-							.getTime() + messageObject.getInt("UpdateMillisec");
+					long time = calcTickTime(messageObject.getString("UpdateTime"))
+							+ messageObject.getInt("UpdateMillisec");
 					String symbol = CTPProducts.find(instrumentID).getExchange() + "." + instrumentID;
 					BigDecimal lowerLimitPrice = convertBigDecimal(messageObject, "LowerLimitPrice");
 					BigDecimal upperLimitPrice = convertBigDecimal(messageObject, "UpperLimitPrice");
@@ -68,6 +66,30 @@ public abstract class CtpMarketAPI extends CtpBaseApi {
 		} catch (Throwable t) {
 			t.printStackTrace();
 		}
+	}
+
+	private long calcTickTime(String updateTimeString) {
+		Calendar now = Calendar.getInstance();
+		//
+		int localTimeSecond = now.get(Calendar.HOUR_OF_DAY) * 3600 + now.get(Calendar.MINUTE) * 60
+				+ now.get(Calendar.SECOND);
+		int tickTimeSecond = Integer.parseInt(updateTimeString.substring(0, 2)) * 3600
+				+ Integer.parseInt(updateTimeString.substring(3, 5)) * 60
+				+ Integer.parseInt(updateTimeString.substring(6, 8));
+		//
+		now.set(Calendar.HOUR_OF_DAY, 0);
+		now.set(Calendar.MINUTE, 0);
+		now.set(Calendar.SECOND, 0);
+		now.set(Calendar.MILLISECOND, 0);
+		//
+		if (localTimeSecond - tickTimeSecond > 20 * 3600) {
+			// 本地时间过慢，需要往后一天
+			now.setTimeInMillis(now.getTimeInMillis() + 24 * 3600 * 1000);
+		} else if (tickTimeSecond - localTimeSecond > 20 * 3600) {
+			// 本地时间过快，需要往前一天
+			now.setTimeInMillis(now.getTimeInMillis() - 24 * 3600 * 1000);
+		}
+		return now.getTimeInMillis() + tickTimeSecond * 1000;
 	}
 
 	private BigDecimal convertBigDecimal(JSONObject o, String key) {

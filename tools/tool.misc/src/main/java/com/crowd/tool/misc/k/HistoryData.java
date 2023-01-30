@@ -26,7 +26,7 @@ public class HistoryData {
 	}
 
 	public final static void main(String[] args) throws Throwable {
-		String pname = "SHFE.cu";
+		String pname = "CZCE.AP";
 		String period = "5m";
 		String[][] dataArray = readKLineData(pname, period, "2016-01-01", "2021-12-31");
 		StringBuffer stringBuffer = new StringBuffer();

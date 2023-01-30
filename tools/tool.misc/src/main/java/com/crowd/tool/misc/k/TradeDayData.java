@@ -104,13 +104,13 @@ public class TradeDayData {
 					prevKlineTime = newData.getBaseTime() - t * 1000;
 					dataList.add(new KLineData(interval, priceScale, prevKlineTime, BigDecimal.ZERO, BigDecimal.ZERO,
 							BigDecimal.ZERO));
-					System.out.println(dataList.get(dataList.size() - 1));
+//					System.out.println(dataList.get(dataList.size() - 1));
 				}
 				while (newData.getBaseTime() - prevKlineTime > interval * 1000) {
 					prevKlineTime = prevKlineTime + interval * 1000;
 					dataList.add(new KLineData(interval, priceScale, prevKlineTime, BigDecimal.ZERO, BigDecimal.ZERO,
 							BigDecimal.ZERO));
-					System.out.println(dataList.get(dataList.size() - 1));
+//					System.out.println(dataList.get(dataList.size() - 1));
 				}
 			}
 		}

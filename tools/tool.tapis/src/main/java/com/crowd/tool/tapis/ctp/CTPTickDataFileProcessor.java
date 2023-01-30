@@ -10,7 +10,9 @@ import java.io.RandomAccessFile;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -22,11 +24,79 @@ import com.crowd.tool.misc.k.TradeDayData;
 
 public class CTPTickDataFileProcessor {
 
+//	public final static void main0(String[] args) throws Throwable {
+//		File sourceDir = new File("F:\\MD_CFFEX\\");
+//		for (File dir : sourceDir.listFiles()) {
+//			String name = dir.getName();
+//			System.out.println(name + "...");
+//			RandomAccessFile raf = new RandomAccessFile(
+//					dir.getAbsolutePath() + File.separator + name + "_tick_202211.csv", "rw");
+//			RandomAccessFile raf2 = new RandomAccessFile(
+//					dir.getAbsolutePath() + File.separator + name + "_tick_202214.txt", "rw");
+//			raf2.setLength(0);
+//			long length = 0;
+//			String line = raf.readLine();
+//			while ((line = raf.readLine()) != null) {
+//				String[] arr = StringUtils.split(line, ",");
+//				long time = Long.parseLong(arr[1]);
+//				if (time < 1668171600000000000L) {
+//					length = raf.getFilePointer();
+//				} else {
+//					String timeStr = arr[0].replace(" ", "").replace("-", "").replace(":", "").replace(".", "")
+//							.substring(2, 17);
+//					raf2.writeBytes(name + "," + timeStr + "," + arr[2] + "," + arr[5] + "," + arr[7] + "," + arr[8]
+//							+ "," + arr[9] + "," + arr[10] + "," + arr[11] + "\r\n");
+//				}
+//			}
+//			raf.setLength(length);
+//			raf.close();
+//			raf2.close();
+//		}
+//	}
+
 	public final static void main(String[] args) throws Throwable {
-		String exName = "SHFE";
-		String productName = "cu";
+//		String exName = "CFFEX";
+//		String[] productNames = new String[] { "IC","IF","IH","IM","T","TF","TS"};
+//		String exName = "INE";
+//		String[] productNames = new String[] { "bc","lu","nr","sc"};
+//		String exName = "CZCE";
+//		String[] productNames = new String[] {"AP","CF","CJ","CY","FG","LR","MA","OI","PF","PK","PM","RI","RM","RS","SA","SF","SM","SR","TA","UR","WH","ZC"};
+		String exName = "DCE";
+		String[] productNames = new String[] {"a","b","bb","c","cs","eb","eg","fb","i","j","jd","jm","l","lh","m","p","pg","pp","rr","v","y"};
+//		String exName = "SHFE";
+//		String[] productNames = new String[] {"ag","al","au","bu","cu","fu","hc","ni","pb","rb","ru","sn","sp","ss","wr","zn"};
+		for (String productName : productNames) {
+			processTQTickFile(exName, productName);
+		}
+	}
+
+	public final static void main1(String[] args) throws Throwable {
+		File sourceDir = new File("F:\\mdstream");
+		String tradeDay = "2022-11-14";
+		int index = 0;
+		while (true) {
+			File file = new File(sourceDir, tradeDay + "_" + index);
+			if (!file.exists()) {
+				break;
+			}
+			if (file.length() == 0) {
+				continue;
+			}
+			RandomAccessFile raf = new RandomAccessFile(file, "r");
+			Map<String, RandomAccessFile> rafMap = new HashMap<String, RandomAccessFile>();
+			String line = null;
+			while((line = raf.readLine()) != null) {
+				//SHFE.ag2212,221124022948000,4905.0,374860,256607,4905.0,2,4906.0,37
+				
+			}
+			index++;
+		}
+	}
+
+	public final static void processTQTickFile(String exName, String productName) throws Throwable {
 		String symbol = exName + "." + productName;
-		File sourceDir = new File("Z:\\MD\\" + symbol);
+		File sourceDir = new File("Z:\\BAK\\" + symbol);
+		File targetDir = new File("Z:\\MD\\" + symbol);
 		List<String> fileNameList = new ArrayList<String>();
 		for (File file : sourceDir.listFiles()) {
 			if (file.isFile() && file.getAbsolutePath().endsWith(".csv")) {
@@ -41,18 +111,32 @@ public class CTPTickDataFileProcessor {
 		if (ctpProduct == null || !ctpProduct.getExchange().equals(exName)) {
 			return;
 		}
-		new File(sourceDir, "daytick").mkdirs();
-		new File(sourceDir, "daytime").mkdirs();
-		new File(sourceDir, "kline").mkdirs();
+		new File(targetDir, "daytick").mkdirs();
+		new File(targetDir, "daytime").mkdirs();
+		new File(targetDir, "kline").mkdirs();
 
 		String finishDay = "";
-		File markFile = new File(sourceDir, ".mark");
+		File markFile = new File(targetDir, ".mark");
 		if (markFile.exists()) {
 			RandomAccessFile tradeDayFinishMarkRAF = new RandomAccessFile(markFile, "r");
 			finishDay = tradeDayFinishMarkRAF.readLine().trim();
 			tradeDayFinishMarkRAF.close();
 		}
-
+		//
+		String[] tradeDays = TradeDays.getTradeDayList();
+		int tradeDayIndex = 0;
+		if (StringUtils.isNotEmpty(finishDay)) {
+			for (int i = 0; i < tradeDays.length; i++) {
+				if (tradeDays[i].equals(finishDay)) {
+					tradeDayIndex = i + 1;
+					break;
+				}
+			}
+		}
+		if (tradeDayIndex == tradeDays.length) {
+			throw new IllegalStateException("所有可用交易日均处理完毕");
+		}
+		//
 		int progressCount = 0;
 		TradeDayData tradeDayData = null;
 		for (String fileName : fileNameList) {
@@ -84,10 +168,29 @@ public class CTPTickDataFileProcessor {
 						}
 						if (tradeDayData == null || !tradeDayData.getTradeDay().equals(tradeDay)) {
 							// 保存数据
-							save(symbol, tradeDayData, sourceDir);
+							save(symbol, tradeDayData, targetDir);
 							// 创建新数据
+							while (!tradeDay.equals(tradeDays[tradeDayIndex])) {
+								tradeDayData = new TradeDayData(tradeDays[tradeDayIndex], ctpProduct);
+								System.out.print("默认处理" + tradeDays[tradeDayIndex] + "***");
+								//
+								TickInfo mockTickInfo = new TickInfo();
+								mockTickInfo.setTime(
+										TradeDays.getTradeDayTime(tradeDays[tradeDayIndex]) + 1000 * 60 * 60 * 15);
+								mockTickInfo.setLastPrice(BigDecimal.ZERO);
+								mockTickInfo.setVolume(BigDecimal.ZERO);
+								mockTickInfo.setOpenInterest(BigDecimal.ZERO);
+								mockTickInfo.setBidPrice1(BigDecimal.ZERO);
+								mockTickInfo.setBidVolume1(BigDecimal.ZERO);
+								mockTickInfo.setAskPrice1(BigDecimal.ZERO);
+								mockTickInfo.setAskVolume1(BigDecimal.ZERO);
+								tradeDayData.onTick(mockTickInfo);
+								save(symbol, tradeDayData, targetDir);
+								tradeDayIndex++;
+							}
 							tradeDayData = new TradeDayData(tradeDay, ctpProduct);
 							System.out.print("开始处理" + tradeDay + "...");
+							tradeDayIndex++;
 						}
 						tradeDayData.onTick(tickInfo);
 						progressCount++;
@@ -96,7 +199,7 @@ public class CTPTickDataFileProcessor {
 							System.out.print(".");
 						}
 					} else if (line.trim().equals("---###---")) {
-						save(symbol, tradeDayData, sourceDir);
+						save(symbol, tradeDayData, targetDir);
 						tradeDayData = null;
 					}
 				}
@@ -106,16 +209,16 @@ public class CTPTickDataFileProcessor {
 				bufferedReader.close();
 			}
 		}
-		save(symbol, tradeDayData, sourceDir);
+		save(symbol, tradeDayData, targetDir);
 	}
 
-	private static void save(String symbol, TradeDayData tradeDayData, File sourceDir) throws Throwable {
+	private static void save(String symbol, TradeDayData tradeDayData, File targetDir) throws Throwable {
 		if (tradeDayData == null) {
 			return;
 		}
 
 		String tradeDay = tradeDayData.getTradeDay();
-		File dayTickDir = new File(sourceDir, "daytick");
+		File dayTickDir = new File(targetDir, "daytick");
 
 		System.out.print("正在写入文件");
 
@@ -144,7 +247,7 @@ public class CTPTickDataFileProcessor {
 		Thread.sleep(10);
 
 		// 写入标记文件
-		RandomAccessFile tradeDayFinishMarkRAF = new RandomAccessFile(new File(sourceDir, ".mark"), "rw");
+		RandomAccessFile tradeDayFinishMarkRAF = new RandomAccessFile(new File(targetDir, ".mark"), "rw");
 		tradeDayFinishMarkRAF.setLength(0);
 		tradeDayFinishMarkRAF.write(tradeDay.getBytes());
 		tradeDayFinishMarkRAF.close();

@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -54,7 +55,7 @@ public class CTPTickDataFileProcessor {
 //		}
 //	}
 
-	public final static void main(String[] args) throws Throwable {
+	public final static void main0(String[] args) throws Throwable {
 //		String exName = "CFFEX";
 //		String[] productNames = new String[] { "IC","IF","IH","IM","T","TF","TS"};
 //		String exName = "INE";
@@ -62,7 +63,8 @@ public class CTPTickDataFileProcessor {
 //		String exName = "CZCE";
 //		String[] productNames = new String[] {"AP","CF","CJ","CY","FG","LR","MA","OI","PF","PK","PM","RI","RM","RS","SA","SF","SM","SR","TA","UR","WH","ZC"};
 		String exName = "DCE";
-		String[] productNames = new String[] {"a","b","bb","c","cs","eb","eg","fb","i","j","jd","jm","l","lh","m","p","pg","pp","rr","v","y"};
+		String[] productNames = new String[] { "a", "b", "bb", "c", "cs", "eb", "eg", "fb", "i", "j", "jd", "jm", "l",
+				"lh", "m", "p", "pg", "pp", "rr", "v", "y" };
 //		String exName = "SHFE";
 //		String[] productNames = new String[] {"ag","al","au","bu","cu","fu","hc","ni","pb","rb","ru","sn","sp","ss","wr","zn"};
 		for (String productName : productNames) {
@@ -70,26 +72,152 @@ public class CTPTickDataFileProcessor {
 		}
 	}
 
-	public final static void main1(String[] args) throws Throwable {
+	public final static void main(String[] args) throws Throwable {
+//		String exName = "CFFEX";
+//		String[] productNames = new String[] { "IC","IF","IH","IM","T","TF","TS"};
+//		String exName = "INE";
+//		String[] productNames = new String[] { "bc","lu","nr","sc"};
+//		String exName = "CZCE";
+//		String[] productNames = new String[] {"AP","CF","CJ","CY","FG","LR","MA","OI","PF","PK","PM","RI","RM","RS","SA","SF","SM","SR","TA","UR","WH","ZC"};
+//		String exName = "DCE";
+//		String[] productNames = new String[] { "a", "b", "bb", "c", "cs", "eb", "eg", "fb", "i", "j", "jd", "jm", "l",
+//				"lh", "m", "p", "pg", "pp", "rr", "v", "y" };
+		String exName = "SHFE";
+		String[] productNames = new String[] { "ag" };
+//		String[] productNames = new String[] {"ag","al","au","bu","cu","fu","hc","ni","pb","rb","ru","sn","sp","ss","wr","zn"};
+		for (String productName : productNames) {
+			processMDStreamFile(exName, productName);
+		}
+	}
+
+	public final static void main2(String[] args) throws Throwable {
 		File sourceDir = new File("F:\\mdstream");
-		String tradeDay = "2022-11-14";
+		File targetDir = new File("Z:\\BAK");
+		String tradeDay = "2023-01-31";
 		int index = 0;
+		Map<String, StringBuffer> buffers = new HashMap<String, StringBuffer>();
 		while (true) {
-			File file = new File(sourceDir, tradeDay + "_" + index);
+			File sourceFile = new File(sourceDir, tradeDay + "_" + index + ".txt");
+			if (!sourceFile.exists()) {
+				break;
+			}
+			byte[] content = new byte[(int) sourceFile.length()];
+			RandomAccessFile sourceRaf = new RandomAccessFile(sourceFile, "r");
+			sourceRaf.read(content);
+			sourceRaf.close();
+			//
+			ByteArrayInputStream bais = new ByteArrayInputStream(content);
+			InputStreamReader streamReader = new InputStreamReader(bais);
+			BufferedReader bufferedReader = new BufferedReader(streamReader);
+			try {
+				String line = null;
+				while ((line = bufferedReader.readLine()) != null) {
+					String[] arr = StringUtils.split(line, ",");
+					String[] productInfo = StringUtils.split(arr[0], ".");
+					ProductDefine productDefine = CTPProducts.find(productInfo[1]);
+					String fileName = targetDir.getAbsolutePath() + File.separator + productDefine.getExchange() + "."
+							+ productDefine.getName() + File.separator + tradeDay + ".txt";
+					StringBuffer buffer = buffers.get(fileName);
+					if (buffer == null) {
+						buffer = new StringBuffer();
+						buffers.put(fileName, buffer);
+					}
+					buffer.append(line);
+					buffer.append("\r\n");
+				}
+			} finally {
+				bais.close();
+				streamReader.close();
+				bufferedReader.close();
+			}
+			index++;
+		}
+		for (String fileName : buffers.keySet()) {
+			File file = new File(fileName);
+			file.getParentFile().mkdir();
+			RandomAccessFile raf = new RandomAccessFile(file, "rw");
+			raf.setLength(0);
+			raf.write(buffers.get(fileName).toString().getBytes());
+			raf.close();
+		}
+	}
+
+	public final static void processMDStreamFile(String exName, String productName) throws Throwable {
+		String symbol = exName + "." + productName;
+		File sourceDir = new File("Z:\\BAK\\" + symbol);
+		File targetDir = new File("Z:\\MD\\" + symbol);
+		final SimpleDateFormat sdf = new SimpleDateFormat("yyMMddHHmmssSSS");
+		//
+		ProductDefine ctpProduct = CTPProducts.find(productName);
+		if (ctpProduct == null || !ctpProduct.getExchange().equals(exName)) {
+			return;
+		}
+		new File(targetDir, "daytick").mkdirs();
+		new File(targetDir, "daytime").mkdirs();
+		new File(targetDir, "kline").mkdirs();
+		String[] tradeDays = TradeDays.getTradeDayList();
+		int currentTradeDayIndex = 0;
+		File markFile = new File(targetDir, ".mark");
+		if (markFile.exists()) {
+			RandomAccessFile tradeDayFinishMarkRAF = new RandomAccessFile(markFile, "r");
+			String finishDay = tradeDayFinishMarkRAF.readLine().trim();
+			tradeDayFinishMarkRAF.close();
+			if (StringUtils.isNotEmpty(finishDay)) {
+				for (int i = 0; i < tradeDays.length; i++) {
+					if (tradeDays[i].equals(finishDay)) {
+						currentTradeDayIndex = i + 1;
+						break;
+					}
+				}
+			}
+		}
+		//
+		if (currentTradeDayIndex == tradeDays.length) {
+			throw new IllegalStateException("所有可用交易日均处理完毕");
+		}
+		//
+		for (int i = currentTradeDayIndex; i < tradeDays.length; i++) {
+			String tradeDay = tradeDays[i];
+			File file = new File(sourceDir, tradeDay + ".txt");
 			if (!file.exists()) {
 				break;
 			}
-			if (file.length() == 0) {
-				continue;
-			}
+			TradeDayData tradeDayData = new TradeDayData(tradeDay, ctpProduct);
 			RandomAccessFile raf = new RandomAccessFile(file, "r");
-			Map<String, RandomAccessFile> rafMap = new HashMap<String, RandomAccessFile>();
-			String line = null;
-			while((line = raf.readLine()) != null) {
-				//SHFE.ag2212,221124022948000,4905.0,374860,256607,4905.0,2,4906.0,37
-				
+			byte[] content = new byte[(int) raf.length()];
+			raf.read(content);
+			raf.close();
+			ByteArrayInputStream bais = new ByteArrayInputStream(content);
+			InputStreamReader streamReader = new InputStreamReader(bais);
+			BufferedReader bufferedReader = new BufferedReader(streamReader);
+			try {
+				String line = null;
+				long lastTime = 0;
+				while (StringUtils.isNotEmpty(line = bufferedReader.readLine())) {
+					String[] info = StringUtils.split(line, ",");
+					long time = sdf.parse(info[1]).getTime();
+					if (time <= lastTime) {
+						continue;
+					}
+					TickInfo tickInfo = new TickInfo();
+					tickInfo.setLabel(info[1]);
+					tickInfo.setTime(time);
+					tickInfo.setLastPrice(new BigDecimal(info[2]));
+					tickInfo.setVolume(new BigDecimal(info[3]));
+					tickInfo.setOpenInterest(new BigDecimal(info[4]));
+					tickInfo.setBidPrice1(getBidOrAskValue(info[5]));
+					tickInfo.setBidVolume1(getBidOrAskValue(info[6]));
+					tickInfo.setAskPrice1(getBidOrAskValue(info[7]));
+					tickInfo.setAskVolume1(getBidOrAskValue(info[8]));
+					tradeDayData.onTick(tickInfo);
+					lastTime = time;
+				}
+			} finally {
+				bais.close();
+				streamReader.close();
+				bufferedReader.close();
 			}
-			index++;
+			save(symbol, tradeDayData, targetDir);
 		}
 	}
 

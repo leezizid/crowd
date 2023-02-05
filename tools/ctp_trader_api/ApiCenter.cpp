@@ -13,11 +13,11 @@ map<string, CMarketApi*> marketApis;
 
 
 //初始行情接口
-extern "C" __declspec(dllexport) const void initMarket(char* id, const char* dir, const char* marketFront, JnaResCallback jnaResCallback);
-const void initMarket(char* id, const char* dir, const char* marketFront, JnaResCallback jnaCallback)
+extern "C" __declspec(dllexport) const char* initMarket(char* id, const char* dir, const char* marketFront, JnaResCallback jnaResCallback);
+const char* initMarket(char* id, const char* dir, const char* marketFront, JnaResCallback jnaCallback)
 {
 	marketApis[id] = new CMarketApi();
-	marketApis[id]->init(dir, marketFront, jnaCallback);
+	return marketApis[id]->init(dir, marketFront, jnaCallback);
 }
 
 //销毁行情接口
@@ -50,11 +50,11 @@ const int subscribe(char* id, char** instrumentIDs, int count)
 }
 
 //初始化交易接口
-extern "C" __declspec(dllexport) const void initTrader(char* id, const char* dir, const char* input, JnaResCallback jnaResCallback);
-const void initTrader(char* id, const char* dir, const char* input, JnaResCallback jnaCallback)
+extern "C" __declspec(dllexport) const char* initTrader(char* id, const char* dir, const char* input, JnaResCallback jnaResCallback);
+const char* initTrader(char* id, const char* dir, const char* input, JnaResCallback jnaCallback)
 {
 	traderApis[id] = new CTraderApi();
-	traderApis[id]->init(dir, input, jnaCallback);
+	return traderApis[id]->init(dir, input, jnaCallback);
 }
 
 //销毁交易接口

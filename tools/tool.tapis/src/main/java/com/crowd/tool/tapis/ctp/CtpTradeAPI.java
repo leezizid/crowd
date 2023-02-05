@@ -1,6 +1,5 @@
 package com.crowd.tool.tapis.ctp;
 
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -299,6 +298,7 @@ public abstract class CtpTradeAPI extends CtpBaseApi {
 							Thread.sleep(1000);
 							getOrders();
 						} catch (Throwable t) {
+							t.printStackTrace();
 							dispose("初始化委托缓存失败");
 						}
 						try {
@@ -475,7 +475,7 @@ public abstract class CtpTradeAPI extends CtpBaseApi {
 						o.setProductId(messageObject.getString("ProductID"));
 						o.setDeliveryYear(messageObject.getInt("DeliveryYear"));
 						o.setDeliveryMonth(messageObject.getInt("DeliveryMonth"));
-						if(!o.getId().endsWith("efp") && !o.getId().endsWith("TAS")) {
+						if (!o.getId().endsWith("efp") && !o.getId().endsWith("TAS")) {
 							instrumentList.add(o);
 						}
 					}
@@ -497,8 +497,8 @@ public abstract class CtpTradeAPI extends CtpBaseApi {
 					}
 				}
 			}
-		} catch (UnsupportedEncodingException e) {
-
+		} catch (Throwable t) {
+			t.printStackTrace();
 		}
 	}
 
@@ -528,7 +528,8 @@ public abstract class CtpTradeAPI extends CtpBaseApi {
 	}
 
 	protected void doInit(String flowDir) {
-		CtpApiLibrary.instance.initTrader(id, flowDir, connectInfo.getJsonBase64String(), this);
+		System.out.println("TraderAPIVersion:"
+				+ CtpApiLibrary.instance.initTrader(id, flowDir, connectInfo.getJsonBase64String(), this));
 	}
 
 	protected void doRelease() {

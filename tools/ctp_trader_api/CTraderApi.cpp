@@ -10,7 +10,7 @@ using namespace std;
 
 
 //初始化系统
-const void CTraderApi::init(const char* dir, const char* input, JnaResCallback jnaCallback)
+const char* CTraderApi::init(const char* dir, const char* input, JnaResCallback jnaCallback)
 {
 	Json::Value inputObject;
 	inputObject = parseJsonString(Base64_Decode(input).c_str());
@@ -34,6 +34,7 @@ const void CTraderApi::init(const char* dir, const char* input, JnaResCallback j
 	ctpApi->RegisterFront(const_cast<char*>(traderFront.c_str()));
 	ctpApi->Init();
 	//traderApi->Join();
+	return ctpApi->GetApiVersion();
 }
 
 //销毁

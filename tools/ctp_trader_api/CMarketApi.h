@@ -29,7 +29,7 @@ private:
 public:
 
 	//初始化系统
-	virtual const void init(const char* dir, const char* marketFront, JnaResCallback jnaCallback);
+	virtual const char* init(const char* dir, const char* marketFront, JnaResCallback jnaCallback);
 
 	//销毁
 	virtual const void release();

@@ -8,7 +8,7 @@ public interface CtpApiLibrary extends Library {
 
 	static CtpApiLibrary instance = Native.load("ctpbridge.dll", CtpApiLibrary.class);
 
-	void initMarket(String id, String flowDir, String front, SpiCallback spiCallback);
+	String initMarket(String id, String flowDir, String front, SpiCallback spiCallback);
 
 	void releaseMarket(String id);
 
@@ -18,7 +18,7 @@ public interface CtpApiLibrary extends Library {
 
 	int subscribe(String id, String[] instrumentIDs, int count);
 
-	void initTrader(String id, String flowDir, String input, SpiCallback spiCallback);
+	String initTrader(String id, String flowDir, String input, SpiCallback spiCallback);
 
 	void releaseTrader(String id);
 

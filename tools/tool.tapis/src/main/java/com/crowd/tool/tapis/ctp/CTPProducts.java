@@ -121,6 +121,9 @@ public class CTPProducts {
 		if (product != null) {
 			return product;
 		}
+		if (name.indexOf(".") != -1) {
+			name = name.substring(name.indexOf(".") + 1);
+		}
 		if (name.length() > 4) {
 			try {
 				Integer.parseInt(name.substring(name.length() - 4));

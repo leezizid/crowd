@@ -113,7 +113,7 @@ public abstract class CtpMarketAPI extends CtpBaseApi {
 			BigDecimal askPrice1, int askVolume1);
 
 	protected void doInit(String flowDir) {
-		CtpApiLibrary.instance.initMarket(id, flowDir, front, this);
+		System.out.println("MarketAPIVersion:" + CtpApiLibrary.instance.initMarket(id, flowDir, front, this));
 	}
 
 	protected void doRelease() {

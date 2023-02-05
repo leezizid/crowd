@@ -10,7 +10,7 @@ using namespace std;
 
 
 //初始化系统
-const void CMarketApi::init(const char* dir, const char* marketFront, JnaResCallback jnaCallback)
+const char* CMarketApi::init(const char* dir, const char* marketFront, JnaResCallback jnaCallback)
 {
 	marketApi = CThostFtdcMdApi::CreateFtdcMdApi(dir);
 	marketSpi = new CMarketSpi(jnaCallback);
@@ -18,6 +18,7 @@ const void CMarketApi::init(const char* dir, const char* marketFront, JnaResCall
 	marketApi->RegisterFront(const_cast<char*>(marketFront));
 	marketApi->Init();
 	//traderApi->Join();
+	return marketApi->GetApiVersion();
 }
 
 //销毁

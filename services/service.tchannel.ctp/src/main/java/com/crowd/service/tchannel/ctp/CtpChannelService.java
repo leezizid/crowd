@@ -198,10 +198,16 @@ public class CtpChannelService implements CrowdService {
 		ConnectInfo connectInfo = new ConnectInfo(traderFront, brokerId, userId, password, investorId, authCode, appId,
 				productInfo, macAddress);
 		//
+		final Calendar calendar = Calendar.getInstance();
 		CtpTradeAPI ctpTradeAPI = channels.get(id);
 		if (ctpTradeAPI == null) {
 			ctpTradeAPI = new CtpTradeAPI(id, connectInfo) {
 				protected boolean checkContextDisposed() {
+					calendar.setTimeInMillis(System.currentTimeMillis());
+					int hour = calendar.get(Calendar.HOUR_OF_DAY);
+					if (hour == 16) {
+						return true; //每天16点自动关闭接口
+					}
 					return crowdContext.isDisposed() || !channels.containsKey(id);
 				}
 

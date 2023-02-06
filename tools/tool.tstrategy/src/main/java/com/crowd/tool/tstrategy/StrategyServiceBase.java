@@ -7,6 +7,7 @@ import java.io.RandomAccessFile;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Hashtable;
 
 import org.apache.commons.lang3.StringUtils;
@@ -229,6 +230,12 @@ public abstract class StrategyServiceBase implements CrowdService {
 
 							@Override
 							protected boolean checkContextDisposed() {
+								Calendar calendar = Calendar.getInstance();
+								calendar.setTimeInMillis(System.currentTimeMillis());
+								int hour = calendar.get(Calendar.HOUR_OF_DAY);
+								if (hour == 16) {
+									return true; //每天16点自动关闭策略，需要重新开始以刷新主力合约
+								}
 								return crowdContext.isDisposed();
 							}
 

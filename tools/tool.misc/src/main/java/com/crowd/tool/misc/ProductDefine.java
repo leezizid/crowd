@@ -42,6 +42,10 @@ public class ProductDefine {
 		}
 	}
 
+	public String getSymbol() {
+		return exchange + "." + name;
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -65,7 +69,7 @@ public class ProductDefine {
 	public int getPriceScale() {
 		return priceScale;
 	}
-	
+
 	public boolean isDelivery() {
 		return false;
 	}
@@ -92,7 +96,7 @@ public class ProductDefine {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 距离在当前交易时段多久，如果不在任何一个交易时段内，返回-1
 	 * 

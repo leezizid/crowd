@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 import org.json.JSONObject;
 
 /**
- * 交易标的
+ * 交易标的(一般为具体合约)
  *
  */
 public class ProductInfo {
@@ -20,16 +20,30 @@ public class ProductInfo {
 
 	private BigDecimal closeTakerCostRate;
 
+	private String date = ""; // 合约月份
+
+	public ProductDefine getProductDefine() {
+		return this.productDefine;
+	}
+
 	public String getSymbol() {
-		return productDefine.getExchange() + "." + productDefine.getName();
+		return productDefine.getSymbol() + date;
 	}
 
 	public String getTitle() {
-		return productDefine.getTitle();
+		return productDefine.getTitle() + date;
 	}
 
 	public boolean isDelivery() {
 		return productDefine.isDelivery();
+	}
+
+	public String getDate() {
+		return date;
+	}
+
+	public void setDate(String date) {
+		this.date = date;
 	}
 
 	public BigDecimal getMinVolume() {
@@ -55,7 +69,7 @@ public class ProductInfo {
 	public BigDecimal getCloseTakerCostRate() {
 		return closeTakerCostRate;
 	}
-	
+
 	public int getPriceScale() {
 		return productDefine.getPriceScale();
 	}
@@ -90,7 +104,7 @@ public class ProductInfo {
 		return productDefine.beforeCloseMarket(time);
 	}
 
-	public void fromJSON(JSONObject o) {
+	void fromJSON(JSONObject o) {
 		String symbol = o.getString("symbol");
 		String name = symbol.substring(symbol.indexOf(".") + 1);
 		this.productDefine = ProductDefineRegistry.find(name);

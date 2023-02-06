@@ -62,29 +62,17 @@ public abstract class StrategyServiceBase implements CrowdService {
 		if (strategyInfo != null) {
 			try {
 				StrategyEnv strategyEnv;
-				Products products = new Products(
-						crowdContext.load("products", strategyInfo.getProductGroup() + ".json"));
+				String productGroup = strategyInfo.getProductGroup(); // 格式类似：ctp.yly
+				String productGroupType = productGroup.substring(0, productGroup.indexOf("."));
+				JSONObject mainDateInfos = crowdContext.invoke("/tchannel." + productGroupType + "/mainDateInfos",
+						new JSONObject()); // 调用特定通道服务方法获取主力合约信息
 				if (test) {
+					Products products = new Products(crowdContext.load("products", productGroup + ".json"), null);
 					strategyEnv = StrategyEnv.createTest(crowdContext,
 							createStrategyInstance(strategyInfo.getArguments()), strategyInfo, products);
-					// XXX：
-//					String marketDataSource = strategyInfo.getMarketDataSource();
-//					if (marketDataSource.startsWith("history:")) {
-//						String[] info = StringUtils.split(marketDataSource.substring("history:".length()), ",");
-//						String symbol = info[0];
-//						String startDay = info[1];
-//						String endDay = info[2];
-//						JSONObject o = new JSONObject();
-//						o.put("serviceName", this.getClass().getName());
-//						o.put("arguments", strategyInfo.getArguments());
-//						o.put("symbol", symbol);
-//						o.put("rate",  products.getProduct(symbol).getOpenMakerCostRate().toString()); //XXX：注意处理baseRate
-//						o.put("dateSource", startDay + "," + endDay);
-//						crowdContext.invoke("/testserver/doTest", o);
-//						//TODO：获取结果，保存数据
-//						return;
-//					}
 				} else {
+					Products products = new Products(crowdContext.load("products", productGroup + ".json"),
+							mainDateInfos);
 					strategyEnv = StrategyEnv.createReal(crowdContext,
 							createStrategyInstance(strategyInfo.getArguments()), strategyInfo, products);
 					runningStrategyEnvs.put(id, strategyEnv);
@@ -235,9 +223,9 @@ public abstract class StrategyServiceBase implements CrowdService {
 
 						}.run();
 					} else if (marketDataSource.startsWith("CTP:")) {
-						String[] symbols = StringUtils.split(marketDataSource.substring("CTP:".length()), ",");
+						String symbol = marketDataSource.substring("CTP:".length());
 						String front = "tcp://140.206.242.115:42213"; // 正式行情(中信建投）
-						new CtpMarketAPI(id, front, symbols) {
+						new CtpMarketAPI(id, front, symbol + mainDateInfos.getString(symbol)) {
 
 							@Override
 							protected boolean checkContextDisposed() {
@@ -255,9 +243,9 @@ public abstract class StrategyServiceBase implements CrowdService {
 							}
 						}.run();
 					} else if (marketDataSource.startsWith("CTPTEST:")) {
-						String[] symbols = StringUtils.split(marketDataSource.substring("CTPTEST:".length()), ",");
+						String symbol = marketDataSource.substring("CTPTEST:".length());
 						String front = "tcp://180.168.146.187:10211"; // simnow行情
-						new CtpMarketAPI(id, front, symbols) {
+						new CtpMarketAPI(id, front, symbol + mainDateInfos.getString(symbol)) {
 
 							@Override
 							protected boolean checkContextDisposed() {
@@ -275,9 +263,9 @@ public abstract class StrategyServiceBase implements CrowdService {
 							}
 						}.run();
 					} else if (marketDataSource.startsWith("CTPMOCK:")) {
-						String[] symbols = StringUtils.split(marketDataSource.substring("CTPMOCK:".length()), ",");
+						String symbol = marketDataSource.substring("CTPMOCK:".length());
 						String front = "tcp://180.168.146.187:10131"; // 全天测试行情
-						new CtpMarketAPI(id, front, symbols) {
+						new CtpMarketAPI(id, front, symbol + mainDateInfos.getString(symbol)) {
 
 							@Override
 							protected boolean checkContextDisposed() {

@@ -351,6 +351,20 @@ public class CtpChannelService implements CrowdService {
 		outputObject.put("instruments", new JSONArray(instruments));
 	}
 
+	@CrowdMethod
+	public void mainDateInfos(CrowdContext crowdContext, JSONObject inputObject, JSONObject outputObject)
+			throws Throwable {
+		JSONArray arr = new JSONArray(crowdContext.load("instruments.data"));
+		for (int i = 0; i < arr.length(); i++) {
+			JSONObject o = arr.getJSONObject(i);
+			boolean isMain = o.optBoolean("isMain");
+			if (isMain) {
+				String productId = o.getString("productId");
+				outputObject.put(productId, o.getString("id").substring(productId.length()));
+			}
+		}
+	}
+
 	@CrowdWorker
 	public void marketDataMonitor(CrowdWorkerContext context, JSONObject inputObject) throws Throwable {
 		Calendar calendar = Calendar.getInstance();

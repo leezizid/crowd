@@ -36,7 +36,9 @@ public abstract class SManageServiceBase implements CrowdService {
 		String marketDataSource = contentObject.getString("marketDataSource");
 		String currencyType = contentObject.getString("currencyType");
 		String strategyId = contentObject.getString("id");
-		Products products = new Products(context.load("products", productGroup + ".json"));
+		String productGroupType = productGroup.substring(0, productGroup.indexOf("."));
+		JSONObject mainDateInfos = context.invoke("/tchannel." + productGroupType + "/mainDateInfos", new JSONObject());
+		Products products = new Products(context.load("products", productGroup + ".json"), mainDateInfos);
 		NumberFormatter numberFormatter = NumberFormatter.getInstance();
 		//
 		JSONArray properties = new JSONArray();
@@ -182,7 +184,7 @@ public abstract class SManageServiceBase implements CrowdService {
 			}
 			output.put("profits", profitArray);
 			//
-			if(history) {
+			if (history) {
 				JSONArray historyArray = new JSONArray();
 				JSONArray matches = new JSONArray();
 				int historyCount = 0;
@@ -293,7 +295,7 @@ public abstract class SManageServiceBase implements CrowdService {
 		output.put("properties", properties);
 		output.put("transactions", transactionArray);
 		output.put("openOrders", openOrderArray);
-//		output.put("productArray", products.toJSONArray());
+		output.put("productArray", products.toJSONArray());
 	}
 
 	@CrowdMethod
@@ -374,7 +376,7 @@ public abstract class SManageServiceBase implements CrowdService {
 		transactionHistory.put(transaction);
 		context.save(id + ".history", transactionHistory.toString(4));
 	}
-	
+
 	@CrowdMethod
 	public final void saveTransactions(CrowdContext context, JSONObject input, JSONObject output) throws Throwable {
 		String id = input.getString("id");

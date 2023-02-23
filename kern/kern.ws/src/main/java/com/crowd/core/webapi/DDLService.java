@@ -1,4 +1,4 @@
-//package com.crowd.core.webapi;
+package com.crowd.core.webapi;
 //
 //import java.util.ArrayList;
 //import java.util.HashMap;
@@ -9,7 +9,7 @@
 //import org.json.JSONArray;
 //import org.json.JSONObject;
 //
-//public class DDLService {
+public class DDLService {
 //
 //	final static void refactor(Context context, JSONArray tableArray) throws Throwable {
 //		for (int i = 0; i < tableArray.length(); i++) {
@@ -178,4 +178,4 @@
 //		throw new UnsupportedOperationException("不支持的数据类型[" + type + "]");
 //	}
 //
-//}
+}

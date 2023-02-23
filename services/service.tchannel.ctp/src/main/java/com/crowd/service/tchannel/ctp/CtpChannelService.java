@@ -191,10 +191,10 @@ public class CtpChannelService implements CrowdService {
 		String userId = inputObject.getString("userId");
 		String password = inputObject.getString("password");
 		String investorId = inputObject.getString("investorId");
+		String appId = inputObject.getString("appId");
+		String productInfo = inputObject.getString("productInfo");
 		String authCode = inputObject.getString("authCode");
 		String macAddress = inputObject.getString("macAddress");
-		String appId = "SHINNY_Q7V2_2.93";
-		String productInfo = "SHINNYQ7V2";
 		ConnectInfo connectInfo = new ConnectInfo(traderFront, brokerId, userId, password, investorId, authCode, appId,
 				productInfo, macAddress);
 		//

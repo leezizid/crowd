@@ -1,4 +1,4 @@
-//package com.crowd.core.webapi;
+package com.crowd.core.webapi;
 //
 //import java.lang.reflect.Method;
 //import java.util.HashMap;
@@ -6,7 +6,7 @@
 //
 //import org.json.JSONObject;
 //
-//public abstract class DMLServiceHandler {
+public abstract class DMLServiceHandler {
 //
 //	public final boolean forUpdate;
 //
@@ -136,4 +136,4 @@
 //			releaseMethod.invoke(o);
 //		}
 //	}
-//}
+}

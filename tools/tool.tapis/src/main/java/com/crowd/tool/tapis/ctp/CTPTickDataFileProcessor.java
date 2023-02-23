@@ -93,7 +93,7 @@ public class CTPTickDataFileProcessor {
 	public final static void main2(String[] args) throws Throwable {
 		File sourceDir = new File("F:\\mdstream");
 		File targetDir = new File("Z:\\BAK");
-		String tradeDay = "2023-02-03";
+		String tradeDay = "2023-02-15";
 		int index = 0;
 		Map<String, StringBuffer> buffers = new HashMap<String, StringBuffer>();
 		while (true) {

@@ -3,3 +3,5 @@ com.crowd.service.tchannel.StrategyManageService
 com.crowd.service.tchannel.BacktestManageService
 com.crowd.service.tchannel.ProductsManageService
 com.crowd.service.tchannel.HistoryDataService
+com.crowd.service.tchannel.ctp.CtpChannelService
+com.crowd.service.tchannel.binance.BinanceChannelService

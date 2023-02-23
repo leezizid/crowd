@@ -224,7 +224,8 @@ public class WSChannelWrapper implements Runnable {
 		WS_lastMessageTime = System.currentTimeMillis();
 		WS_status = WS_CONNECTED;
 		//
-		System.out.println("已经连接:" + messageObject.toString());
+		System.out.println("已经连接:");
+		System.out.println(messageObject.toString(4));
 	}
 
 	private class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> {

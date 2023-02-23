@@ -225,7 +225,7 @@ public abstract class StrategyServiceBase implements CrowdService {
 						}.run();
 					} else if (marketDataSource.startsWith("CTP:")) {
 						String symbol = marketDataSource.substring("CTP:".length());
-						String front = "tcp://140.206.242.115:42213"; // 正式行情(中信建投）
+						String front = "tcp://" + System.getProperty("MaketDataServer"); //
 						new CtpMarketAPI(id, front, symbol + mainDateInfos.getString(symbol)) {
 
 							@Override
@@ -234,7 +234,7 @@ public abstract class StrategyServiceBase implements CrowdService {
 								calendar.setTimeInMillis(System.currentTimeMillis());
 								int hour = calendar.get(Calendar.HOUR_OF_DAY);
 								if (hour == 16) {
-									return true; //每天16点自动关闭策略，需要重新开始以刷新主力合约
+									return true; // 每天16点自动关闭策略，需要重新开始以刷新主力合约
 								}
 								return crowdContext.isDisposed();
 							}

@@ -6,7 +6,7 @@ import com.sun.jna.Native;
 
 public interface CtpApiLibrary extends Library {
 
-	static CtpApiLibrary instance = Native.load("ctpbridge.dll", CtpApiLibrary.class);
+	static CtpApiLibrary instance = Native.load("ctpbridge", CtpApiLibrary.class);
 
 	String initMarket(String id, String flowDir, String front, SpiCallback spiCallback);
 

@@ -1,4 +1,4 @@
-//package com.crowd.core.webapi;
+package com.crowd.core.webapi;
 //
 //import java.util.ArrayList;
 //import java.util.Base64;
@@ -9,7 +9,7 @@
 //import org.json.JSONArray;
 //import org.json.JSONObject;
 //
-//public class DMLService {
+public class DMLService {
 //
 //	final static void executeUpdate(Context context, JSONObject inputObject, JSONObject outputObject) throws Throwable {
 //		String prepareSql = inputObject.getString("prepareSql").trim();
@@ -309,4 +309,4 @@
 //		return stringBuffer.toString();
 //	}
 //
-//}
+}

@@ -133,7 +133,6 @@ export default class AnalyseView extends BaseComponent {
                 splitLine: {show: false}
             }
         ],
-        
         dataZoom: [
             {
                 type: 'inside',

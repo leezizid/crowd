@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import {Button, Message, Tree, Table, TableColumn, Spin, Tabs, Tab, Dialog, Form, FormItem, Input, Select, Option, Spinner,ButtonGroup, Pagination} from 'kpc-react';
 import BaseComponent from '../../commons/react/BaseComponent'
 import AnalyseView from './views/AnalyseView'
+import ContextChartView from './views/ContextChartView'
 import ProfitView from './views/ProfitView'
 import PLStatView from './views/PLStatView'
 
@@ -10,7 +11,7 @@ export default class StrategyInfoView extends BaseComponent {
 
   constructor(props) {
     super(props);
-    this.setState({loading: false, showDetailDialog: false, showOrderDialog: false, showAnalyseDialog:false, analyseDay: '', orderInfo: {}, activeTab: 0, tChannelId: null, strategyId: null, serviceName: null, progress: -1, newPrice: 0, properties: [], transactions: [], openOrders: [], history: [], historyCount:0, currentPage: 1, matches:[], orders: [], profits: [], plStats:[], productArray: []});
+    this.setState({loading: false, showDetailDialog: false, showOrderDialog: false, showAnalyseDialog:false, showContextChartDialog:false, analyseDay: '', orderInfo: {}, activeTab: 0, tChannelId: null, strategyId: null, serviceName: null, progress: -1, newPrice: 0, properties: [], transactions: [], openOrders: [], history: [], historyCount:0, currentPage: 1, matches:[], orders: [], profits: [], plStats:[], productArray: []});
   }
 
 
@@ -77,6 +78,10 @@ export default class StrategyInfoView extends BaseComponent {
 
   analyse(symbol, day) {
     this.setState({showAnalyseDialog: true, analyseSymbol: symbol, analyseDay: day})
+  }
+
+  contextChart(symbol, contextTime) {
+    this.setState({showContextChartDialog: true, analyseSymbol: symbol, contextTime: contextTime})
   }
 
   getEmptyTableMessage() {
@@ -182,7 +187,10 @@ export default class StrategyInfoView extends BaseComponent {
                             }}>明细</a> 
                             &nbsp;&nbsp;<a onClick={()=>{
                                 this.analyse(this.state.history[index].symbol, this.state.history[index].tradeDay);
-                            }}>分析</a>
+                            }}>日内</a>
+                            &nbsp;&nbsp;<a onClick={()=>{
+                                this.contextChart(this.state.history[index].symbol, this.state.history[index].openTime);
+                            }}>场景</a>
                         </React.Fragment>
                     }}
                   ></TableColumn>
@@ -312,7 +320,7 @@ export default class StrategyInfoView extends BaseComponent {
         </Dialog>           
         <Dialog value={this.state.showAnalyseDialog}
                   on$change-value={(c, show) => this.setState({showAnalyseDialog: show})}
-                  title="交易分析"
+                  title="日内行情分析"
                   b-footer-wrapper=""
                   width={document.body.clientWidth-10}
                   style={{paddingLeft:0}}
@@ -327,6 +335,20 @@ export default class StrategyInfoView extends BaseComponent {
                     analyseDay={this.state.analyseDay}
                   />
         </Dialog> 
+        <Dialog value={this.state.showContextChartDialog}
+                  on$change-value={(c, show) => this.setState({showContextChartDialog: show})}
+                  title={"上下文行情分析（"+this.state.contextTime+"）"}
+                  b-footer-wrapper=""
+                  width={document.body.clientWidth-10}
+                  style={{paddingLeft:0}}
+              >
+                  <ContextChartView 
+                    width={document.body.clientWidth-50} 
+                    height={document.body.clientHeight-150} 
+                    symbol={this.state.analyseSymbol} 
+                    time={this.state.contextTime}
+                  />
+        </Dialog>         
       </div>
     )
   }

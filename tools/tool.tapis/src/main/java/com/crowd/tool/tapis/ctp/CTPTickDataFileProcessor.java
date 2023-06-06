@@ -11,9 +11,12 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -73,6 +76,10 @@ public class CTPTickDataFileProcessor {
 	}
 
 	public final static void main(String[] args) throws Throwable {
+		//
+		processMDStreams();
+		
+		//
 //		String exName = "CFFEX";
 //		String[] productNames = new String[] { "IC","IF","IH","IM","T","TF","TS"};
 //		String exName = "INE";
@@ -83,17 +90,38 @@ public class CTPTickDataFileProcessor {
 //		String[] productNames = new String[] { "a", "b", "bb", "c", "cs", "eb", "eg", "fb", "i", "j", "jd", "jm", "l",
 //				"lh", "m", "p", "pg", "pp", "rr", "v", "y" };
 		String exName = "SHFE";
-		String[] productNames = new String[] { "ag" };
+		String[] productNames = new String[] { "ag", "al" };
 //		String[] productNames = new String[] {"ag","al","au","bu","cu","fu","hc","ni","pb","rb","ru","sn","sp","ss","wr","zn"};
 		for (String productName : productNames) {
 			processMDStreamFile(exName, productName);
 		}
 	}
 
-	public final static void main2(String[] args) throws Throwable {
+	public final static void processMDStreams() throws Throwable {
+		File sourceDir = new File("F:\\mdstream");
+		Set<String> tradeDays = new HashSet<String>();
+		for(File file : sourceDir.listFiles()) {
+			if(file.getName().length() >= 16) {
+				tradeDays.add(file.getName().substring(0,10));
+			}
+		}
+		List<String> tradeDayList = new ArrayList<String>();
+		tradeDayList.addAll(tradeDays);
+		tradeDayList.sort(new Comparator<String>() {
+			@Override
+			public int compare(String o1, String o2) {
+				return o1.compareTo(o2);
+			}
+		});
+		for(String tradeDay : tradeDayList) {
+			processMDStream(tradeDay);
+		}
+	}
+	
+	public final static void processMDStream(String tradeDay) throws Throwable {
 		File sourceDir = new File("F:\\mdstream");
 		File targetDir = new File("Z:\\BAK");
-		String tradeDay = "2023-02-15";
+//		String tradeDay = "2023-03-24";
 		int index = 0;
 		Map<String, StringBuffer> buffers = new HashMap<String, StringBuffer>();
 		while (true) {
@@ -134,6 +162,9 @@ public class CTPTickDataFileProcessor {
 		}
 		for (String fileName : buffers.keySet()) {
 			File file = new File(fileName);
+			if(file.exists()) {
+				continue;
+			}
 			file.getParentFile().mkdir();
 			RandomAccessFile raf = new RandomAccessFile(file, "rw");
 			raf.setLength(0);

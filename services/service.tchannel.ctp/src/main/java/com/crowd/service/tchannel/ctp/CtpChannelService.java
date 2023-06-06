@@ -52,7 +52,7 @@ public class CtpChannelService implements CrowdService {
 
 	@Override
 	public void init(CrowdInitContext context) throws Throwable {
-		marketDataServer = System.getProperty("MaketDataServer", "140.206.242.115:42213");
+		marketDataServer = System.getProperty("MaketDataServer", "140.207.150.241:42213");
 		marketDataDir = System.getProperty("MaketDataDir", "F:\\mdstream");
 	}
 

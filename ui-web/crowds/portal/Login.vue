@@ -3,7 +3,7 @@
     <k-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" autocomplete="on" label-position="left">
 
       <div class="title-container">
-        <h3 class="title">Crowd</h3>
+        <h3 class="title">CrowdStrategy量化系统</h3>
       </div>
 
       <k-form-item prop="username" label="用户名：" style="width: 100%;color: white;font-size: 17px;">

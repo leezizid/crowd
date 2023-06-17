@@ -30,7 +30,7 @@ registerApp('BacktestManage','react', BacktestManage)
 export default class DemoApp extends BaseApp {
 
   constructor(props) {
-    super(props, '', 'ws://192.168.100.118:33333/websocket')
+    super(props, '', 'ws://127.0.0.1:33333/websocket')
   }
 
 

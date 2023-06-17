@@ -48,7 +48,7 @@ public class TradeDays {
 			// 2024
 
 			// miss（缺失交易日数据）
-			"2022-06-23", "2023-02-17", "2023-02-22", "2023-06-01", "2023-06-02", "2023-06-05" };
+			"2022-06-23", "2023-02-17", "2023-02-22", "2023-06-01", "2023-06-02", "2023-06-05", "2023-06-06" };
 
 	private static Map<String, Long> days = new HashMap<String, Long>();
 	private static List<String> dayList = new ArrayList<String>();

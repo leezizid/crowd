@@ -16,13 +16,16 @@ public class HistoryData {
 
 	private final static int DAY_MILLIS = 24 * 60 * 60 * 1000;
 
-	private final static String HistoryDataDir;
+	private static String HistoryDataDir;
 
 	private final static Map<String, byte[]> cache = new HashMap<String, byte[]>();
 	private final static List<String> keyList = new ArrayList<String>();
 
 	static {
 		HistoryDataDir = System.getProperty("HistoryDataDir");
+		if(StringUtils.isEmpty(HistoryDataDir)) {
+			HistoryDataDir = System.getProperty("user.dir") + File.separator + "MD";
+		}
 	}
 
 	public final static void main(String[] args) throws Throwable {

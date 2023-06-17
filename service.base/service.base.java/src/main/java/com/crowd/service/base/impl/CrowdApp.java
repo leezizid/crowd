@@ -51,17 +51,6 @@ public class CrowdApp {
 	final static String CORE_SERVICE_WORKER_LIST = "/" + CORE_SERVICE_WORKER + "/list";
 	final static String CORE_SERVICE_WORKER_DISPOSE = "/" + CORE_SERVICE_WORKER + "/dispose";
 
-//	private final static String zkServerAddress;
-//	private final static String serverIp;
-//	private final static int serverPort;
-//	private final static String domain;
-
-	static {
-//		zkServerAddress = System.getProperty("zkServer");
-//		serverIp = System.getProperty("ip", "127.0.0.1");
-//		serverPort = Integer.parseInt(System.getProperty("port", "9090"));
-//		domain = System.getProperty("domain");
-	}
 
 	public static void main(String[] args) throws Throwable {
 

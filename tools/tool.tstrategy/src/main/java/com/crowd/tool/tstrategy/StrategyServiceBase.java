@@ -225,7 +225,7 @@ public abstract class StrategyServiceBase implements CrowdService {
 						}.run();
 					} else if (marketDataSource.startsWith("CTP:")) {
 						String symbol = marketDataSource.substring("CTP:".length());
-						String front = "tcp://" + System.getProperty("MaketDataServer"); //
+						String front = "tcp://" + System.getProperty("MarketDataServer"); //
 						new CtpMarketAPI(id, front, symbol + mainDateInfos.getString(symbol)) {
 
 							@Override

@@ -52,13 +52,18 @@ public class CtpChannelService implements CrowdService {
 
 	@Override
 	public void init(CrowdInitContext context) throws Throwable {
-		marketDataServer = System.getProperty("MaketDataServer", "140.207.150.241:42213");
-		marketDataDir = System.getProperty("MaketDataDir", "F:\\mdstream");
+		marketDataServer = System.getProperty("MarketDataServer");
+		marketDataDir = System.getProperty("MarketDataDir");
+		if(StringUtils.isEmpty(marketDataDir)) {
+			marketDataDir = System.getProperty("user.dir") + File.separator + "mdstream";
+		}
 	}
 
 	@Override
 	public void postInit(CrowdInitContext context) throws Throwable {
-		context.startWorker("/" + getName() + "/marketDataMonitor", new JSONObject());
+		if(StringUtils.isNotEmpty(marketDataServer)) {
+			context.startWorker("/" + getName() + "/marketDataMonitor", new JSONObject());
+		}
 	}
 
 	@Override
@@ -399,7 +404,7 @@ public class CtpChannelService implements CrowdService {
 				//
 				Thread.sleep(3 * 60 * 1000);
 			} catch (Throwable t) {
-
+				t.printStackTrace();
 			}
 		}
 	}

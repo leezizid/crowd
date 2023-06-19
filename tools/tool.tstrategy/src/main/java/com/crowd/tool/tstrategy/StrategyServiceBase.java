@@ -25,7 +25,7 @@ import com.crowd.tool.misc.PositionSide;
 import com.crowd.tool.misc.Products;
 import com.crowd.tool.misc.TradeDays;
 import com.crowd.tool.misc.k.HistoryData;
-import com.crowd.tool.misc.k.TickInfo;
+import com.crowd.tool.misc.k.TickData;
 import com.crowd.tool.tapis.ba.BinanceDeliveryMarketAPI;
 import com.crowd.tool.tapis.ctp.CTPProducts;
 import com.crowd.tool.tapis.ctp.CtpMarketAPI;
@@ -104,12 +104,12 @@ public abstract class StrategyServiceBase implements CrowdService {
 								DataInputStream dis = new DataInputStream(new ByteArrayInputStream(content));
 								int count = content.length / 36;
 								for (int i = 0; i < count; i++) {
-									TickInfo tickInfo = new TickInfo();
-									tickInfo.readFromStream(dis);
-									strategyEnv.onTick(symbol + "", tickInfo.getTime(), BigDecimal.ZERO,
-											BigDecimal.ZERO, tickInfo.getLastPrice(),
-											tickInfo.getVolume().subtract(lastTotalVolume), tickInfo.getOpenInterest());
-									lastTotalVolume = tickInfo.getVolume();
+									TickData tickData = new TickData();
+									tickData.readFromStream(dis);
+									strategyEnv.onTick(symbol + "", tickData.getTime(), BigDecimal.ZERO,
+											BigDecimal.ZERO, tickData.getLastPrice(),
+											tickData.getVolume().subtract(lastTotalVolume), tickData.getOpenInterest());
+									lastTotalVolume = tickData.getVolume();
 								}
 								crowdContext.reportWork(new BigDecimal(++finishCount)
 										.divide(new BigDecimal(totalCount), 4, RoundingMode.HALF_UP).floatValue(), "");

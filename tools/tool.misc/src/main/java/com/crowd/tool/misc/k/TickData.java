@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-public class TickInfo {
+public class TickData {
 
 	private String label;
 

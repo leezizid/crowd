@@ -23,7 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.crowd.tool.misc.ProductDefine;
 import com.crowd.tool.misc.TradeDays;
 import com.crowd.tool.misc.k.HistoryData;
-import com.crowd.tool.misc.k.TickInfo;
+import com.crowd.tool.misc.k.TickData;
 import com.crowd.tool.misc.k.TradeDayData;
 
 public class CTPTickDataFileProcessor {
@@ -78,7 +78,7 @@ public class CTPTickDataFileProcessor {
 	public final static void main(String[] args) throws Throwable {
 		//
 		processMDStreams();
-		
+
 		//
 //		String exName = "CFFEX";
 //		String[] productNames = new String[] { "IC","IF","IH","IM","T","TF","TS"};
@@ -100,9 +100,9 @@ public class CTPTickDataFileProcessor {
 	public final static void processMDStreams() throws Throwable {
 		File sourceDir = new File("F:\\mdstream");
 		Set<String> tradeDays = new HashSet<String>();
-		for(File file : sourceDir.listFiles()) {
-			if(file.getName().length() >= 16) {
-				tradeDays.add(file.getName().substring(0,10));
+		for (File file : sourceDir.listFiles()) {
+			if (file.getName().length() >= 16) {
+				tradeDays.add(file.getName().substring(0, 10));
 			}
 		}
 		List<String> tradeDayList = new ArrayList<String>();
@@ -113,11 +113,11 @@ public class CTPTickDataFileProcessor {
 				return o1.compareTo(o2);
 			}
 		});
-		for(String tradeDay : tradeDayList) {
+		for (String tradeDay : tradeDayList) {
 			processMDStream(tradeDay);
 		}
 	}
-	
+
 	public final static void processMDStream(String tradeDay) throws Throwable {
 		File sourceDir = new File("F:\\mdstream");
 		File targetDir = new File("Z:\\BAK");
@@ -162,7 +162,7 @@ public class CTPTickDataFileProcessor {
 		}
 		for (String fileName : buffers.keySet()) {
 			File file = new File(fileName);
-			if(file.exists()) {
+			if (file.exists()) {
 				continue;
 			}
 			file.getParentFile().mkdir();
@@ -230,17 +230,17 @@ public class CTPTickDataFileProcessor {
 					if (time <= lastTime) {
 						continue;
 					}
-					TickInfo tickInfo = new TickInfo();
-					tickInfo.setLabel(info[1]);
-					tickInfo.setTime(time);
-					tickInfo.setLastPrice(new BigDecimal(info[2]));
-					tickInfo.setVolume(new BigDecimal(info[3]));
-					tickInfo.setOpenInterest(new BigDecimal(info[4]));
-					tickInfo.setBidPrice1(getBidOrAskValue(info[5]));
-					tickInfo.setBidVolume1(getBidOrAskValue(info[6]));
-					tickInfo.setAskPrice1(getBidOrAskValue(info[7]));
-					tickInfo.setAskVolume1(getBidOrAskValue(info[8]));
-					tradeDayData.onTick(tickInfo);
+					TickData tickData = new TickData();
+					tickData.setLabel(info[1]);
+					tickData.setTime(time);
+					tickData.setLastPrice(new BigDecimal(info[2]));
+					tickData.setVolume(new BigDecimal(info[3]));
+					tickData.setOpenInterest(new BigDecimal(info[4]));
+					tickData.setBidPrice1(getBidOrAskValue(info[5]));
+					tickData.setBidVolume1(getBidOrAskValue(info[6]));
+					tickData.setAskPrice1(getBidOrAskValue(info[7]));
+					tickData.setAskVolume1(getBidOrAskValue(info[8]));
+					tradeDayData.onTick(tickData);
 					lastTime = time;
 				}
 			} finally {
@@ -316,9 +316,9 @@ public class CTPTickDataFileProcessor {
 			try {
 				String line = null;
 				while ((line = bufferedReader.readLine()) != null) {
-					TickInfo tickInfo = convertToTickInfo(line);
-					if (tickInfo != null) {
-						String tradeDay = TradeDays.matchTradeDay(tickInfo.getTime());
+					TickData tickData = convertToTickData(line);
+					if (tickData != null) {
+						String tradeDay = TradeDays.matchTradeDay(tickData.getTime());
 						// 忽略已经处理的数据行
 						if (StringUtils.isNotEmpty(finishDay)) {
 							if (tradeDay.equals(finishDay) || tradeDay.compareTo(finishDay) < 0) {
@@ -333,17 +333,17 @@ public class CTPTickDataFileProcessor {
 								tradeDayData = new TradeDayData(tradeDays[tradeDayIndex], ctpProduct);
 								System.out.print("默认处理" + tradeDays[tradeDayIndex] + "***");
 								//
-								TickInfo mockTickInfo = new TickInfo();
-								mockTickInfo.setTime(
+								TickData mockTickData = new TickData();
+								mockTickData.setTime(
 										TradeDays.getTradeDayTime(tradeDays[tradeDayIndex]) + 1000 * 60 * 60 * 15);
-								mockTickInfo.setLastPrice(BigDecimal.ZERO);
-								mockTickInfo.setVolume(BigDecimal.ZERO);
-								mockTickInfo.setOpenInterest(BigDecimal.ZERO);
-								mockTickInfo.setBidPrice1(BigDecimal.ZERO);
-								mockTickInfo.setBidVolume1(BigDecimal.ZERO);
-								mockTickInfo.setAskPrice1(BigDecimal.ZERO);
-								mockTickInfo.setAskVolume1(BigDecimal.ZERO);
-								tradeDayData.onTick(mockTickInfo);
+								mockTickData.setLastPrice(BigDecimal.ZERO);
+								mockTickData.setVolume(BigDecimal.ZERO);
+								mockTickData.setOpenInterest(BigDecimal.ZERO);
+								mockTickData.setBidPrice1(BigDecimal.ZERO);
+								mockTickData.setBidVolume1(BigDecimal.ZERO);
+								mockTickData.setAskPrice1(BigDecimal.ZERO);
+								mockTickData.setAskVolume1(BigDecimal.ZERO);
+								tradeDayData.onTick(mockTickData);
 								save(symbol, tradeDayData, targetDir);
 								tradeDayIndex++;
 							}
@@ -351,7 +351,7 @@ public class CTPTickDataFileProcessor {
 							System.out.print("开始处理" + tradeDay + "...");
 							tradeDayIndex++;
 						}
-						tradeDayData.onTick(tickInfo);
+						tradeDayData.onTick(tickData);
 						progressCount++;
 						if (progressCount == 1000) {
 							progressCount = 0;
@@ -415,48 +415,48 @@ public class CTPTickDataFileProcessor {
 
 	}
 
-	private static TickInfo convertToTickInfo(String line) {
+	private static TickData convertToTickData(String line) {
 		try {
 			String[] info = StringUtils.split(line, ",");
 			long time = Long.parseLong(info[1]);
-			TickInfo tickInfo = new TickInfo();
-			tickInfo.setLabel(info[0].substring(0, info[0].length() - 6));
-			tickInfo.setTime(time / 1000000 + ((time / 1000000) % 1000 > 0 ? 0 : (time % 1000000) / 1000)); // 某些tick数据时间有问题，毫秒数为0，但是后面有更小的精度数值
-			tickInfo.setLastPrice(new BigDecimal(info[2]));
-//			tickInfo.setHighestPrice(new BigDecimal(info[3]));
-//			tickInfo.setLowestPrice(new BigDecimal(info[4]));
-			tickInfo.setVolume(new BigDecimal(info[5]));
-//			tickInfo.setValue(new BigDecimal(info[6]));
-			tickInfo.setOpenInterest(new BigDecimal(info[7]));
-			tickInfo.setBidPrice1(getBidOrAskValue(info[8]));
-			tickInfo.setBidVolume1(getBidOrAskValue(info[9]));
-			tickInfo.setAskPrice1(getBidOrAskValue(info[10]));
-			tickInfo.setAskVolume1(getBidOrAskValue(info[11]));
+			TickData tickData = new TickData();
+			tickData.setLabel(info[0].substring(0, info[0].length() - 6));
+			tickData.setTime(time / 1000000 + ((time / 1000000) % 1000 > 0 ? 0 : (time % 1000000) / 1000)); // 某些tick数据时间有问题，毫秒数为0，但是后面有更小的精度数值
+			tickData.setLastPrice(new BigDecimal(info[2]));
+//			tickData.setHighestPrice(new BigDecimal(info[3]));
+//			tickData.setLowestPrice(new BigDecimal(info[4]));
+			tickData.setVolume(new BigDecimal(info[5]));
+//			tickData.setValue(new BigDecimal(info[6]));
+			tickData.setOpenInterest(new BigDecimal(info[7]));
+			tickData.setBidPrice1(getBidOrAskValue(info[8]));
+			tickData.setBidVolume1(getBidOrAskValue(info[9]));
+			tickData.setAskPrice1(getBidOrAskValue(info[10]));
+			tickData.setAskVolume1(getBidOrAskValue(info[11]));
 //			if (info.length > 12) {
-//				tickInfo.setBidPrice2(getBidOrAskValue(info[12]));
-//				tickInfo.setBidVolume2(getBidOrAskValue(info[13]));
-//				tickInfo.setAskPrice2(getBidOrAskValue(info[14]));
-//				tickInfo.setAskVolume2(getBidOrAskValue(info[15]));
+//				tickData.setBidPrice2(getBidOrAskValue(info[12]));
+//				tickData.setBidVolume2(getBidOrAskValue(info[13]));
+//				tickData.setAskPrice2(getBidOrAskValue(info[14]));
+//				tickData.setAskVolume2(getBidOrAskValue(info[15]));
 //			}
 //			if (info.length > 16) {
-//				tickInfo.setBidPrice3(getBidOrAskValue(info[16]));
-//				tickInfo.setBidVolume3(getBidOrAskValue(info[17]));
-//				tickInfo.setAskPrice3(getBidOrAskValue(info[18]));
-//				tickInfo.setAskVolume3(getBidOrAskValue(info[19]));
+//				tickData.setBidPrice3(getBidOrAskValue(info[16]));
+//				tickData.setBidVolume3(getBidOrAskValue(info[17]));
+//				tickData.setAskPrice3(getBidOrAskValue(info[18]));
+//				tickData.setAskVolume3(getBidOrAskValue(info[19]));
 //			}
 //			if (info.length > 20) {
-//				tickInfo.setBidPrice4(getBidOrAskValue(info[20]));
-//				tickInfo.setBidVolume4(getBidOrAskValue(info[21]));
-//				tickInfo.setAskPrice4(getBidOrAskValue(info[22]));
-//				tickInfo.setAskVolume4(getBidOrAskValue(info[23]));
+//				tickData.setBidPrice4(getBidOrAskValue(info[20]));
+//				tickData.setBidVolume4(getBidOrAskValue(info[21]));
+//				tickData.setAskPrice4(getBidOrAskValue(info[22]));
+//				tickData.setAskVolume4(getBidOrAskValue(info[23]));
 //			}
 //			if (info.length > 24) {
-//				tickInfo.setBidPrice5(getBidOrAskValue(info[24]));
-//				tickInfo.setBidVolume5(getBidOrAskValue(info[25]));
-//				tickInfo.setAskPrice5(getBidOrAskValue(info[26]));
-//				tickInfo.setAskVolume5(getBidOrAskValue(info[27]));
+//				tickData.setBidPrice5(getBidOrAskValue(info[24]));
+//				tickData.setBidVolume5(getBidOrAskValue(info[25]));
+//				tickData.setAskPrice5(getBidOrAskValue(info[26]));
+//				tickData.setAskVolume5(getBidOrAskValue(info[27]));
 //			}
-			return tickInfo;
+			return tickData;
 		} catch (Throwable t) {
 			return null;
 		}

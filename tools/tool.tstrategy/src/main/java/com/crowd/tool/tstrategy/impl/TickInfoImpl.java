@@ -2,7 +2,7 @@ package com.crowd.tool.tstrategy.impl;
 
 import java.math.BigDecimal;
 
-import com.crowd.tool.tstrategy.TickInfo;
+import com.crowd.tool.misc.TickInfo;
 
 public class TickInfoImpl implements TickInfo {
 

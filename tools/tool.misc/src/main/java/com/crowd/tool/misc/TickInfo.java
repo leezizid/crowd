@@ -1,4 +1,4 @@
-package com.crowd.tool.tstrategy;
+package com.crowd.tool.misc;
 
 import java.math.BigDecimal;
 

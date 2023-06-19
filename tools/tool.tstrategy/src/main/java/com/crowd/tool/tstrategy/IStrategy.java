@@ -2,6 +2,8 @@ package com.crowd.tool.tstrategy;
 
 import java.math.BigDecimal;
 
+import com.crowd.tool.misc.TickInfo;
+
 /**
  * 基础（半自动化/手动）策略接口
  */

@@ -11,7 +11,7 @@ import com.crowd.tool.misc.TradeDays;
 
 public class TradeDayData {
 
-	private List<TickInfo> _tickList = new ArrayList<TickInfo>();
+	private List<TickData> _tickList = new ArrayList<TickData>();
 
 	private List<KLineData> _1mKLineDataList = new ArrayList<KLineData>();
 
@@ -58,12 +58,12 @@ public class TradeDayData {
 //		return _1dKLineData;
 //	}
 
-	public final void onTick(TickInfo tickInfo) {
-		_tickList.add(tickInfo);
-		long time = tickInfo.getTime();
-		BigDecimal price = tickInfo.getLastPrice();
-		BigDecimal volume = tickInfo.getVolume().subtract(lastTickVolume);
-		BigDecimal openInterest = tickInfo.getOpenInterest();
+	public final void onTick(TickData tickData) {
+		_tickList.add(tickData);
+		long time = tickData.getTime();
+		BigDecimal price = tickData.getLastPrice();
+		BigDecimal volume = tickData.getVolume().subtract(lastTickVolume);
+		BigDecimal openInterest = tickData.getOpenInterest();
 		//
 		pushKLineData(_1mKLineDataList, time, price, volume, openInterest, 60);
 		pushKLineData(_5mKLineDataList, time, price, volume, openInterest, 60 * 5);
@@ -76,7 +76,7 @@ public class TradeDayData {
 			_1dKLineData.put(price, volume, openInterest);
 		}
 		//
-		lastTickVolume = tickInfo.getVolume();
+		lastTickVolume = tickData.getVolume();
 	}
 
 	private final void pushKLineData(List<KLineData> dataList, long time, BigDecimal price, BigDecimal volume,
@@ -136,15 +136,15 @@ public class TradeDayData {
 
 //	public void writeTickDataToCsv(DataOutput output) throws IOException {
 //		for (int i = 0; i < _tickList.size(); i++) {
-//			TickInfo tickInfo = _tickList.get(i);
-//			output.write((tickInfo.toString(priceScale) + "\r\n").getBytes());
+//			TickData tickData = _tickList.get(i);
+//			output.write((tickData.toString(priceScale) + "\r\n").getBytes());
 //		}
 //	}
 
 	public void writeTickDataToStream(DataOutput output) throws IOException {
 		for (int i = 0; i < _tickList.size(); i++) {
-			TickInfo tickInfo = _tickList.get(i);
-			tickInfo.writeToStream(output, priceScale);
+			TickData tickData = _tickList.get(i);
+			tickData.writeToStream(output, priceScale);
 		}
 	}
 

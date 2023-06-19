@@ -16,7 +16,7 @@ export default class ContextChartView extends BaseComponent {
 
   componentDidMount() {
     this.chart = echarts.init(document.getElementById(this.chartId), "dark");
-    this.invoke("/cta_strategy/testdata", {symbol: this.symbol, time: this.time}, (error, data) => {
+    this.invoke("/history-data/contextTickChartData", {symbol: this.symbol, time: this.time}, (error, data) => {
         if(error) {
           Message.error(error.message);
         } else {

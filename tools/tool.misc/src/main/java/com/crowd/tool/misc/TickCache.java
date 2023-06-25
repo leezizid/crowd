@@ -3,16 +3,21 @@ package com.crowd.tool.misc;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.crowd.tool.misc.zb.EMA;
+
 public class TickCache {
 
 	private TickInfo[] tickArray;
+	private double[] ema5Values;
 	private int continuousTimeMinute;
 	private int cursor = -1; // 最新tick的索引
 	private long validStartTime; //
 	private long lastTime; //
+	private EMA ema5;
 
 	public TickCache(int count, int continuousTimeMinute) {
 		tickArray = new TickInfo[count]; // 保留足够数量的tick数据，以便进行匹配序列核对
+		ema5Values = new double[count];
 		this.continuousTimeMinute = continuousTimeMinute;
 	}
 
@@ -22,11 +27,13 @@ public class TickCache {
 			cursor = 0;
 		}
 		tickArray[cursor] = tickInfo;
-		// XXX: 如果tick时间相隔超过3分钟，则重置有效开始时间
-		if (tickInfo.getTime() - lastTime > 1000 * 3 * 60) {
+		// XXX: 如果tick时间相隔超过16分钟，则重置有效开始时间
+		if (tickInfo.getTime() - lastTime > 1000 * 60 * 16) {
 			validStartTime = tickInfo.getTime();
+			ema5 = new EMA(2 * 60 * 5);
 		}
 		lastTime = tickInfo.getTime();
+		ema5Values[cursor] = ema5.push(tickInfo.getNewPrice().doubleValue());
 	}
 
 	/**
@@ -112,4 +119,42 @@ public class TickCache {
 		}
 		return prices;
 	}
+
+	/**
+	 * 返回基准时间之前的指定时间内，价格偏离ema值的最大数值
+	 * 
+	 * @return
+	 */
+	public double getMaxDeviation(long markTime, long timeSecond) {
+		double maxDeviation = 0;
+		long startTime = markTime - timeSecond * 1000;
+		int index = cursor;
+		// 找到序列起始索引
+		while (true) {
+			if (tickArray[index] == null) {
+				throw new IllegalStateException("前序数据不足");
+			}
+			if (tickArray[index].getTime() <= startTime) {
+				break;
+			}
+			if (tickArray[index].getTime() < markTime) {
+				maxDeviation = Math.max(maxDeviation,
+						Math.abs(tickArray[index].getNewPrice().doubleValue() - ema5Values[index]));
+			}
+			index--;
+			if (index == -1) {
+				index = tickArray.length - 1;
+			}
+		}
+		return maxDeviation;
+	}
+
+	public double getLastPrice() {
+		return tickArray[cursor].getNewPrice().doubleValue();
+	}
+
+	public double getLastEmaValue() {
+		return ema5Values[cursor];
+	}
+
 }

@@ -104,7 +104,7 @@ public class HistoryDataService implements CrowdService {
 		String symbol = input.getString("symbol");
 		long markTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(input.getString("time")).getTime();
 		String tradeDay = TradeDays.matchTradeDay(markTime);
-		SimpleDateFormat sdf = new SimpleDateFormat("mm:ss:SSS");
+		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss:SSS");
 		JSONArray tickArray = new JSONArray();
 		byte[] content = HistoryData.readTradeDayTickData(symbol, tradeDay);
 		DataInputStream dis = new DataInputStream(new ByteArrayInputStream(content));
@@ -115,10 +115,10 @@ public class HistoryDataService implements CrowdService {
 		for (int i = 0; i < count; i++) {
 			TickData tickData = new TickData();
 			tickData.readFromStream(dis);
-			if (tickData.getTime() < markTime - 25 * 60 * 1000) {
+			if (tickData.getTime() < markTime - 60 * 60 * 1000) {
 				continue;
 			}
-			if (tickData.getTime() > markTime + 25 * 60 * 1000) {
+			if (tickData.getTime() > markTime + 60 * 60 * 1000) {
 				break;
 			}
 			JSONArray dataArray = new JSONArray();

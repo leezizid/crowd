@@ -40,6 +40,7 @@ public class CTPProducts {
 		productList.add(new ProductDefine("bu", SHFE, "沥青", 10, 0, MARKET_TIME_3));
 		productList.add(new ProductDefine("ru", SHFE, "沪胶", 10, 0, MARKET_TIME_3));
 		productList.add(new ProductDefine("sp", SHFE, "纸浆", 10, 0, MARKET_TIME_3));
+		//productList.add(new ProductDefine("ao", SHFE, "氧化铝", 20, 0, MARKET_TIME_4));
 
 		// CFFEX
 		productList.add(new ProductDefine("IF", CFFEX, "沪深300", 300, 1, MARKET_TIME_2));
@@ -65,7 +66,7 @@ public class CTPProducts {
 		productList.add(new ProductDefine("c", DCE, "玉米", 10, 0, MARKET_TIME_3));
 		productList.add(new ProductDefine("cs", DCE, "淀粉", 10, 0, MARKET_TIME_3));
 		productList.add(new ProductDefine("jd", DCE, "鸡蛋", 5, 0, MARKET_TIME_1));
-		productList.add(new ProductDefine("bb", DCE, "胶板", 500, 2, MARKET_TIME_1));
+		productList.add(new ProductDefine("bb", DCE, "胶板", 500, 2, MARKET_TIME_1));// XXX:
 		productList.add(new ProductDefine("fb", DCE, "纤板", 10, 1, MARKET_TIME_1));
 		productList.add(new ProductDefine("l", DCE, "塑料", 5, 0, MARKET_TIME_3));
 		productList.add(new ProductDefine("v", DCE, "聚氯乙烯", 5, 0, MARKET_TIME_3));
@@ -88,21 +89,21 @@ public class CTPProducts {
 		productList.add(new ProductDefine("CF", CZCE, "棉花", 5, 0, MARKET_TIME_3));
 		productList.add(new ProductDefine("CY", CZCE, "棉纱", 5, 0, MARKET_TIME_3));
 		productList.add(new ProductDefine("SR", CZCE, "白糖", 10, 0, MARKET_TIME_3));
-		productList.add(new ProductDefine("RS", CZCE, "菜籽", 5, 0, MARKET_TIME_1));
+		productList.add(new ProductDefine("RS", CZCE, "菜籽", 5, 0, MARKET_TIME_1));// XXX:
 		productList.add(new ProductDefine("OI", CZCE, "菜油", 10, 0, MARKET_TIME_3));
 		productList.add(new ProductDefine("RM", CZCE, "菜粕", 10, 0, MARKET_TIME_3));
-		productList.add(new ProductDefine("ZC", CZCE, "动煤", 100, 1, MARKET_TIME_3));
 		productList.add(new ProductDefine("MA", CZCE, "甲醇", 10, 0, MARKET_TIME_3));
 		productList.add(new ProductDefine("TA", CZCE, "PTA", 5, 0, MARKET_TIME_3));
 		productList.add(new ProductDefine("FG", CZCE, "玻璃", 20, 0, MARKET_TIME_3));
 		productList.add(new ProductDefine("SF", CZCE, "硅铁", 5, 0, MARKET_TIME_1));
 		productList.add(new ProductDefine("SM", CZCE, "锰硅", 5, 0, MARKET_TIME_1));
 		productList.add(new ProductDefine("AP", CZCE, "苹果", 10, 0, MARKET_TIME_1));
-		productList.add(new ProductDefine("WH", CZCE, "强麦", 20, 0, MARKET_TIME_1));
-		productList.add(new ProductDefine("PM", CZCE, "普麦", 50, 0, MARKET_TIME_1));
-		productList.add(new ProductDefine("RI", CZCE, "早稻", 20, 0, MARKET_TIME_1));
-		productList.add(new ProductDefine("LR", CZCE, "晚稻", 20, 0, MARKET_TIME_1));
-		productList.add(new ProductDefine("JR", CZCE, "梗稻", 20, 0, MARKET_TIME_1));
+		productList.add(new ProductDefine("WH", CZCE, "强麦", 20, 0, MARKET_TIME_1));// XXX:
+		productList.add(new ProductDefine("PM", CZCE, "普麦", 50, 0, MARKET_TIME_1));// XXX:
+		productList.add(new ProductDefine("RI", CZCE, "早稻", 20, 0, MARKET_TIME_1));// XXX:
+		productList.add(new ProductDefine("LR", CZCE, "晚稻", 20, 0, MARKET_TIME_1));// XXX:
+		productList.add(new ProductDefine("JR", CZCE, "梗稻", 20, 0, MARKET_TIME_1));// XXX:
+		productList.add(new ProductDefine("ZC", CZCE, "动煤", 100, 1, MARKET_TIME_3));// XXX:
 
 		//
 		for (ProductDefine productDefine : productList) {

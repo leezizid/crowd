@@ -80,18 +80,35 @@ public class CTPTickDataFileProcessor {
 		processMDStreams();
 
 		//
-//		String exName = "CFFEX";
-//		String[] productNames = new String[] { "IC","IF","IH","IM","T","TF","TS"};
-//		String exName = "INE";
-//		String[] productNames = new String[] { "bc","lu","nr","sc"};
-//		String exName = "CZCE";
-//		String[] productNames = new String[] {"AP","CF","CJ","CY","FG","LR","MA","OI","PF","PK","PM","RI","RM","RS","SA","SF","SM","SR","TA","UR","WH","ZC"};
-//		String exName = "DCE";
-//		String[] productNames = new String[] { "a", "b", "bb", "c", "cs", "eb", "eg", "fb", "i", "j", "jd", "jm", "l",
-//				"lh", "m", "p", "pg", "pp", "rr", "v", "y" };
-		String exName = "SHFE";
-		String[] productNames = new String[] { "ag", "al" };
-//		String[] productNames = new String[] {"ag","al","au","bu","cu","fu","hc","ni","pb","rb","ru","sn","sp","ss","wr","zn"};
+		String exName = "CFFEX";
+		String[] productNames = new String[] { "IC", "IF", "IH", "IM", "T", "TF", "TS" };
+		for (String productName : productNames) {
+			processMDStreamFile(exName, productName);
+		}
+		//
+		exName = "INE";
+		productNames = new String[] { "bc", "lu", "nr", "sc" };
+		for (String productName : productNames) {
+			processMDStreamFile(exName, productName);
+		}
+		//
+		exName = "CZCE";
+		productNames = new String[] { "AP", "CF", "CJ", "CY", "FG", "LR", "MA", "OI", "PF", "PK", "PM", "RI", "RM",
+				"RS", "SA", "SF", "SM", "SR", "TA", "UR", "WH", "ZC" };
+		for (String productName : productNames) {
+			processMDStreamFile(exName, productName);
+		}
+		//
+		exName = "DCE";
+		productNames = new String[] { "a", "b", "bb", "c", "cs", "eb", "eg", "fb", "i", "j", "jd", "jm", "l", "lh", "m",
+				"p", "pg", "pp", "rr", "v", "y" };
+		for (String productName : productNames) {
+			processMDStreamFile(exName, productName);
+		}
+		//
+		exName = "SHFE";
+		productNames = new String[] { "ag", "al", "au", "bu", "cu", "fu", "hc", "ni", "pb", "rb", "ru", "sn", "sp",
+				"ss", "wr", "zn" };
 		for (String productName : productNames) {
 			processMDStreamFile(exName, productName);
 		}

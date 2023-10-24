@@ -13,6 +13,7 @@ import connectInfo from '../reducers/connectInfo';
 import serverInfo from '../reducers/serverInfo';
 import ActiveWorkerView from '../crowds/apps/ActiveWorkerView';
 import FuturesInfoView from '../crowds/apps/FuturesInfoView';
+import StockInfoView from '../crowds/apps/StockInfoView';
 import ChannelManage from '../crowds/apps/ChannelManage';
 import StrategyManage from '../crowds/apps/StrategyManage';
 import BacktestManage from '../crowds/apps/BacktestManage';
@@ -24,6 +25,7 @@ registerApp('Login', 'vue', LoginView)
 registerApp('ActiveWorker','react', ActiveWorkerView)
 registerApp('ChannelManage','react', ChannelManage)
 registerApp('FuturesInfoView','react', FuturesInfoView)
+registerApp('StockInfoView','react', StockInfoView)
 registerApp('StrategyManage','react', StrategyManage)
 registerApp('BacktestManage','react', BacktestManage)
 

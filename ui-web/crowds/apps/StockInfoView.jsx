@@ -74,7 +74,7 @@ export default class StockInfoView extends BaseComponent {
 
   updateBuyDate(buyDate) {
     if(this.state.stock && this.state.stock.code && this.state.stock.buyDate != buyDate) {
-      this.invoke("/stock/update", {code:this.state.stock.code, buyDate: buyDate ? buyDate: ''}, (error, data) => {
+      this.invoke("/stock/update", {code:this.state.stock.code, buyDate: buyDate ? buyDate: '', days:this.state.days}, (error, data) => {
         if(error) {
           Message.error(error.message);
         } else {     

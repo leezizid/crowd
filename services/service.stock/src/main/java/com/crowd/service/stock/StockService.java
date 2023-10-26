@@ -63,16 +63,20 @@ public class StockService implements CrowdService {
 			}
 			String[] info = quoteInfo(code);
 			if (info.length > 10) {
+				JSONArray newArray = new JSONArray();
 				JSONObject o = new JSONObject();
 				o.put("key", code);
 				o.put("code", code);
 				o.put("name", info[0]);
 				o.put("buyDate", "");
-				array.put(o);
-				context.save("pool.json", array.toString(4));
+				newArray.put(o);
+				for (int i = 0; i < array.length(); i++) {
+					newArray.put(array.getJSONObject(i));
+				}
+				context.save("pool.json", newArray.toString(4));
 				isOk = true;
 				output.put("stock", o);
-				output.put("stocks", array);
+				output.put("stocks", newArray);
 			}
 		}
 		//
@@ -132,7 +136,7 @@ public class StockService implements CrowdService {
 	public void chartData(CrowdContext context, JSONObject input, JSONObject output) throws Throwable {
 		String code = input.getString("code");
 		String buyDate = input.getString("buyDate");
-		int days  = input.getInt("days");
+		int days = input.getInt("days");
 //		System.out.println(input);
 		JSONArray amplitudeSeries = new JSONArray();
 		JSONArray klineSeries = new JSONArray();
@@ -145,11 +149,11 @@ public class StockService implements CrowdService {
 		//
 		JSONArray crowdData = quoteKLineData("sh000852", days);
 		JSONArray targetData = quoteKLineData(code, days);
-		if(targetData.length() < crowdData.length()) {
+		if (targetData.length() < crowdData.length()) {
 			crowdData = quoteKLineData("sh000852", targetData.length());
 		}
 		int length = targetData.length();
-		
+
 		BigDecimal crowdBasePrice = new BigDecimal(crowdData.getJSONArray(0).getString(2));
 		BigDecimal targetBasePrice = new BigDecimal(targetData.getJSONArray(0).getString(2));
 		if (StringUtils.isNotEmpty(buyDate)) {

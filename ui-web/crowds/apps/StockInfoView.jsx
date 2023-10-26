@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {Message, Datepicker, Button, Spin,Select, Option, Dialog, Form, FormItem, Input} from 'kpc-react';
+import {Table, TableColumn,Menu, MenuItem, Message, Datepicker, Button, Spin,Select, Option, Dialog, Form, FormItem, Input} from 'kpc-react';
 import echarts from 'echarts';
 import BaseComponent from '../../commons/react/BaseComponent'
 
@@ -14,7 +14,7 @@ export default class StockInfoView extends BaseComponent {
     this.chartId = "chart" + new Date().getTime();
     this.chart = null;
     //
-    this.setState({loading: false,showStockDialog:false, showConfirmDialog:false, newCode:null, stock:{code:'',buyDate:''}, stocks:[]});
+    this.setState({loading: false,showStockDialog:false, showConfirmDialog:false, newCode:null, days:240, stock:{code:'',buyDate:''}, stocks:[]});
   }
 
   componentDidMount() {
@@ -38,7 +38,7 @@ export default class StockInfoView extends BaseComponent {
 
   loadStockData() {
     this.setState({loading: true});
-    this.invoke("/stock/chartData", {code:this.state.stock ? this.state.stock.code : '', buyDate: this.state.stock ? this.state.stock.buyDate : ''}, (error, data) => {
+    this.invoke("/stock/chartData", {code:this.state.stock ? this.state.stock.code : '', buyDate: this.state.stock ? this.state.stock.buyDate : '', days:this.state.days}, (error, data) => {
       this.setState({loading: false});
       if(error) {
         Message.error(error.message);
@@ -347,12 +347,26 @@ export default class StockInfoView extends BaseComponent {
   }       
 
 
+  onSelect(value) {  
+    //alert(value)
+    for(let i = 0; i < this.state.stocks.length; i++) {
+      let stock = this.state.stocks[i];
+      if(stock.code == value) {
+        this.setState({stock:stock})
+        this.loadStockData();               
+        return;
+      }
+    }
+    this.setState({stock:{code:'',buyDate:''}})
+    this.loadStockData();               
+  }
+
   render() {
     return (
-      <div style={{height:"100%", display:"flex", flexFlow:"column", padding: 10}}>
+      <div style={{height:"100%", display:"flex", flexFlow:"column", paddingTop: 10, paddingRight: 10, paddingBottom: 10}}>
         <div style={{display:"flex", flexFlow:"row"}}>
-          <span style={{marginTop:10}}>股票池：</span>
-          <Select value={this.state.stock ? this.state.stock.code: ''} on$change-value={(c,value) => {        
+          {/* <span style={{marginTop:10}}>股票池：</span> */}
+          {/* <Select value={this.state.stock ? this.state.stock.code: ''} on$change-value={(c,value) => {        
             for(let i = 0; i < this.state.stocks.length; i++) {
               let stock = this.state.stocks[i];
               if(stock.code == value) {
@@ -365,22 +379,40 @@ export default class StockInfoView extends BaseComponent {
             this.loadStockData();   
             }}>
             {this.state.stocks.map((value,key) => {return (<Option key={value.code} value={value.code}>{value.name}</Option>)})}
-          </Select>
+          </Select> */}
           <span style={{width:10}}>&nbsp;&nbsp;</span>
           <Button style={{width:'120px'}} type="primary" onClick={()=>(this.setState({showStockDialog: true}))}>新增</Button>
           <span style={{width:10}}>&nbsp;&nbsp;</span>
+          <Button style={{width:'120px'}} type="primary"   disabled={this.state.stock == null} onClick={()=>(this.onSelect(this.state.stock.code))}>刷新</Button>
+          <span style={{width:10}}>&nbsp;&nbsp;</span>
           <Button style={{width:'120px'}} type="secondary" disabled={this.state.stock == null} onClick={()=>(this.setState({showConfirmDialog: true}))}>删除</Button>    
           <span style={{flex:100}}>&nbsp;&nbsp;</span>
+          <span style={{marginTop:10}}>数据周期（天）：</span> 
+          <Select style={{width:'100px'}} value={this.state.days} on$change-value={(c,value) =>{
+            this.setState({days:value});
+            this.loadStockData();
+           }}>
+            <Option value={240}>240</Option>
+            <Option value={300}>300</Option>
+            <Option value={360}>360</Option>
+            <Option value={420}>420</Option>
+            <Option value={480}>480</Option>
+          </Select>
+          <span style={{width:'100px'}}></span> 
           <span style={{marginTop:10}}>设置买入日期：</span> 
           <Datepicker clearable disabled={!(this.state.stock && this.state.stock.code)} value={this.state.stock ? this.state.stock.buyDate : ''} on$change-value={(c, date) => this.updateBuyDate(date)} />
         </div>      
         <div style={{marginBottom: 5}}></div>
-        <div id={this.chartId} style={{flex:100, display:"flex", flexFlow:"column", overflow: 'auto'}}>
+        <div style={{flex:100, display:"flex", flexFlow:"row",overflow: 'auto'}}>
+          <Table type="default" rowSelectable={true} rowKey={(value)=>{return value.code}} checkedKey={this.state.stock ? this.state.stock.code: ''} fixHeader={true} style={{width:'135px'}} data={this.state.stocks} checkType="radio" noDataTemplate={"无数据"} on$change-checked={(instance, newValue, oldValue)=>{
+              this.onSelect(newValue)
+          }}>
+            <TableColumn key="name" title="自选股票池"/>
+          </Table>
+          <div id={this.chartId} style={{flex:100, display:"flex", flexFlow:"column", overflow: 'auto'}}></div>
         </div>
         {this.state.loading ? <Spin overlay /> : ""}
-        <Dialog value={this.state.showStockDialog} on$change-value={(c, show) => this.setState({showStockDialog: show})} title="新增股票" width={630}
-                  ok={(dialog)=>{this.confirmAddStock(dialog)}}
-              >
+        <Dialog value={this.state.showStockDialog} on$change-value={(c, show) => this.setState({showStockDialog: show})} title="新增股票" width={630} ok={(dialog)=>{this.confirmAddStock(dialog)}}>
                 <Form ref={i => this.stockCodeForm = i} size="default">
                   <FormItem label="股票代码" rules={{required: true}}>
                       <Input width={480} on$change-value={(c, value) => {this.setState({newCode: value})}}/>

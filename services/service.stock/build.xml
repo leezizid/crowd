@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="create_run_jar" name="Create Runnable Jar for Project service.portal with libraries in sub-folder">
+    <!--this file was created by Eclipse Runnable JAR Export Wizard-->
+    <!--ANT 1.7 is required                                        -->
+    <!--define folder properties-->
+    <property name="dir.buildfile" value="."/>
+    <property name="dir.workspace" value="C:/Eclipse/workspace"/>
+    <property name="dir.jarfile" value="E:/Bin"/>
+    <target name="create_run_jar">
+        <jar destfile="${dir.jarfile}/stock.jar">
+            <manifest>
+                <attribute name="Main-Class" value="com.crowd.service.base.impl.CrowdApp"/>
+                <attribute name="Class-Path" value=". lib/netty-all-4.1.30.Final.jar lib/json-20180813.jar lib/commons-lang3-3.8.1.jar"/>
+            </manifest>
+            <fileset dir="${dir.buildfile}/target/classes"/>
+            <fileset dir="E:/Work/crowd/service.base/service.base.java/target/classes"/>
+        </jar>
+        <mkdir dir="${dir.jarfile}/lib"/>
+        <copy file="C:/Users/62/.m2/repository/io/netty/netty-all/4.1.30.Final/netty-all-4.1.30.Final.jar" todir="${dir.jarfile}/lib"/>
+        <copy file="C:/Users/62/.m2/repository/org/json/json/20180813/json-20180813.jar" todir="${dir.jarfile}/lib"/>
+        <copy file="C:/Users/62/.m2/repository/org/apache/commons/commons-lang3/3.8.1/commons-lang3-3.8.1.jar" todir="${dir.jarfile}/lib"/>
+    </target>
+</project>

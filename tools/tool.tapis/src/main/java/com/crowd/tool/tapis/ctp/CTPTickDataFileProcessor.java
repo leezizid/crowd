@@ -10,7 +10,6 @@ import java.io.RandomAccessFile;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -58,22 +57,36 @@ public class CTPTickDataFileProcessor {
 //		}
 //	}
 
-	public final static void main0(String[] args) throws Throwable {
+//	public final static void main(String[] args) throws Throwable {
 //		String exName = "CFFEX";
-//		String[] productNames = new String[] { "IC","IF","IH","IM","T","TF","TS"};
-//		String exName = "INE";
-//		String[] productNames = new String[] { "bc","lu","nr","sc"};
-//		String exName = "CZCE";
-//		String[] productNames = new String[] {"AP","CF","CJ","CY","FG","LR","MA","OI","PF","PK","PM","RI","RM","RS","SA","SF","SM","SR","TA","UR","WH","ZC"};
-		String exName = "DCE";
-		String[] productNames = new String[] { "a", "b", "bb", "c", "cs", "eb", "eg", "fb", "i", "j", "jd", "jm", "l",
-				"lh", "m", "p", "pg", "pp", "rr", "v", "y" };
-//		String exName = "SHFE";
-//		String[] productNames = new String[] {"ag","al","au","bu","cu","fu","hc","ni","pb","rb","ru","sn","sp","ss","wr","zn"};
-		for (String productName : productNames) {
-			processTQTickFile(exName, productName);
-		}
-	}
+//		String[] productNames = new String[] { "IC", "IF", "IH", "IM", "T", "TF", "TS" };
+//		for (String productName : productNames) {
+//			processTQTickFile(exName, productName);
+//		}
+//		exName = "INE";
+//		productNames = new String[] { "bc", "lu", "nr", "sc" };
+//		for (String productName : productNames) {
+//			processTQTickFile(exName, productName);
+//		}
+//		exName = "CZCE";
+//		productNames = new String[] { "AP", "CF", "CJ", "CY", "FG", "LR", "MA", "OI", "PF", "PK", "PM", "RI", "RM",
+//				"RS", "SA", "SF", "SM", "SR", "TA", "UR", "WH", "ZC" };
+//		for (String productName : productNames) {
+//			processTQTickFile(exName, productName);
+//		}
+//		exName = "DCE";
+//		productNames = new String[] { "a", "b", "bb", "c", "cs", "eb", "eg", "fb", "i", "j", "jd", "jm", "l", "lh", "m",
+//				"p", "pg", "pp", "rr", "v", "y" };
+//		for (String productName : productNames) {
+//			processTQTickFile(exName, productName);
+//		}
+//		exName = "SHFE";
+//		productNames = new String[] { "ag", "al", "au", "bu", "cu", "fu", "hc", "ni", "pb", "rb", "ru", "sn",
+//				"sp", "ss", "wr", "zn" };
+//		for (String productName : productNames) {
+//			processTQTickFile(exName, productName);
+//		}
+//	}
 
 	public final static void main(String[] args) throws Throwable {
 		//
@@ -269,124 +282,127 @@ public class CTPTickDataFileProcessor {
 		}
 	}
 
-	public final static void processTQTickFile(String exName, String productName) throws Throwable {
-		String symbol = exName + "." + productName;
-		File sourceDir = new File("Z:\\BAK\\" + symbol);
-		File targetDir = new File("Z:\\MD\\" + symbol);
-		List<String> fileNameList = new ArrayList<String>();
-		for (File file : sourceDir.listFiles()) {
-			if (file.isFile() && file.getAbsolutePath().endsWith(".csv")) {
-				fileNameList.add(file.getName());
-			}
-		}
-		Collections.sort(fileNameList);
-
-		//
-//		String[] info = StringUtils.split(sourceDir.getName(), ".");
-		ProductDefine ctpProduct = CTPProducts.find(productName);
-		if (ctpProduct == null || !ctpProduct.getExchange().equals(exName)) {
-			return;
-		}
-		new File(targetDir, "daytick").mkdirs();
-		new File(targetDir, "daytime").mkdirs();
-		new File(targetDir, "kline").mkdirs();
-
-		String finishDay = "";
-		File markFile = new File(targetDir, ".mark");
-		if (markFile.exists()) {
-			RandomAccessFile tradeDayFinishMarkRAF = new RandomAccessFile(markFile, "r");
-			finishDay = tradeDayFinishMarkRAF.readLine().trim();
-			tradeDayFinishMarkRAF.close();
-		}
-		//
-		String[] tradeDays = TradeDays.getTradeDayList();
-		int tradeDayIndex = 0;
-		if (StringUtils.isNotEmpty(finishDay)) {
-			for (int i = 0; i < tradeDays.length; i++) {
-				if (tradeDays[i].equals(finishDay)) {
-					tradeDayIndex = i + 1;
-					break;
-				}
-			}
-		}
-		if (tradeDayIndex == tradeDays.length) {
-			throw new IllegalStateException("所有可用交易日均处理完毕");
-		}
-		//
-		int progressCount = 0;
-		TradeDayData tradeDayData = null;
-		for (String fileName : fileNameList) {
-			// 忽略已经处理的数据文件
-			if (StringUtils.isNotEmpty(finishDay)) {
-				String dataMonth = fileName.substring(fileName.lastIndexOf('_') + 1, fileName.indexOf(".csv"));
-				if (dataMonth.compareTo(finishDay.substring(0, 4) + finishDay.substring(5, 7)) < 0) {
-					continue;
-				}
-			}
-			RandomAccessFile raf = new RandomAccessFile(new File(sourceDir, fileName), "r");
-			byte[] content = new byte[(int) raf.length()];
-			raf.read(content);
-			raf.close();
-			ByteArrayInputStream bais = new ByteArrayInputStream(content);
-			InputStreamReader streamReader = new InputStreamReader(bais);
-			BufferedReader bufferedReader = new BufferedReader(streamReader);
-			try {
-				String line = null;
-				while ((line = bufferedReader.readLine()) != null) {
-					TickData tickData = convertToTickData(line);
-					if (tickData != null) {
-						String tradeDay = TradeDays.matchTradeDay(tickData.getTime());
-						// 忽略已经处理的数据行
-						if (StringUtils.isNotEmpty(finishDay)) {
-							if (tradeDay.equals(finishDay) || tradeDay.compareTo(finishDay) < 0) {
-								continue;
-							}
-						}
-						if (tradeDayData == null || !tradeDayData.getTradeDay().equals(tradeDay)) {
-							// 保存数据
-							save(symbol, tradeDayData, targetDir);
-							// 创建新数据
-							while (!tradeDay.equals(tradeDays[tradeDayIndex])) {
-								tradeDayData = new TradeDayData(tradeDays[tradeDayIndex], ctpProduct);
-								System.out.print("默认处理" + tradeDays[tradeDayIndex] + "***");
-								//
-								TickData mockTickData = new TickData();
-								mockTickData.setTime(
-										TradeDays.getTradeDayTime(tradeDays[tradeDayIndex]) + 1000 * 60 * 60 * 15);
-								mockTickData.setLastPrice(BigDecimal.ZERO);
-								mockTickData.setVolume(BigDecimal.ZERO);
-								mockTickData.setOpenInterest(BigDecimal.ZERO);
-								mockTickData.setBidPrice1(BigDecimal.ZERO);
-								mockTickData.setBidVolume1(BigDecimal.ZERO);
-								mockTickData.setAskPrice1(BigDecimal.ZERO);
-								mockTickData.setAskVolume1(BigDecimal.ZERO);
-								tradeDayData.onTick(mockTickData);
-								save(symbol, tradeDayData, targetDir);
-								tradeDayIndex++;
-							}
-							tradeDayData = new TradeDayData(tradeDay, ctpProduct);
-							System.out.print("开始处理" + tradeDay + "...");
-							tradeDayIndex++;
-						}
-						tradeDayData.onTick(tickData);
-						progressCount++;
-						if (progressCount == 1000) {
-							progressCount = 0;
-							System.out.print(".");
-						}
-					} else if (line.trim().equals("---###---")) {
-						save(symbol, tradeDayData, targetDir);
-						tradeDayData = null;
-					}
-				}
-			} finally {
-				bais.close();
-				streamReader.close();
-				bufferedReader.close();
-			}
-		}
-		save(symbol, tradeDayData, targetDir);
-	}
+//	public final static void processTQTickFile(String exName, String productName) throws Throwable {
+//		String symbol = exName + "." + productName;
+//		File sourceDir = new File("Z:\\BAK\\" + symbol);
+//		File targetDir = new File("Z:\\MD\\" + symbol);
+//		if(!sourceDir.exists()) {
+//			return;
+//		}
+//		List<String> fileNameList = new ArrayList<String>();
+//		for (File file : sourceDir.listFiles()) {
+//			if (file.isFile() && file.getAbsolutePath().endsWith(".csv")) {
+//				fileNameList.add(file.getName());
+//			}
+//		}
+//		Collections.sort(fileNameList);
+//
+//		//
+////		String[] info = StringUtils.split(sourceDir.getName(), ".");
+//		ProductDefine ctpProduct = CTPProducts.find(productName);
+//		if (ctpProduct == null || !ctpProduct.getExchange().equals(exName)) {
+//			return;
+//		}
+//		new File(targetDir, "daytick").mkdirs();
+//		new File(targetDir, "daytime").mkdirs();
+//		new File(targetDir, "kline").mkdirs();
+//
+//		String finishDay = "";
+//		File markFile = new File(targetDir, ".mark");
+//		if (markFile.exists()) {
+//			RandomAccessFile tradeDayFinishMarkRAF = new RandomAccessFile(markFile, "r");
+//			finishDay = tradeDayFinishMarkRAF.readLine().trim();
+//			tradeDayFinishMarkRAF.close();
+//		}
+//		//
+//		String[] tradeDays = TradeDays.getTradeDayList();
+//		int tradeDayIndex = 0;
+//		if (StringUtils.isNotEmpty(finishDay)) {
+//			for (int i = 0; i < tradeDays.length; i++) {
+//				if (tradeDays[i].equals(finishDay)) {
+//					tradeDayIndex = i + 1;
+//					break;
+//				}
+//			}
+//		}
+//		if (tradeDayIndex == tradeDays.length) {
+//			throw new IllegalStateException("所有可用交易日均处理完毕");
+//		}
+//		//
+//		int progressCount = 0;
+//		TradeDayData tradeDayData = null;
+//		for (String fileName : fileNameList) {
+//			// 忽略已经处理的数据文件
+//			if (StringUtils.isNotEmpty(finishDay)) {
+//				String dataMonth = fileName.substring(fileName.lastIndexOf('_') + 1, fileName.indexOf(".csv"));
+//				if (dataMonth.compareTo(finishDay.substring(0, 4) + finishDay.substring(5, 7)) < 0) {
+//					continue;
+//				}
+//			}
+//			RandomAccessFile raf = new RandomAccessFile(new File(sourceDir, fileName), "r");
+//			byte[] content = new byte[(int) raf.length()];
+//			raf.read(content);
+//			raf.close();
+//			ByteArrayInputStream bais = new ByteArrayInputStream(content);
+//			InputStreamReader streamReader = new InputStreamReader(bais);
+//			BufferedReader bufferedReader = new BufferedReader(streamReader);
+//			try {
+//				String line = null;
+//				while ((line = bufferedReader.readLine()) != null) {
+//					TickData tickData = convertToTickData(line);
+//					if (tickData != null) {
+//						String tradeDay = TradeDays.matchTradeDay(tickData.getTime());
+//						// 忽略已经处理的数据行
+//						if (StringUtils.isNotEmpty(finishDay)) {
+//							if (tradeDay.equals(finishDay) || tradeDay.compareTo(finishDay) < 0) {
+//								continue;
+//							}
+//						}
+//						if (tradeDayData == null || !tradeDayData.getTradeDay().equals(tradeDay)) {
+//							// 保存数据
+//							save(symbol, tradeDayData, targetDir);
+//							// 创建新数据
+//							while (!tradeDay.equals(tradeDays[tradeDayIndex])) {
+//								tradeDayData = new TradeDayData(tradeDays[tradeDayIndex], ctpProduct);
+//								System.out.print("默认处理" + tradeDays[tradeDayIndex] + "***");
+//								//
+//								TickData mockTickData = new TickData();
+//								mockTickData.setTime(
+//										TradeDays.getTradeDayTime(tradeDays[tradeDayIndex]) + 1000 * 60 * 60 * 15);
+//								mockTickData.setLastPrice(BigDecimal.ZERO);
+//								mockTickData.setVolume(BigDecimal.ZERO);
+//								mockTickData.setOpenInterest(BigDecimal.ZERO);
+//								mockTickData.setBidPrice1(BigDecimal.ZERO);
+//								mockTickData.setBidVolume1(BigDecimal.ZERO);
+//								mockTickData.setAskPrice1(BigDecimal.ZERO);
+//								mockTickData.setAskVolume1(BigDecimal.ZERO);
+//								tradeDayData.onTick(mockTickData);
+//								save(symbol, tradeDayData, targetDir);
+//								tradeDayIndex++;
+//							}
+//							tradeDayData = new TradeDayData(tradeDay, ctpProduct);
+//							System.out.print("开始处理" + tradeDay + "...");
+//							tradeDayIndex++;
+//						}
+//						tradeDayData.onTick(tickData);
+//						progressCount++;
+//						if (progressCount == 1000) {
+//							progressCount = 0;
+//							System.out.print(".");
+//						}
+//					} else if (line.trim().equals("---###---")) {
+//						save(symbol, tradeDayData, targetDir);
+//						tradeDayData = null;
+//					}
+//				}
+//			} finally {
+//				bais.close();
+//				streamReader.close();
+//				bufferedReader.close();
+//			}
+//		}
+//		save(symbol, tradeDayData, targetDir);
+//	}
 
 	private static void save(String symbol, TradeDayData tradeDayData, File targetDir) throws Throwable {
 		if (tradeDayData == null) {
@@ -432,52 +448,52 @@ public class CTPTickDataFileProcessor {
 
 	}
 
-	private static TickData convertToTickData(String line) {
-		try {
-			String[] info = StringUtils.split(line, ",");
-			long time = Long.parseLong(info[1]);
-			TickData tickData = new TickData();
-			tickData.setLabel(info[0].substring(0, info[0].length() - 6));
-			tickData.setTime(time / 1000000 + ((time / 1000000) % 1000 > 0 ? 0 : (time % 1000000) / 1000)); // 某些tick数据时间有问题，毫秒数为0，但是后面有更小的精度数值
-			tickData.setLastPrice(new BigDecimal(info[2]));
-//			tickData.setHighestPrice(new BigDecimal(info[3]));
-//			tickData.setLowestPrice(new BigDecimal(info[4]));
-			tickData.setVolume(new BigDecimal(info[5]));
-//			tickData.setValue(new BigDecimal(info[6]));
-			tickData.setOpenInterest(new BigDecimal(info[7]));
-			tickData.setBidPrice1(getBidOrAskValue(info[8]));
-			tickData.setBidVolume1(getBidOrAskValue(info[9]));
-			tickData.setAskPrice1(getBidOrAskValue(info[10]));
-			tickData.setAskVolume1(getBidOrAskValue(info[11]));
-//			if (info.length > 12) {
-//				tickData.setBidPrice2(getBidOrAskValue(info[12]));
-//				tickData.setBidVolume2(getBidOrAskValue(info[13]));
-//				tickData.setAskPrice2(getBidOrAskValue(info[14]));
-//				tickData.setAskVolume2(getBidOrAskValue(info[15]));
-//			}
-//			if (info.length > 16) {
-//				tickData.setBidPrice3(getBidOrAskValue(info[16]));
-//				tickData.setBidVolume3(getBidOrAskValue(info[17]));
-//				tickData.setAskPrice3(getBidOrAskValue(info[18]));
-//				tickData.setAskVolume3(getBidOrAskValue(info[19]));
-//			}
-//			if (info.length > 20) {
-//				tickData.setBidPrice4(getBidOrAskValue(info[20]));
-//				tickData.setBidVolume4(getBidOrAskValue(info[21]));
-//				tickData.setAskPrice4(getBidOrAskValue(info[22]));
-//				tickData.setAskVolume4(getBidOrAskValue(info[23]));
-//			}
-//			if (info.length > 24) {
-//				tickData.setBidPrice5(getBidOrAskValue(info[24]));
-//				tickData.setBidVolume5(getBidOrAskValue(info[25]));
-//				tickData.setAskPrice5(getBidOrAskValue(info[26]));
-//				tickData.setAskVolume5(getBidOrAskValue(info[27]));
-//			}
-			return tickData;
-		} catch (Throwable t) {
-			return null;
-		}
-	}
+//	private static TickData convertToTickData(String line) {
+//		try {
+//			String[] info = StringUtils.split(line, ",");
+//			long time = Long.parseLong(info[1]);
+//			TickData tickData = new TickData();
+//			tickData.setLabel(info[0].substring(0, info[0].length() - 6));
+//			tickData.setTime(time / 1000000 + ((time / 1000000) % 1000 > 0 ? 0 : (time % 1000000) / 1000)); // 某些tick数据时间有问题，毫秒数为0，但是后面有更小的精度数值
+//			tickData.setLastPrice(new BigDecimal(info[2]));
+////			tickData.setHighestPrice(new BigDecimal(info[3]));
+////			tickData.setLowestPrice(new BigDecimal(info[4]));
+//			tickData.setVolume(new BigDecimal(info[5]));
+////			tickData.setValue(new BigDecimal(info[6]));
+//			tickData.setOpenInterest(new BigDecimal(info[7]));
+//			tickData.setBidPrice1(getBidOrAskValue(info[8]));
+//			tickData.setBidVolume1(getBidOrAskValue(info[9]));
+//			tickData.setAskPrice1(getBidOrAskValue(info[10]));
+//			tickData.setAskVolume1(getBidOrAskValue(info[11]));
+////			if (info.length > 12) {
+////				tickData.setBidPrice2(getBidOrAskValue(info[12]));
+////				tickData.setBidVolume2(getBidOrAskValue(info[13]));
+////				tickData.setAskPrice2(getBidOrAskValue(info[14]));
+////				tickData.setAskVolume2(getBidOrAskValue(info[15]));
+////			}
+////			if (info.length > 16) {
+////				tickData.setBidPrice3(getBidOrAskValue(info[16]));
+////				tickData.setBidVolume3(getBidOrAskValue(info[17]));
+////				tickData.setAskPrice3(getBidOrAskValue(info[18]));
+////				tickData.setAskVolume3(getBidOrAskValue(info[19]));
+////			}
+////			if (info.length > 20) {
+////				tickData.setBidPrice4(getBidOrAskValue(info[20]));
+////				tickData.setBidVolume4(getBidOrAskValue(info[21]));
+////				tickData.setAskPrice4(getBidOrAskValue(info[22]));
+////				tickData.setAskVolume4(getBidOrAskValue(info[23]));
+////			}
+////			if (info.length > 24) {
+////				tickData.setBidPrice5(getBidOrAskValue(info[24]));
+////				tickData.setBidVolume5(getBidOrAskValue(info[25]));
+////				tickData.setAskPrice5(getBidOrAskValue(info[26]));
+////				tickData.setAskVolume5(getBidOrAskValue(info[27]));
+////			}
+//			return tickData;
+//		} catch (Throwable t) {
+//			return null;
+//		}
+//	}
 
 	private static BigDecimal getBidOrAskValue(String s) {
 		try {

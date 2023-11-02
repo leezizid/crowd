@@ -14,7 +14,7 @@ export default class StockTestView extends BaseComponent {
     this.chartId = "chart" + new Date().getTime();
     this.chart = null;
     //
-    this.setState({loading: false,startDay: '2018-01-02', maxPositionDays: 100, targetAmplitude: 0.05});
+    this.setState({loading: false,startDay: '2018-03-01', maxPositionDays: 20, targetAmplitude: 0.02, stopAmplitude: -0.1, algorithm:'cci'});
   }
 
   componentDidMount() {
@@ -24,7 +24,7 @@ export default class StockTestView extends BaseComponent {
   
   startTest() {
     this.setState({loading: true});
-    this.invoke("/stock/test0", {startDay: this.state.startDay, maxPositionDays:this.state.maxPositionDays, targetAmplitude: this.state.targetAmplitude}, (error, data) => {
+    this.invoke("/stock/test0", {startDay: this.state.startDay, maxPositionDays:this.state.maxPositionDays, targetAmplitude: this.state.targetAmplitude, stopAmplitude: this.state.stopAmplitude, algorithm: this.state.algorithm}, (error, data) => {
       this.setState({loading: false});
       if(error) {
         Message.error(error.message);
@@ -168,25 +168,45 @@ export default class StockTestView extends BaseComponent {
           <Select style={{width:'100px'}} value={this.state.maxPositionDays} on$change-value={(c,value) =>{
             this.setState({maxPositionDays:value});
            }}>
+            <Option value={20}>20</Option>
+            <Option value={30}>30</Option>
+            <Option value={40}>40</Option>
+            <Option value={50}>50</Option>
             <Option value={100}>100</Option>
             <Option value={150}>150</Option>
             <Option value={200}>200</Option>
-            <Option value={250}>250</Option>
-            <Option value={300}>300</Option>
           </Select>
           <span style={{width:'20px'}}></span> 
-          <span style={{marginTop:10}}>目标涨幅（相对指数）：</span> 
+          <span style={{marginTop:10}}>止盈（相对指数）：</span> 
           <Select style={{width:'100px'}} value={this.state.targetAmplitude} on$change-value={(c,value) =>{
             this.setState({targetAmplitude:value});
            }}>
-            <Option value={0.02}>0.02</Option>
-            <Option value={0.03}>0.03</Option>
-            <Option value={0.04}>0.04</Option>
-            <Option value={0.05}>0.05</Option>
-            <Option value={0.08}>0.08</Option>
-            <Option value={0.1}>0.10</Option>
+            <Option value={0.02}>2%</Option>
+            <Option value={0.03}>3%</Option>
+            <Option value={0.04}>4%</Option>
+            <Option value={0.05}>5%</Option>
+            <Option value={0.08}>8%</Option>
+            <Option value={0.10}>10%</Option>
           </Select>
-          <span style={{width:10}}>&nbsp;&nbsp;</span>
+          <span style={{width:'20px'}}></span> 
+          <span style={{marginTop:10}}>止损（相对指数）：</span> 
+          <Select style={{width:'100px'}} value={this.state.stopAmplitude} on$change-value={(c,value) =>{
+            this.setState({stopAmplitude:value});
+           }}>
+            <Option value={-0.10}>10%</Option>
+            <Option value={-0.15}>15%</Option>
+            <Option value={-0.20}>20%</Option>
+            <Option value={-0.25}>25%</Option>            
+          </Select>
+          <span style={{width:'20px'}}></span> 
+          <span style={{marginTop:10}}>选股算法：</span> 
+          <Select style={{width:'100px'}} value={this.state.algorithm} on$change-value={(c,value) =>{
+            this.setState({algorithm:value});
+           }}>
+            <Option value={'random'}>随机</Option>
+            <Option value={'cci'}>CCI</Option>
+          </Select>
+          <span style={{width:50}}>&nbsp;&nbsp;</span>
           <Button style={{width:'120px'}} type="primary"   onClick={()=>(this.startTest())}>开始测试</Button>
           <span style={{flex:100}}>&nbsp;&nbsp;</span>
         </div>

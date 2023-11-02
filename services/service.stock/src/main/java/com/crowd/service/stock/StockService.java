@@ -11,6 +11,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -223,6 +224,9 @@ public class StockService implements CrowdService {
 		String startDay = input.getString("startDay");
 		int maxPositionDays = input.getInt("maxPositionDays");
 		float targetAmplitude = input.getFloat("targetAmplitude");
+		float stopAmplitude = input.getFloat("stopAmplitude");
+		String algorithm = input.getString("algorithm");
+		int cciPeriod = 14;
 		Set<String> daySet = new HashSet<String>(); // 交易日集合（无序）
 		List<String> dayList = new ArrayList<String>(); // 交易日列表
 		List<String> codeList = new ArrayList<String>(); // 所有可用股票代码
@@ -248,14 +252,46 @@ public class StockService implements CrowdService {
 			for (int i = 0; i < array.length(); i++) {
 				JSONArray dataArray = array.getJSONArray(i);
 				KData kData = new KData();
+				//
 				kData.day = dataArray.getString(0);
 				kData.closePrice = new BigDecimal(dataArray.getString(2));
 				kData.highPrice = new BigDecimal(dataArray.getString(3));
+				kData.lowPrice = new BigDecimal(dataArray.getString(4));
 				kData.volume = new BigDecimal(dataArray.getString(5));
+				//
 				kDataList.add(kData);
 				kDataMap.put(kData.day, kData);
 				if (kData.day.compareTo(startDay) >= 0) {
 					daySet.add(kData.day);
+				}
+				//
+				kData.avgPrice = kData.closePrice.add(kData.highPrice).add(kData.lowPrice).divide(new BigDecimal(3), 4,
+						RoundingMode.HALF_UP);
+				if (i == cciPeriod - 1) {
+					for (int x = 0; x < cciPeriod; x++) {
+						kData.maSumValue = kData.maSumValue.add(kDataList.get(x).avgPrice);
+					}
+				} else if (i > cciPeriod - 1) {
+					kData.maSumValue = kDataList.get(i - 1).maSumValue.subtract(kDataList.get(i - cciPeriod).avgPrice);
+					kData.maSumValue = kData.maSumValue.add(kData.avgPrice);
+				}
+				kData.maValue = kData.maSumValue.divide(new BigDecimal(cciPeriod), 2, RoundingMode.HALF_UP);
+				if (i == cciPeriod * 2 - 1) {
+					for (int x = 0; x < cciPeriod; x++) {
+						kData.mdSumValue = kData.mdSumValue.add(
+								kDataList.get(cciPeriod + x).maValue.subtract(kDataList.get(cciPeriod + x).avgPrice));
+					}
+				} else if (i > cciPeriod * 2 - 1) {
+					kData.mdSumValue = kDataList.get(i - 1).mdSumValue.subtract(
+							kDataList.get(i - cciPeriod).maValue.subtract(kDataList.get(i - cciPeriod).avgPrice));
+					kData.mdSumValue = kData.mdSumValue.add(kData.maValue.subtract(kData.avgPrice));
+				}
+				kData.mdValue = kData.mdSumValue.divide(new BigDecimal(cciPeriod), 2, RoundingMode.HALF_UP);
+				if (kData.mdValue.compareTo(BigDecimal.ZERO) != 0) {
+					kData.cciValue = kData.avgPrice.subtract(kData.maValue)
+							.divide(kData.mdValue.multiply(new BigDecimal(0.015)), 0, RoundingMode.HALF_UP);
+				} else {
+					kData.cciValue = BigDecimal.ZERO;
 				}
 			}
 			codeList.add(code);
@@ -275,10 +311,14 @@ public class StockService implements CrowdService {
 		BigDecimal INDEX_POINT_VALUE = new BigDecimal(200); // 指数单点价值
 		BigDecimal SINGLE_STOCK_VALUE = new BigDecimal(30000); // 个股买入市值
 		BigDecimal TARGET_AMPLITUDE = new BigDecimal(targetAmplitude);
+		BigDecimal STOP_AMPLITUDE = new BigDecimal(stopAmplitude);
 		BigDecimal fundValue = new BigDecimal(2000000);
 		BigDecimal balanceValue = new BigDecimal(1500000);
 		BigDecimal contractBaseValue = new BigDecimal(500000);
 		BigDecimal initIndexValue = code2KDataMap.get(INDEX_CODE).get(startDay).closePrice;
+		BigDecimal winValue = BigDecimal.ZERO;
+		BigDecimal loseValue = BigDecimal.ZERO;
+		int normalCloseCount = 0;
 		for (int i = 0; i < dayList.size(); i++) {
 			//
 			String day = dayList.get(i);
@@ -286,46 +326,96 @@ public class StockService implements CrowdService {
 			// 卖出股票
 			BigDecimal marketValue = BigDecimal.ZERO;
 			Map<String, OrderInfo> newActiveOrders = new HashMap<String, OrderInfo>();
+			Set<String> sellOrderCodes = new HashSet<String>();
 			for (OrderInfo orderInfo : activeOrders.values()) {
 				orderInfo.days = orderInfo.days + 1;
 				KData kData = code2KDataMap.get(orderInfo.code).get(day);
+				boolean sellFlag = false;
 				// 该日期有交易（未停牌）
 				if (kData != null) {
 					BigDecimal indexAmplitude = indexValue.subtract(orderInfo.openIndexValue)
 							.divide(orderInfo.openIndexValue, 4, RoundingMode.HALF_UP);
-					BigDecimal stockAmplitude = indexAmplitude.add(TARGET_AMPLITUDE);
-					BigDecimal targetPrice = orderInfo.openPrice.add(orderInfo.openPrice.multiply(stockAmplitude))
+					BigDecimal targetPrice = orderInfo.openPrice
+							.add(orderInfo.openPrice.multiply(indexAmplitude.add(TARGET_AMPLITUDE)))
 							.setScale(2, RoundingMode.HALF_UP);
-//					BigDecimal price = kData.closePrice.max(kData.highPrice);
-					BigDecimal price = kData.closePrice; // XXX：此处可以优化为盘中满足平仓条件的价格
-//					BigDecimal stockAmplitude = price.subtract(orderInfo.openPrice).divide(orderInfo.openPrice, 4,
-//							RoundingMode.HALF_UP);
-					if (kData.highPrice.compareTo(targetPrice) >= 0 || orderInfo.days > maxPositionDays) {
-						orderInfo.closeIndexValue = indexValue;
-						orderInfo.closeDay = day;
-						orderInfo.closePrice = price;
-						historyOrders.add(orderInfo);
-						BigDecimal value = price.multiply(orderInfo.volume);
-						value = value.subtract(value.multiply(new BigDecimal("0.0012")));
-						balanceValue = balanceValue.add(value);
-						continue;
+					BigDecimal relativeAmplitude = kData.closePrice.subtract(orderInfo.openPrice)
+							.divide(orderInfo.openPrice, 4, RoundingMode.HALF_UP).subtract(indexAmplitude);
+					if (kData.highPrice.compareTo(targetPrice) >= 0) {
+						orderInfo.closePrice = targetPrice;
+						sellFlag = true;
+						normalCloseCount++;
+					} else if (orderInfo.days > maxPositionDays || relativeAmplitude.compareTo(STOP_AMPLITUDE) < 0) {
+						orderInfo.closePrice = kData.closePrice;
+						sellFlag = true;
 					}
 				}
-				newActiveOrders.put(orderInfo.code, orderInfo);
-				marketValue = marketValue.add(orderInfo.volume.multiply(orderInfo.openPrice));
+				if (sellFlag) {
+					orderInfo.closeIndexValue = indexValue;
+					orderInfo.closeDay = day;
+					historyOrders.add(orderInfo);
+					sellOrderCodes.add(orderInfo.code);
+					BigDecimal value = orderInfo.closePrice.multiply(orderInfo.volume);
+					balanceValue = balanceValue.add(value).subtract(value.multiply(new BigDecimal("0.0007")));
+
+					// XXX：统计盈亏累计
+					BigDecimal profitValue = orderInfo.closePrice.multiply(orderInfo.volume)
+							.multiply(new BigDecimal("0.9993")).subtract(
+									orderInfo.openPrice.multiply(orderInfo.volume).multiply(new BigDecimal("1.0002")));
+					if (profitValue.compareTo(BigDecimal.ZERO) >= 0) {
+						winValue = winValue.add(profitValue);
+					} else {
+						loseValue = loseValue.add(profitValue.abs());
+					}
+				} else {
+					newActiveOrders.put(orderInfo.code, orderInfo);
+					marketValue = marketValue.add(orderInfo.volume.multiply(orderInfo.openPrice));
+				}
 			}
 			activeOrders = newActiveOrders;
 
-			// 买入股票
+			//
+			List<StockZBValue> stockZBValueList = new ArrayList<StockZBValue>();
+			for (String code : codeList) {
+				if (sellOrderCodes.contains(code)) {
+					continue;
+				}
+				if (activeOrders.containsKey(code)) {
+					continue;
+				}
+				KData kData = code2KDataMap.get(code).get(day);
+				if (kData == null) {
+					continue;
+				}
+				if (kData.cciValue.abs().doubleValue() < 50) {
+					continue;
+				}
+				StockZBValue stockZBValue = new StockZBValue();
+				stockZBValue.code = code;
+				stockZBValue.cci = kData.cciValue.abs().doubleValue();
+				stockZBValueList.add(stockZBValue);
+			}
+			Collections.sort(stockZBValueList, new Comparator<StockZBValue>() {
+				@Override
+				public int compare(StockZBValue o1, StockZBValue o2) {
+					return o1.cci - o2.cci == 0 ? 0 : (o1.cci - o2.cci > 0 ? -1 : 1);
+				}
+			});
+
+			// 买入股票（随机策略）
 			while (true) {
 				// 持仓市值达到目标
 				if (marketValue.compareTo(indexValue.multiply(INDEX_POINT_VALUE)) >= 0) {
 					break;
 				}
+
+				// XXX：随机买入
+				String code = codeList.get(new Random().nextInt(codeList.size()));
+
 				//
-				int index = new Random().nextInt(codeList.size()); // XXX：随机买入
-				String code = codeList.get(index);
-				// XXX:注意排除今日或近期卖出的股票
+				if (("cci").equals(algorithm)) {
+					StockZBValue stockZBValue = stockZBValueList.remove(stockZBValueList.size() - 1);
+					code = stockZBValue.code;
+				}
 
 				// 排除持仓的股票
 				if (activeOrders.containsKey(code)) {
@@ -347,8 +437,7 @@ public class StockService implements CrowdService {
 				activeOrders.put(code, orderInfo);
 				// 为简化计算，实际余额可能小于0
 				BigDecimal value = orderInfo.openPrice.multiply(orderInfo.volume);
-				value = value.subtract(value.multiply(new BigDecimal("0.0002")));
-				balanceValue = balanceValue.subtract(value);
+				balanceValue = balanceValue.subtract(value).subtract(value.multiply(new BigDecimal("0.0002")));
 				marketValue = marketValue.add(value);
 			}
 			//
@@ -379,8 +468,17 @@ public class StockService implements CrowdService {
 //			System.out.println(
 //					orderInfo.code + ":" + orderInfo.openDay + "," + orderInfo.days + "," + orderInfo.openPrice);
 //		}
-//		System.out.println("当前交易数量：" + activeOrders.size());
-//		System.out.println("历史交易数量：" + historyOrders.size());
+		System.out.println("-------------------------------------------------");
+		System.out.println("算法：" + algorithm);
+		System.out.println("最大持股天数：" + maxPositionDays);
+		System.out.println("止盈涨幅：" + targetAmplitude * 100 + "%");
+		System.out.println("止损跌幅：" + stopAmplitude * 100 + "%");
+		System.out.println("当前未平仓交易数量：" + activeOrders.size());
+		System.out.println("历史交易数量：" + historyOrders.size());
+		System.out.println("正常平仓数量：" + normalCloseCount);
+		System.out.println("已平仓盈利合计：" + winValue.doubleValue());
+		System.out.println("已平仓亏损合计：" + loseValue.doubleValue());
+		System.out.println("-------------------------------------------------");
 	}
 
 	private String[] quoteInfo(String code) throws Throwable {
@@ -656,7 +754,14 @@ class KData {
 	String day;
 	BigDecimal closePrice;
 	BigDecimal highPrice;
+	BigDecimal lowPrice;
 	BigDecimal volume;
+	BigDecimal avgPrice; // (closePrice+highPrice+lowPrice)/ 3
+	BigDecimal maValue;
+	BigDecimal mdValue;
+	BigDecimal cciValue;
+	BigDecimal maSumValue = BigDecimal.ZERO;
+	BigDecimal mdSumValue = BigDecimal.ZERO;
 }
 
 class OrderInfo {
@@ -676,4 +781,9 @@ class AssetInfo {
 	BigDecimal balanceValue; // 资金余额
 	BigDecimal marketValue; // 股票市值
 	BigDecimal contractValue; // 合约价值
+}
+
+class StockZBValue {
+	String code;
+	double cci;
 }

@@ -69,10 +69,10 @@
           {appId: 'ActiveWorker', appName: 'ActiveWorker', appTitle: '后台服务监控', icon: {type: 'KIcon', class: 'ion-ios-timer'}},
           {appId: 'ChannelManage', appName: 'ChannelManage', appTitle: '通道管理', icon: {type: 'KIcon', class: 'ion-playstation'}},
           {appId: 'FuturesInfoView', appName: 'FuturesInfoView', appTitle: '期货合约信息', icon: {type: 'KIcon', class: 'ion-ios-paper-outline'}},
-          {appId: 'StockInfoView', appName: 'StockInfoView', appTitle: '个股分析', icon: {type: 'KIcon', class: 'ion-code-download'}},
+          {appId: 'StrategyManage', appName: 'StrategyManage', appTitle: '合约策略管理', icon: {type: 'KIcon', class: 'ion-ios-cog'}},
+          {appId: 'BacktestManage', appName: 'BacktestManage', appTitle: '合约回测管理', icon: {type: 'KIcon', class: 'ion-clipboard'}},
           {appId: 'StockTestView', appName: 'StockTestView', appTitle: 'A股量化测试', icon: {type: 'KIcon', class: 'ion-ios-shuffle'}},
-          {appId: 'StrategyManage', appName: 'StrategyManage', appTitle: '策略管理', icon: {type: 'KIcon', class: 'ion-ios-cog'}},
-          {appId: 'BacktestManage', appName: 'BacktestManage', appTitle: '回测管理', icon: {type: 'KIcon', class: 'ion-clipboard'}},
+          {appId: 'StockInfoView', appName: 'StockInfoView', appTitle: '个股分析', icon: {type: 'KIcon', class: 'ion-code-download'}},
           // {appId: 'query', appTitle: '查询', icon: {type: 'KIcon', class: 'ion-ios-search-strong'},
           //   children: [
           //     {appId: 'q1',appName: 'q1', appTitle: '查询1'},

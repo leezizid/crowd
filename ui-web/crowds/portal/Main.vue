@@ -73,6 +73,7 @@
           {appId: 'BacktestManage', appName: 'BacktestManage', appTitle: '合约回测管理', icon: {type: 'KIcon', class: 'ion-clipboard'}},
           {appId: 'StockTestView', appName: 'StockTestView', appTitle: 'A股量化测试', icon: {type: 'KIcon', class: 'ion-ios-shuffle'}},
           {appId: 'StockInfoView', appName: 'StockInfoView', appTitle: '个股分析', icon: {type: 'KIcon', class: 'ion-code-download'}},
+          {appId: 'IdeaTestView', appName: 'IdeaTestView', appTitle: '概念测试', icon: {type: 'KIcon', class: 'ion-ios-lightbulb'}},
           // {appId: 'query', appTitle: '查询', icon: {type: 'KIcon', class: 'ion-ios-search-strong'},
           //   children: [
           //     {appId: 'q1',appName: 'q1', appTitle: '查询1'},

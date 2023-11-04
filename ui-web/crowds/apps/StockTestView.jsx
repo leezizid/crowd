@@ -95,15 +95,23 @@ export default class StockTestView extends BaseComponent {
             axisLine: { lineStyle: { color: 'lightgrey' } },
             splitLine: { show: true , lineStyle: {opacity: 0.4}}
         },
-        yAxis: {
+        yAxis: [
+           {
             scale: true,
             axisLine: { show: true, lineStyle: { color: 'lightgrey'} },
             axisLabel: {show: true},
             splitLine: { show: true , lineStyle: {opacity: 0.4}}
-        },
+          },
+          {
+            scale: true,
+            axisLine: { show: true, lineStyle: { color: 'lightgrey'} },
+            axisLabel: {show: true},
+            splitLine: { show: true , lineStyle: {opacity: 0.4}}
+          }
+        ],
         series: [
             {
-                name: '实际盈亏',
+                name: '综合盈亏',
                 type: 'line',
                 smooth: false,
                 symbol: 'none',
@@ -142,6 +150,24 @@ export default class StockTestView extends BaseComponent {
                 smooth: false,
                 symbol: 'none',
                 itemStyle: {
+                    color: 'lightgreen'
+                },
+                lineStyle: {
+                    width: 1,
+                    color: 'lightgreen'
+                },
+                encode: {
+                    x: 0,
+                    y: 3
+                }
+            },
+            {
+                name: '每日开仓数量',
+                type: 'bar',
+                yAxisIndex: 1,
+                smooth: false,
+                symbol: 'none',
+                itemStyle: {
                     color: 'lightblue'
                 },
                 lineStyle: {
@@ -150,7 +176,7 @@ export default class StockTestView extends BaseComponent {
                 },
                 encode: {
                     x: 0,
-                    y: 3
+                    y: 4
                 }
             }
         ]
@@ -177,6 +203,7 @@ export default class StockTestView extends BaseComponent {
             <Option value={100}>100</Option>
             <Option value={150}>150</Option>
             <Option value={200}>200</Option>
+            <Option value={2000}>2000</Option>
           </Select>
           <span style={{width:'30px'}}></span> 
           <span style={{marginTop:10}}>止盈：</span> 
@@ -204,7 +231,9 @@ export default class StockTestView extends BaseComponent {
             <Option value={0.10}>10%</Option>
             <Option value={0.15}>15%</Option>
             <Option value={0.20}>20%</Option>
-            <Option value={0.25}>25%</Option>            
+            <Option value={0.25}>25%</Option>       
+            <Option value={0.5}>50%</Option>       
+            <Option value={0.99}>100%</Option>           
           </Select>
           <span style={{width:'30px'}}></span> 
           <span style={{marginTop:10}}>波动模式：</span> 

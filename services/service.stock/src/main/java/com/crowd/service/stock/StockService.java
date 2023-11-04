@@ -362,12 +362,14 @@ public class StockService implements CrowdService {
 		//
 		Map<String, OrderInfo> activeOrders = new HashMap<String, OrderInfo>();
 		JSONArray historyOrders = new JSONArray();
-		List<AssetInfo> assetInfos = new ArrayList<AssetInfo>();
+		List<DayReportInfo> dayReportInfos = new ArrayList<DayReportInfo>();
 		//
 		startDay = dayList.get(0);
 		String INDEX_CODE = "sh000852"; // 指数代码
+		BigDecimal BROKER_RATE = new BigDecimal(0.0002); // 券商交易费率
+		BigDecimal TAX_RATE = new BigDecimal(0.0005); // 印花税率
 		BigDecimal INDEX_POINT_VALUE = new BigDecimal(200); // 指数单点价值
-		BigDecimal SINGLE_STOCK_VALUE = new BigDecimal(30000); // 个股买入市值
+		BigDecimal SINGLE_STOCK_VALUE = new BigDecimal(20000); // 个股买入市值
 		BigDecimal TARGET_AMPLITUDE = new BigDecimal(targetAmplitude);
 		BigDecimal STOP_AMPLITUDE = new BigDecimal(stopAmplitude).negate();
 		BigDecimal FUND_VALUE = new BigDecimal(1500000);
@@ -428,14 +430,15 @@ public class StockService implements CrowdService {
 					orderInfo.closeIndexValue = indexValue;
 					orderInfo.closeDay = day;
 					BigDecimal value = orderInfo.closePrice.multiply(orderInfo.volume);
-					balanceValue = balanceValue.add(value).subtract(value.multiply(new BigDecimal("0.0007")));
-					brokerValue = brokerValue.add(value.multiply(new BigDecimal("0.0002")));
-					taxValue = taxValue.add(value.multiply(new BigDecimal("0.0005")));
+					balanceValue = balanceValue.add(value).subtract(value.multiply(BROKER_RATE.add(TAX_RATE)));
+					brokerValue = brokerValue.add(value.multiply(BROKER_RATE));
+					taxValue = taxValue.add(value.multiply(TAX_RATE));
 
 					// XXX：统计累计盈亏
 					BigDecimal profitValue = orderInfo.closePrice.multiply(orderInfo.volume)
-							.multiply(new BigDecimal("0.9993")).subtract(
-									orderInfo.openPrice.multiply(orderInfo.volume).multiply(new BigDecimal("1.0002")));
+							.multiply(BigDecimal.ONE.subtract(TAX_RATE).subtract(BROKER_RATE))
+							.subtract(orderInfo.openPrice.multiply(orderInfo.volume)
+									.multiply(BigDecimal.ONE.add(BROKER_RATE)));
 					if (profitValue.compareTo(BigDecimal.ZERO) >= 0) {
 						winValue = winValue.add(profitValue);
 						winCount++;
@@ -453,13 +456,13 @@ public class StockService implements CrowdService {
 				}
 			}
 			activeOrders = newActiveOrders;
-
+			int orderCount = activeOrders.size();
 			//
 			if (i < dayList.size() - 1) {
 				//
 				List<StockZBValue> stockZBValueList = new ArrayList<StockZBValue>();
 				for (String code : codeList) {
-					if(code.equals(INDEX_CODE)) {
+					if (code.equals(INDEX_CODE)) {
 						continue;
 					}
 					if (sellOrderCodes.contains(code)) {
@@ -501,9 +504,9 @@ public class StockService implements CrowdService {
 						StockZBValue stockZBValue = stockZBValueList.remove(stockZBValueList.size() - 1);
 						code = stockZBValue.code;
 					}
-					
+
 					//
-					if(code.equals(INDEX_CODE)) {
+					if (code.equals(INDEX_CODE)) {
 						continue;
 					}
 
@@ -525,24 +528,29 @@ public class StockService implements CrowdService {
 							.multiply(new BigDecimal(100));
 					orderInfo.openIndexValue = indexValue;
 					orderInfo.lastPrice = orderInfo.openPrice;
-					if(orderInfo.volume.compareTo(BigDecimal.ZERO) > 0) {
+					if (orderInfo.volume.compareTo(BigDecimal.ZERO) > 0) {
 						activeOrders.put(code, orderInfo);
 						// 为简化计算，实际余额可能小于0
 						BigDecimal value = orderInfo.openPrice.multiply(orderInfo.volume);
-						balanceValue = balanceValue.subtract(value).subtract(value.multiply(new BigDecimal("0.0002")));
+						balanceValue = balanceValue.subtract(value).subtract(value.multiply(BROKER_RATE));
 						marketValue = marketValue.add(value);
-						brokerValue = brokerValue.add(value.multiply(new BigDecimal("0.0002")));
+						brokerValue = brokerValue.add(value.multiply(BROKER_RATE));
 					}
 				}
 			}
 
 			//
-			AssetInfo assetInfo = new AssetInfo();
-			assetInfo.day = day;
-			assetInfo.balanceValue = balanceValue;
-			assetInfo.marketValue = marketValue;
-			assetInfo.contractProfit = initIndexValue.subtract(indexValue).multiply(INDEX_POINT_VALUE);
-			assetInfos.add(assetInfo);
+			DayReportInfo dayReportInfo = new DayReportInfo();
+			dayReportInfo.day = day;
+			dayReportInfo.balanceValue = balanceValue;
+			dayReportInfo.marketValue = marketValue;
+			dayReportInfo.contractProfit = initIndexValue.subtract(indexValue).multiply(INDEX_POINT_VALUE).setScale(2,
+					RoundingMode.HALF_UP);
+			dayReportInfo.profitValue0 = balanceValue.add(marketValue).add(dayReportInfo.contractProfit).setScale(2,
+					RoundingMode.HALF_UP);
+			dayReportInfo.profitValue1 = balanceValue.add(marketValue).setScale(2, RoundingMode.HALF_UP);
+			dayReportInfo.openCount = activeOrders.size() - orderCount;
+			dayReportInfos.add(dayReportInfo);
 		}
 		//
 		BigDecimal profit0MaxValue = BigDecimal.ZERO; // 总盈亏最高点
@@ -551,22 +559,16 @@ public class StockService implements CrowdService {
 		BigDecimal profit1MaxWithdrawalValue = BigDecimal.ZERO; // 股票盈亏最大回撤
 		JSONArray dataSeries = new JSONArray();
 		output.put("dataSeries", dataSeries);
-		for (int i = 0; i < assetInfos.size(); i++) {
-			AssetInfo assetInfo = assetInfos.get(i);
-			BigDecimal profitValue0 = assetInfo.balanceValue.add(assetInfo.marketValue).add(assetInfo.contractProfit)
-					.setScale(2, RoundingMode.HALF_UP);
-			BigDecimal profitValue1 = assetInfo.balanceValue.add(assetInfo.marketValue).setScale(2,
-					RoundingMode.HALF_UP);
-			profit0MaxValue = profit0MaxValue.max(profitValue0);
-			profit1MaxValue = profit1MaxValue.max(profitValue1);
-			profit0MaxWithdrawalValue = profit0MaxWithdrawalValue.max(profit0MaxValue.subtract(profitValue0));
-			profit1MaxWithdrawalValue = profit1MaxWithdrawalValue.max(profit1MaxValue.subtract(profitValue1));
-			JSONArray dataArray = new JSONArray();
-			dataArray.put(assetInfo.day);
-			dataArray.put(profitValue0);
-			dataArray.put(profitValue1);
-			dataArray.put(assetInfo.contractProfit.setScale(2, RoundingMode.HALF_UP));
-			dataSeries.put(dataArray);
+		for (int i = 0; i < dayReportInfos.size(); i++) {
+			DayReportInfo dayReportInfo = dayReportInfos.get(i);
+			dataSeries.put(dayReportInfo.toJSONArray());
+			//
+			profit0MaxValue = profit0MaxValue.max(dayReportInfo.profitValue0);
+			profit1MaxValue = profit1MaxValue.max(dayReportInfo.profitValue1);
+			profit0MaxWithdrawalValue = profit0MaxWithdrawalValue
+					.max(profit0MaxValue.subtract(dayReportInfo.profitValue0));
+			profit1MaxWithdrawalValue = profit1MaxWithdrawalValue
+					.max(profit1MaxValue.subtract(dayReportInfo.profitValue1));
 		}
 
 		// 计算平均持股天数
@@ -577,10 +579,7 @@ public class StockService implements CrowdService {
 		averagePositionDays = averagePositionDays / historyOrders.length();
 
 		//
-		AssetInfo assetInfo = assetInfos.get(assetInfos.size() - 1);
-		BigDecimal profitValue0 = assetInfo.balanceValue.add(assetInfo.marketValue).add(assetInfo.contractProfit)
-				.setScale(2, RoundingMode.HALF_UP);
-		BigDecimal profitValue1 = assetInfo.balanceValue.add(assetInfo.marketValue).setScale(2, RoundingMode.HALF_UP);
+		DayReportInfo dayReportInfo = dayReportInfos.get(dayReportInfos.size() - 1);
 		BigDecimal years = new BigDecimal(dayList.size()).divide(new BigDecimal(244), 3, RoundingMode.HALF_UP)
 				.setScale(2, RoundingMode.HALF_UP);
 
@@ -596,8 +595,8 @@ public class StockService implements CrowdService {
 		baseInfo.put("activeOrderCount", activeOrders.size()); // 可能停牌无法卖出
 		baseInfo.put("normalCloseCount", normalCloseCount); // 主动平仓数量
 		baseInfo.put("forceCloseCount", forceCloseCount); // 强平数量
-		baseInfo.put("profitValue0", profitValue0);
-		baseInfo.put("profitValue1", profitValue1);
+		baseInfo.put("profitValue0", dayReportInfo.profitValue0);
+		baseInfo.put("profitValue1", dayReportInfo.profitValue1);
 		baseInfo.put("winValue", winValue.setScale(2, RoundingMode.HALF_UP));
 		baseInfo.put("loseValue", loseValue.setScale(2, RoundingMode.HALF_UP));
 		baseInfo.put("winCount", winCount);
@@ -608,8 +607,10 @@ public class StockService implements CrowdService {
 		baseInfo.put("maxWithdrawalRadio2", profit1MaxWithdrawalValue.divide(FUND_VALUE, 4, RoundingMode.HALF_UP));
 		baseInfo.put("averagePositionDays", averagePositionDays);
 		baseInfo.put("years", years);
-		baseInfo.put("profitYearRadio0", profitValue0.divide(years.multiply(FUND_VALUE), 4, RoundingMode.HALF_UP));
-		baseInfo.put("profitYearRadio1", profitValue1.divide(years.multiply(FUND_VALUE), 4, RoundingMode.HALF_UP));
+		baseInfo.put("profitYearRadio0",
+				dayReportInfo.profitValue0.divide(years.multiply(FUND_VALUE), 4, RoundingMode.HALF_UP));
+		baseInfo.put("profitYearRadio1",
+				dayReportInfo.profitValue1.divide(years.multiply(FUND_VALUE), 4, RoundingMode.HALF_UP));
 
 		//
 		testResult.put("baseInfo", baseInfo);
@@ -775,11 +776,24 @@ class OrderInfo {
 	}
 }
 
-class AssetInfo {
+class DayReportInfo {
 	String day;
 	BigDecimal balanceValue; // 资金余额
 	BigDecimal marketValue; // 股票市值
 	BigDecimal contractProfit; // 合约盈亏
+	BigDecimal profitValue0;
+	BigDecimal profitValue1;
+	int openCount; // 开仓数量
+
+	JSONArray toJSONArray() {
+		JSONArray dataArray = new JSONArray();
+		dataArray.put(day);
+		dataArray.put(profitValue0);
+		dataArray.put(profitValue1);
+		dataArray.put(contractProfit);
+		dataArray.put(openCount);
+		return dataArray;
+	}
 }
 
 class StockZBValue {

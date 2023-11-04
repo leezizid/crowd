@@ -15,6 +15,7 @@ import ActiveWorkerView from '../crowds/apps/ActiveWorkerView';
 import FuturesInfoView from '../crowds/apps/FuturesInfoView';
 import StockInfoView from '../crowds/apps/StockInfoView';
 import StockTestView from '../crowds/apps/StockTestView';
+import IdeaTestView from '../crowds/apps/IdeaTestView';
 import ChannelManage from '../crowds/apps/ChannelManage';
 import StrategyManage from '../crowds/apps/StrategyManage';
 import BacktestManage from '../crowds/apps/BacktestManage';
@@ -28,6 +29,7 @@ registerApp('ChannelManage','react', ChannelManage)
 registerApp('FuturesInfoView','react', FuturesInfoView)
 registerApp('StockInfoView','react', StockInfoView)
 registerApp('StockTestView','react', StockTestView)
+registerApp('IdeaTestView','react', IdeaTestView)
 registerApp('StrategyManage','react', StrategyManage)
 registerApp('BacktestManage','react', BacktestManage)
 

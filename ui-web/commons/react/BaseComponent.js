@@ -59,6 +59,10 @@ export default class BaseComponent extends Component {
         if(this.unsubscribeTopics) {
             this.unsubscribeTopics();
         }
+        //
+        if(this.cancelIntervalInvoke) {
+            this.cancelIntervalInvoke();
+        }
     }
 
     //子类复写，返回需要监听的主题名称数组
@@ -99,6 +103,7 @@ export default class BaseComponent extends Component {
                 if(this.$isWillUnmount) {
                     return
                 }
+                alert(this.$isWillUnmount)
                 callback(error, result);
                 this.intervalInvokeTimer = setTimeout(invokeFunc, interval);
             });

@@ -19,6 +19,7 @@ import IdeaTestView from '../crowds/apps/IdeaTestView';
 import ChannelManage from '../crowds/apps/ChannelManage';
 import StrategyManage from '../crowds/apps/StrategyManage';
 import BacktestManage from '../crowds/apps/BacktestManage';
+import SZ50StrategyView from '../crowds/apps/SZ50StrategyView';
 
 
 initStore({dateRange,currentUnit,workApps,connectInfo,serverInfo})
@@ -32,6 +33,7 @@ registerApp('StockTestView','react', StockTestView)
 registerApp('IdeaTestView','react', IdeaTestView)
 registerApp('StrategyManage','react', StrategyManage)
 registerApp('BacktestManage','react', BacktestManage)
+registerApp('SZ50StrategyView','react', SZ50StrategyView)
 
 export default class DemoApp extends BaseApp {
 

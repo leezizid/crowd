@@ -102,17 +102,19 @@ export default class StockInfoView extends BaseComponent {
       title: {
           text: ""
       },
-      // legend: {
-      //     top: 10,
-      //     left: 'center',
-      //     data: [
-      //         {name:'大盘涨跌幅度'},{name:'个股涨跌幅度'}
-      //     ],
-      //     selected: {
-      //         '大盘涨跌幅度': true,
-      //         '个股涨跌幅度': false
-      //     }
-      // },
+      legend: {
+          top: 10,
+          left: 'center',
+          data: [
+            {name:'个股K线'},{name:'大盘涨跌幅度'},{name:'个股涨跌幅度'},{name:'相对涨跌幅度'}
+          ],
+          selected: {
+              '个股K线': false,
+              '大盘涨跌幅度': true,
+              '个股涨跌幅度': true,
+              '相对涨跌幅度': true
+          }
+      },
       dataset: [
           {
               source: klineSeries
@@ -151,12 +153,18 @@ export default class StockInfoView extends BaseComponent {
                   opacity: 1
               }
           },
+          // formatter: function (params) {
+          //   return (
+          //     '<hr><table><tr><td>交易日：</td><td align="right">' + params[0].value[0] + '</td></tr><tr><td>开盘价：</td><td align="right">' + params[0].value[1].toFixed(2) + '</td></tr><tr><td>收盘价：</td><td align="right">' + params[0].value[2].toFixed(2) + '</td></tr><tr><td>最高价：</td><td align="right">' + params[0].value[3].toFixed(2) + '</td></tr><tr><td>最低价：</td><td align="right">' + params[0].value[4].toFixed(2) + '</td></tr>'
+          //     + '<tr><td>大盘累计涨幅：</td><td align="right">' + (params[1].value[1] * 100).toFixed(2) + '%</td><tr><td>个股累计涨幅：</td><td align="right">' + (params[1].value[2] * 100).toFixed(2) + '%</td><tr><td>个股相对涨幅：</td><td align="right">' + (params[1].value[3] * 100).toFixed(2)  + '%</td></tr></table><hr>'
+          //   );
+          // }
           formatter: function (params) {
             return (
-              '<hr><table><tr><td>交易日：</td><td align="right">' + params[0].value[0] + '</td></tr><tr><td>开盘价：</td><td align="right">' + params[0].value[1].toFixed(2) + '</td></tr><tr><td>收盘价：</td><td align="right">' + params[0].value[2].toFixed(2) + '</td></tr><tr><td>最高价：</td><td align="right">' + params[0].value[3].toFixed(2) + '</td></tr><tr><td>最低价：</td><td align="right">' + params[0].value[4].toFixed(2) + '</td></tr>'
+              '<hr><table><tr><td>交易日：</td><td align="right">' + params[0].value[0] + '</td></tr>'
               + '<tr><td>大盘累计涨幅：</td><td align="right">' + (params[1].value[1] * 100).toFixed(2) + '%</td><tr><td>个股累计涨幅：</td><td align="right">' + (params[1].value[2] * 100).toFixed(2) + '%</td><tr><td>个股相对涨幅：</td><td align="right">' + (params[1].value[3] * 100).toFixed(2)  + '%</td></tr></table><hr>'
             );
-          }
+          }          
       },
       xAxis: [
           {
@@ -234,7 +242,7 @@ export default class StockInfoView extends BaseComponent {
       // ],            
       series: [
           {
-              name: 'K线',
+              name: '个股K线',
               type: 'candlestick',
               xAxisIndex: 0,
               yAxisIndex: 0,

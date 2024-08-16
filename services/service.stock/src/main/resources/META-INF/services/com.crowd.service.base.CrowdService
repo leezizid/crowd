@@ -1,2 +1,3 @@
 com.crowd.service.stock.StockService
 com.crowd.service.stock.IdeaService
+com.crowd.service.stock.SZ50Service

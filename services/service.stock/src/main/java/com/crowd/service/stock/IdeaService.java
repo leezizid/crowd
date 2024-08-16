@@ -32,11 +32,11 @@ public class IdeaService implements CrowdService {
 	@CrowdMethod
 	public void startTest(CrowdContext context, JSONObject input, JSONObject output) throws Throwable {
 		JSONArray dataSeries = new JSONArray();
-		
+
 		//
 		System.setProperty("HistoryDataDir", "Z:\\MD");
-		String[][] data1 = HistoryData.readKLineData("SHFE.hc", "1d", "2016-01-01", "2023-10-31");
-		String[][] data2 = HistoryData.readKLineData("SHFE.rb", "1d", "2016-01-01", "2023-10-31");
+		String[][] data1 = HistoryData.readKLineData("SHFE.hc", "1d", "2020-01-01", "2023-10-31");
+		String[][] data2 = HistoryData.readKLineData("SHFE.rb", "1d", "2020-01-01", "2023-10-31");
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		int cursor1 = 0;
 		int cursor2 = 0;
@@ -45,9 +45,9 @@ public class IdeaService implements CrowdService {
 			String[] dataArray2 = data2[cursor2];
 			if (dataArray1[0].equals(dataArray2[0])) {
 				String date = sdf.format(new Date(Long.parseLong(dataArray1[0])));
-				float price1 = Float.parseFloat(dataArray1[3]);
-				float price2 = Float.parseFloat(dataArray2[4]);
-				double price = new BigDecimal(price1 / price2).setScale(4, RoundingMode.HALF_UP).doubleValue();
+				float price1 = Float.parseFloat(dataArray1[2]);
+				float price2 = Float.parseFloat(dataArray2[2]);
+				double price = new BigDecimal(price2 - price1).setScale(4, RoundingMode.HALF_UP).doubleValue();
 				cursor1++;
 				cursor2++;
 				//
@@ -63,8 +63,7 @@ public class IdeaService implements CrowdService {
 				cursor2++;
 			}
 		}
-		
-		
+
 		//
 		output.put("dataSeries", dataSeries);
 	}

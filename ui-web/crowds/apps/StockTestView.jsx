@@ -103,7 +103,7 @@ export default class StockTestView extends BaseComponent {
             splitLine: { show: true , lineStyle: {opacity: 0.4}}
           },
           {
-            scale: true,
+            max: 200,
             axisLine: { show: true, lineStyle: { color: 'lightgrey'} },
             axisLabel: {show: true},
             splitLine: { show: true , lineStyle: {opacity: 0.4}}
@@ -150,11 +150,11 @@ export default class StockTestView extends BaseComponent {
                 smooth: false,
                 symbol: 'none',
                 itemStyle: {
-                    color: 'lightgreen'
+                    color: 'blue'
                 },
                 lineStyle: {
                     width: 1,
-                    color: 'lightgreen'
+                    color: 'blue'
                 },
                 encode: {
                     x: 0,
@@ -168,6 +168,24 @@ export default class StockTestView extends BaseComponent {
                 smooth: false,
                 symbol: 'none',
                 itemStyle: {
+                    color: 'lightgrey'
+                },
+                lineStyle: {
+                    width: 1,
+                    color: 'lightgrey'
+                },
+                encode: {
+                    x: 0,
+                    y: 4
+                }
+            },
+            {
+                name: '每日持仓比例',
+                type: 'line',
+                yAxisIndex: 1,
+                smooth: false,
+                symbol: 'none',
+                itemStyle: {
                     color: 'lightblue'
                 },
                 lineStyle: {
@@ -176,7 +194,7 @@ export default class StockTestView extends BaseComponent {
                 },
                 encode: {
                     x: 0,
-                    y: 4
+                    y: 5
                 }
             }
         ]
@@ -196,7 +214,14 @@ export default class StockTestView extends BaseComponent {
           <Select style={{width:'100px'}} value={this.state.maxPositionDays} on$change-value={(c,value) =>{
             this.setState({maxPositionDays:value});
            }}>
+            <Option value={1}>1</Option>
+            <Option value={2}>2</Option>
+            <Option value={3}>3</Option>
+            <Option value={5}>5</Option>
+            <Option value={10}>10</Option>
+            <Option value={15}>15</Option>
             <Option value={20}>20</Option>
+            <Option value={25}>25</Option>
             <Option value={30}>30</Option>
             <Option value={40}>40</Option>
             <Option value={50}>50</Option>
@@ -218,6 +243,7 @@ export default class StockTestView extends BaseComponent {
             <Option value={0.15}>15%</Option>
             <Option value={0.20}>20%</Option>
             <Option value={0.25}>25%</Option>
+            <Option value={0.50}>50%</Option>
           </Select>
           <span style={{width:'30px'}}></span> 
           <span style={{marginTop:10}}>止损：</span> 
@@ -230,6 +256,8 @@ export default class StockTestView extends BaseComponent {
             <Option value={0.08}>8%</Option>
             <Option value={0.10}>10%</Option>
             <Option value={0.15}>15%</Option>
+            <Option value={0.16}>16%</Option>
+            <Option value={0.18}>18%</Option>
             <Option value={0.20}>20%</Option>
             <Option value={0.25}>25%</Option>       
             <Option value={0.5}>50%</Option>       
@@ -249,7 +277,7 @@ export default class StockTestView extends BaseComponent {
             this.setState({algorithm:value});
            }}>
             <Option value={'random'}>随机</Option>
-            <Option value={'cci'}>CCI</Option>
+            <Option value={'trend'}>趋势</Option>
           </Select>
           <span style={{width:50}}>&nbsp;&nbsp;</span>
           <Button style={{width:'120px'}} type="primary"   onClick={()=>(this.startTest())}>开始测试</Button>

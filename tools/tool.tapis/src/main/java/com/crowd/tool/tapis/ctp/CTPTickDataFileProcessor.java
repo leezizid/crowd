@@ -128,7 +128,7 @@ public class CTPTickDataFileProcessor {
 	}
 
 	public final static void processMDStreams() throws Throwable {
-		File sourceDir = new File("F:\\mdstream");
+		File sourceDir = new File("E:\\mdstream");
 		Set<String> tradeDays = new HashSet<String>();
 		for (File file : sourceDir.listFiles()) {
 			if (file.getName().length() >= 16) {
@@ -149,7 +149,7 @@ public class CTPTickDataFileProcessor {
 	}
 
 	public final static void processMDStream(String tradeDay) throws Throwable {
-		File sourceDir = new File("F:\\mdstream");
+		File sourceDir = new File("E:\\mdstream");
 		File targetDir = new File("Z:\\BAK");
 //		String tradeDay = "2023-03-24";
 		int index = 0;

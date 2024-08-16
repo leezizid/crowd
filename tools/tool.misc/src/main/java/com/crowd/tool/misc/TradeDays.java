@@ -65,7 +65,7 @@ public class TradeDays {
 		try {
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 			Date startDay = sdf.parse("2016-01-01");
-			Date endDay = sdf.parse("2023-12-31");
+			Date endDay = sdf.parse("2024-12-31");
 			endTime = endDay.getTime();
 			Calendar calendar = Calendar.getInstance();
 			calendar.setTime(startDay);

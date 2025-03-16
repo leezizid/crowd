@@ -7,7 +7,9 @@ import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
@@ -68,7 +70,7 @@ public class SZ50Service implements CrowdService {
 						if (StringUtils.isEmpty(transaction.getString("finishTime"))) {
 							stockInfo.put("amount", transaction.getInt("amount"));
 							stockInfo.put("price", transaction.getFloat("price"));
-							stockInfo.put("achievedProfit", transaction.getInt("achievedProfit"));
+							stockInfo.put("achievedProfit", transaction.getDouble("achievedProfit"));
 							stockInfo.put("positionValue", transaction.getDouble("positionValue"));
 							stockInfo.put("index", transaction.getFloat("index"));
 							stockInfo.put("maxCostValue", transaction.getDouble("maxCostValue"));
@@ -85,6 +87,11 @@ public class SZ50Service implements CrowdService {
 			double totalHistoryProfit = 0;
 			activeStockList.add("sh000016");
 			String[] results = quoteSina(activeStockList.toArray(new String[0]));
+			Map<String, Float> prices = new HashMap<String, Float>();
+			for (int i = 0; i < results.length - 1; i++) {
+				prices.put(activeStockList.get(i).substring(2),
+						Float.parseFloat(StringUtils.splitPreserveAllTokens(results[i], ",")[3]));
+			}
 			float lastIndex = Float.parseFloat(StringUtils.splitPreserveAllTokens(results[results.length - 1], ",")[3]);
 			for (int i = 0; i < stockArray.length(); i++) {
 				JSONObject stockInfo = stockArray.getJSONObject(i);
@@ -92,7 +99,7 @@ public class SZ50Service implements CrowdService {
 				double positionValue = stockInfo.getDouble("positionValue");
 				float index = stockInfo.getFloat("index");
 				if (stockInfo.getBoolean("active")) {
-					float lastPrice = Float.parseFloat(StringUtils.splitPreserveAllTokens(results[i], ",")[3]);
+					float lastPrice = prices.get(stockInfo.getString("code"));
 					double positionProfit = 0;
 					if (amount > 0) {
 						positionProfit = amount * lastPrice - positionValue * lastIndex / index;

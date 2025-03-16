@@ -41,7 +41,8 @@ Vue.mixin({
   }
 })
 
-import App from '../senatus/DemoApp';
+//import App from '../senatus/DemoApp';
+import App from '../senatus/DataApp';
 
 //
 ReactDOM.render(<App />, document.getElementById('app'));

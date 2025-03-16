@@ -11,11 +11,13 @@
   "author": "hfs",
   "license": "ISC",
   "dependencies": {
+    "@king-design/react": "^3.5.2",
     "axios": "^0.19.0",
     "echarts": "^4.9.0",
     "express": "^4.16.3",
     "kpc-react": "^1.5.0",
     "kpc-vue": "^1.5.0",
+    "leader-line": "^1.0.7",
     "parse-headers": "^2.0.3",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",

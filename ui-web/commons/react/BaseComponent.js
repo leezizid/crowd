@@ -63,6 +63,13 @@ export default class BaseComponent extends Component {
         if(this.cancelIntervalInvoke) {
             this.cancelIntervalInvoke();
         }
+        //
+        this.beforeDispose();
+    }
+
+    //子类复写
+    beforeDispose() {
+
     }
 
     //子类复写，返回需要监听的主题名称数组
